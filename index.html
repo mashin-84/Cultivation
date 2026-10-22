@@ -1302,6 +1302,24 @@ class SoundEngine {
       this.ctx.resume();
     }
   }
+  /* v95/v96 劇情打字音(柔和版):kind = low / mid / high / dark / nar */
+  playType(kind) {
+    if (!this.enabled || !this.ctx || this.ctx.state !== 'running') return;
+    const c = this.ctx, now = c.currentTime, v = this.volume;
+    if (!this._tf) { this._tf = c.createBiquadFilter(); this._tf.type = 'lowpass'; this._tf.frequency.value = 1500; this._tf.Q.value = .5; this._tf.connect(c.destination); }
+    const out = this._tf;
+    if (kind === 'nar') {
+      if (!this._nb) { const n = Math.floor(c.sampleRate * .05), bf = c.createBuffer(1, n, c.sampleRate), d = bf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n); this._nb = bf; }
+      const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = this._nb;
+      f.type = 'bandpass'; f.frequency.value = 1300 + Math.random() * 400; f.Q.value = .9; g.gain.setValueAtTime(.018 * v, now);
+      s.connect(f); f.connect(g); g.connect(out); s.start(now); return;
+    }
+    const base = { low: 260, mid: 440, high: 700, dark: 196 }[kind] || 440, o = c.createOscillator(), g = c.createGain(), dur = kind === 'low' || kind === 'dark' ? .13 : .09;
+    o.type = 'sine'; o.frequency.setValueAtTime(base * (1 + (Math.random() - .5) * .06), now);
+    g.gain.setValueAtTime(.0001, now); g.gain.exponentialRampToValueAtTime(.018 * v, now + .012); g.gain.exponentialRampToValueAtTime(.0001, now + dur);
+    o.connect(g); g.connect(out); o.start(now); o.stop(now + dur + .02);
+    if (kind === 'dark') { const o2 = c.createOscillator(), g2 = c.createGain(); o2.type = 'sine'; o2.frequency.setValueAtTime(base / 2, now); g2.gain.setValueAtTime(.0001, now); g2.gain.exponentialRampToValueAtTime(.014 * v, now + .015); g2.gain.exponentialRampToValueAtTime(.0001, now + .16); o2.connect(g2); g2.connect(out); o2.start(now); o2.stop(now + .18); }
+  }
   vibrate(ms = 40) {
     // OPT-O10: 震動回饋
     if (this.enabled && typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -9686,10 +9704,12 @@ const GEN_AR={"bg": ["data:image/webp;base64,UklGRsZ4AABXRUJQVlA4ILp4AABwLwKdASr
   X.sheet('mn', '⚙ 設定', b => {
     const snd = ($('sound-icon') || {}).textContent || '';
     const row = (a, ic, t, s) => `<button class="x5-card" data-x5="${a}" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:22px;width:30px;text-align:center">${ic}</span><span style="flex:1"><b style="color:#fde68a;font-size:14px">${t}</b><br><span class="x5-sub">${s}</span></span><span class="x5-sub">›</span></button>`;
-    b.innerHTML = row('mn.snd', '🔔', '音效', '目前:' + (snd.indexOf('開') >= 0 ? '開' : snd.indexOf('關') >= 0 ? '關' : '切換')) + row('mn.help', '❓', '仙經・玩法說明', '遊戲的基本規則與系統介紹') + row('mn.guide', '📖', '修行指引', '查看全部指引與獎勵') + row('mn.lite', '🔋', '省電模式', state.lite ? '目前:開(關閉動畫,較省電)' : '目前:關(動畫與特效全開)') + row('mn.stat', '📈', '遊玩統計', '遊玩時數、擊殺與收集紀錄') + row('mn.save', '💾', '存檔管理', '保存・匯出・匯入存檔,換手機前先備份;重新開局') + `<div class="x5-sub" style="text-align:center;margin-top:6px">《一念飛仙》v9.8</div>`;
+    b.innerHTML = row('mn.snd', '🔔', '音效', '目前:' + (snd.indexOf('開') >= 0 ? '開' : snd.indexOf('關') >= 0 ? '關' : '切換')) + row('mn.bgm', '🎵', '背景音樂', state.bgmOn !== false ? '目前:開' : '目前:關') + row('mn.tsnd', '🎐', '劇情打字音', state.typeSnd !== false ? '目前:開(對話逐字出現時的輕響)' : '目前:關') + row('mn.help', '❓', '仙經・玩法說明', '遊戲的基本規則與系統介紹') + row('mn.guide', '📖', '修行指引', '查看全部指引與獎勵') + row('mn.lite', '🔋', '省電模式', state.lite ? '目前:開(關閉動畫,較省電)' : '目前:關(動畫與特效全開)') + row('mn.stat', '📈', '遊玩統計', '遊玩時數、擊殺與收集紀錄') + row('mn.save', '💾', '存檔管理', '保存・匯出・匯入存檔,換手機前先備份;重新開局') + `<div class="x5-sub" style="text-align:center;margin-top:6px">《一念飛仙》v9.8</div>`;
   });
   X.act('mn.open', () => X.open('mn'));
   X.act('mn.snd', () => { const b = $('btn-sound-toggle'); if (b) b.click(); setTimeout(() => X.refresh('mn'), 60); });
+  X.act('mn.bgm', () => { state.bgmOn = state.bgmOn === false; saveGame(); X.refresh('mn'); try { BGM96.sync(true); } catch (e) { } });
+  X.act('mn.tsnd', () => { state.typeSnd = state.typeSnd === false; saveGame(); X.refresh('mn'); try { audio.init(); audio.playType('mid'); } catch (e) { } });
   X.act('mn.help', () => { X.close('mn'); const b = $('btn-show-help'); if (b) b.click(); });
   X.act('mn.guide', () => { X.close('mn'); X.open('guide'); });
   X.act('mn.lite', () => { state.lite = !state.lite; window.LITE15 = !!state.lite; document.body.classList.toggle('lite15', !!state.lite); saveGame(); X.refresh('mn'); });
@@ -10351,6 +10371,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   const BGV = { night: 'brightness(.42) saturate(.8) hue-rotate(190deg)', storm: 'brightness(.52) saturate(.55) hue-rotate(200deg) contrast(1.2)', warm: 'sepia(.35) brightness(.9) saturate(1.15)', ruin: 'grayscale(.7) brightness(.62) contrast(1.08)', dim: 'brightness(.5) saturate(.75)' };
   function setBg(full) {
     const pr = String(full).split(':'), name = pr[0], vr = pr[1];
+    try { window.BGM96 && BGM96.story(name); } catch (e) { }
     const url = ART28.bg[name], el = $('st28b' + (bgSlot ^ 1)), old = $('st28b' + bgSlot);
     el.style.cssText = '';
     if (url) { el.style.backgroundImage = `url(${url})`; } else { el.style.background = BGP[name] || BGP.night; }
@@ -10443,9 +10464,18 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     if (run.auto) timer = setTimeout(hideTitle, 3200);
   }
   function hideTitle() { const e = $('st28ti'); if (!e || !e.classList.contains('on')) return; e.classList.remove('on'); if (run) { run.titling = false; next(); } }
+  /* v95:說話者音色 */
+  let VOICE95 = 'nar';
+  function voiceOf(w, name) {
+    if (w === 'tian' || /心魔|魔將|魔道/.test(name || '')) return 'dark';
+    if (w === 'su' || w === 'ba' || /村民|師弟/.test(name || '') || (w === 'ye' && yeG() === 'f')) return 'high';
+    if (['lr', 'tl', 'yh', 'situ'].includes(w) || /長老|老|管事|統領|仙人/.test(name || '')) return 'low';
+    return 'mid';
+  }
   function showLine(b) {
     const nar = b.nar !== undefined, w = ({ '墨塵': 'mo', '蘇棠': 'su', '夜無咎': 'ye', '白澤': 'ba', '祂': 'tian', '司徒衡': 'situ', '仙官': 'xg', '顧青衍': 'gu', '玉衡長老': 'yh', '老人': 'lr', '老匠': 'tl' })[b.say] || b.say, name = nar ? '' : nameOf(w), text = fmt(nar ? b.nar : b.t);
     const nm = $('st28nm'), tx = $('st28tx');
+    VOICE95 = nar ? 'nar' : voiceOf(w, name);
     if (nar) { nm.style.display = 'none'; dimPortrait(true); }
     else {
       nm.style.display = 'block'; nm.textContent = name; nm.style.color = colOf(w);
@@ -10459,8 +10489,8 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     const spd = SD().spd || 1, per = run.skip ? 1 : Math.max(8, 34 / spd), chars = [...text];
     tx.textContent = '';
     if (run.skip) { tx.textContent = text; typeDone(); return; }
-    let i = 0;
-    typeT = setInterval(() => { i++; tx.textContent = chars.slice(0, i).join(''); if (i >= chars.length) { clearInterval(typeT); typeDone(); } }, per);
+    let i = 0, tc = 0; const PUN = /[\s,.!?;:、,。!?;:…「」『』()()—~〜]/;
+    typeT = setInterval(() => { i++; tx.textContent = chars.slice(0, i).join(''); const ch = chars[i - 1]; if (PUN.test(ch)) tc = 0; else if (tc++ % 3 === 0 && state.typeSnd !== false && SD().spd !== 3) { try { audio.playType(VOICE95); } catch (e) { } } if (i >= chars.length) { clearInterval(typeT); typeDone(); } }, per);
   }
   function typeDone() {
     if (!run) return;
@@ -15814,6 +15844,63 @@ body:not(#z74) i.rd{display:block}
   });
   document.addEventListener('change', e => { if (e.target && e.target.id === 'inp-load-file') loaded(e.target.files && e.target.files[0]); });
   window.SV90 = { download, fname };
+})();
+
+/* ===== v96 背景音樂 ===== */
+(() => {
+  const VOL = .38, FADE = 1500, XF = 3;   /* 音量、換曲淡化毫秒、循環交叉秒數 */
+  const STORY = { battle: 'weiju', demon: 'weiju', night: 'weiju', ruin: 'weiju', village_fire: 'weiju', void: 'weiju', grave: 'libie', dream: 'libie' };
+  let cur = null, want = null, storyMood = 'wenqing', battleHold = 0, failed = {};
+  const P = [];   /* 每首兩個播放器輪流,做循環交叉淡化 */
+  function el(name) {
+    const a = new Audio('music/' + name + '.webm'); a.preload = 'auto'; a.volume = 0; a._n = name;
+    a.addEventListener('error', () => { failed[name] = 1; });
+    return a;
+  }
+  const tracks = {};
+  function tr(name) { return tracks[name] || (tracks[name] = { a: el(name), b: null, on: null, v: 0 }); }
+  function ramp(a, to, ms) {
+    clearInterval(a._r); const from = a.volume, t0 = performance.now();
+    a._r = setInterval(() => { const k = Math.min(1, (performance.now() - t0) / ms); a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); if (k >= 1) { clearInterval(a._r); if (to === 0) a.pause(); } }, 50);
+  }
+  function enabled() { return state && state.bgmOn !== false && !document.hidden && !location.protocol.startsWith('file') && !location.protocol.startsWith('content'); }
+  function pick() {
+    const st = document.getElementById('st28');
+    if (st && window.ST28 && ST28.busy() && getComputedStyle(st).display !== 'none') return storyMood;
+    const B = typeof currentBattle !== 'undefined' ? currentBattle : null;
+    if (B && B.monster) {
+      const m = B.monster, id = String(m.id || '');
+      const big = m.isBoss || B.isJie || /^jie_/.test(id) || id === 'mind_demon' || id === 'tw_100' || (B.isTower && /boss/i.test(String(m.tier || m.name || '')));
+      const tab = (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
+      battleHold = Date.now() + 4000;
+      return big ? 'tianjie' : (B.isTower || B.isWB || B.tb26 || tab !== 'tab-adventure') ? 'zhandou' : 'lilian';
+    }
+    if (cur && /tianjie|zhandou/.test(cur) && Date.now() < battleHold) return cur;
+    const tab = (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
+    return tab === 'tab-adventure' ? 'lilian' : 'dongfu';
+  }
+  function play(name) {
+    if (failed[name]) return;
+    const T = tr(name), a = T.on || T.a; T.on = a;
+    if (a.paused) { a.play().catch(() => { }); }
+    ramp(a, VOL, FADE);
+  }
+  function stop(name) { const T = tracks[name]; if (!T) return; [T.a, T.b].forEach(a => a && !a.paused && ramp(a, 0, FADE)); }
+  function sync(force) {
+    if (!enabled()) { Object.keys(tracks).forEach(stop); cur = null; return; }
+    want = pick();
+    if (want !== cur || force) { if (cur && cur !== want) stop(cur); cur = want; play(cur); }
+    /* 循環:曲尾 XF 秒時,另一個播放器從頭淡入 */
+    const T = tracks[cur]; if (!T || !T.on) return;
+    const a = T.on;
+    if (a.duration && a.currentTime > a.duration - XF - .3 && !a._xf) {
+      a._xf = 1; if (!T.b) T.b = el(cur);
+      const nb = a === T.a ? T.b : T.a; nb._xf = 0; nb.currentTime = 0; nb.volume = 0; nb.play().catch(() => { }); ramp(nb, VOL, XF * 1000); ramp(a, 0, XF * 1000); T.on = nb;
+    }
+  }
+  setInterval(() => { try { sync(); } catch (e) { } }, 400);
+  document.addEventListener('visibilitychange', () => { try { sync(); } catch (e) { } });
+  window.BGM96 = { sync, story(bg) { storyMood = STORY[bg] || 'wenqing'; }, cur: () => cur };
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
