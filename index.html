@@ -9346,6 +9346,7 @@ ${R.bonus ? `<div class="x5-cd" style="margin-top:8px;border-color:#f59e0b"><b s
   };
   const _utb = updateTutorialBanner;
   updateTutorialBanner = function () {
+    if (state.tutorialStep === 1 && (state.arrayLevel || 1) > 1) state.tutorialStep = 2;   /* v92:先升過聚靈陣也算完成第 2 步 */
     if ((state.tutorialStep || 0) < 4) { const r = _utb.apply(this, arguments); addGo(); if ((state.tutorialStep || 0) === 3 && window.UNLOCK9 && !UNLOCK9.on('alch')) { const tx = $('tutorial-guide-text'); if (tx) tx.innerText = '第 4 步：修煉至【練氣第5層】開啟煉丹閣,再到【丹器】煉製第一枚【聚氣丹】!'; } const g = $('tut-go'); if (g && g.parentElement) g.parentElement.style.display = 'flex'; return r; }
     const banner = $('tutorial-guide-banner'), textEl = $('tutorial-guide-text'); if (!banner || !textEl) return;
     if (!$('tut-go')) { const sk = $('btn-skip-tutorial'); if (sk) { sk.insertAdjacentHTML('beforebegin', '<span style="display:flex;gap:4px;flex:none;margin-left:4px"><button id="tut-go" data-x5="gd9.go" style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;background:#b45309;color:#fff;border:1px solid #f59e0b">前往</button><button id="tut-list" data-x5="gd9.list" style="font-size:11px;padding:1px 6px;border-radius:6px;background:#1e293b;border:1px solid #475569">清單</button></span>'); sk.textContent = '略過'; sk.style.whiteSpace = 'nowrap'; sk.style.flex = 'none'; sk.style.fontSize = '10px'; sk.style.padding = '2px 6px'; } }
