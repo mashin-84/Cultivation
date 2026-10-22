@@ -1809,8 +1809,12 @@ function loadGame() {
     }
   } catch (e) {
     console.warn('Storage load failed, using default:', e);
+    try { const raw = localStorage.getItem('XIUXIAN_SAVE_V2'); if (raw && !localStorage.getItem('XIUXIAN_SAVE_RESCUE')) localStorage.setItem('XIUXIAN_SAVE_RESCUE', raw); } catch (x) { }
+    window.LOADFAIL98 = true;   /* v98:保留原始資料,暫停備份輪替 */
     state = JSON.parse(JSON.stringify(defaultState));
   }
+  /* v98:主存檔不見但備份還在 → 開啟後詢問還原 */
+  try { if (!localStorage.getItem('XIUXIAN_SAVE_V2') && (localStorage.getItem('XIUXIAN_SAVE_BAK1') || localStorage.getItem('XIUXIAN_SAVE_BAK2'))) window.ORPHAN98 = true; } catch (x) { }
 }
 
 /* ==========================================================================
@@ -5930,6 +5934,7 @@ function renderBreakdown() {
 /* ---------- 存檔保護 ---------- */
 function backupTick() {
   try {
+    if (window.LOADFAIL98 || window.ORPHAN98) return;   /* v98:讀檔異常時不覆蓋舊備份 */
     const now = Date.now(), last = +localStorage.getItem('XIUXIAN_BAK_TS') || 0;
     if (now - last < 5 * 60 * 1000) return;
     const cur = localStorage.getItem('XIUXIAN_SAVE_V2'); if (!cur) return;
@@ -5940,7 +5945,7 @@ function backupTick() {
 }
 function bakInfo(k) { try { const r = localStorage.getItem(k); if (!r) return null; const o = JSON.parse(r); return { t: o.lastSave || 0, realm: REALM_DATA[o.realmIdx || 0]?.name || '' }; } catch (e) { return null; } }
 function restoreBackup(k) {
-  const key = k === '2' ? 'XIUXIAN_SAVE_BAK2' : 'XIUXIAN_SAVE_BAK1', raw = localStorage.getItem(key); if (!raw) { showToast('找不到備份。'); return; }
+  const key = k === 'r' ? 'XIUXIAN_SAVE_RESCUE' : k === '2' ? 'XIUXIAN_SAVE_BAK2' : 'XIUXIAN_SAVE_BAK1', raw = localStorage.getItem(key); if (!raw) { showToast('找不到備份。'); return; }
   if (!window.confirm('確定要還原此備份?目前進度會被覆蓋(建議先匯出目前存檔)。')) return;
   try { localStorage.setItem('XIUXIAN_SAVE_V2', raw); location.reload(); } catch (e) { showToast('還原失敗。'); }
 }
@@ -5953,7 +5958,7 @@ function renderBackupBox() {
   el.innerHTML = `<div class="text-[11px] ${days === null || days >= 3 ? 'text-rose-300' : 'text-emerald-300'}">${days === null ? '⚠️ 尚未匯出過存檔代碼,清除瀏覽器資料會永久遺失進度!' : days >= 3 ? `⚠️ 已 ${days} 天未匯出存檔,建議立即匯出。` : `✅ 最近匯出:${days === 0 ? '今天' : days + ' 天前'}`}</div>
     <div class="text-[10px] text-slate-500">瀏覽器持久儲存:${window._persisted ? '已啟用' : '未啟用(部分瀏覽器不支援)'};遊戲每 5 分鐘自動留一份備份。</div>
     <div class="grid grid-cols-3 gap-1.5 mt-1">${eBtn('backup-export', '', '📤 立即匯出', true)}${eBtn('backup-restore', '1', '還原備份A', !!b1, 'bg-slate-700 text-amber-200')}${eBtn('backup-restore', '2', '還原備份B', !!b2, 'bg-slate-700 text-amber-200')}</div>
-    <div class="text-[10px] text-slate-500">備份A:${fmt(b1)}<br>備份B:${fmt(b2)}</div>`;
+    <div class="text-[10px] text-slate-500">備份A:${fmt(b1)}<br>備份B:${fmt(b2)}</div>${localStorage.getItem('XIUXIAN_SAVE_RESCUE') ? `<div class="mt-1">${eBtn('backup-restore', 'r', '還原救援存檔(讀檔失敗時保留的原始資料)', true, 'bg-slate-700 text-amber-200')}</div>` : ''}`;
 }
 /* ---------- 九九登天塔 ---------- */
 const TOWER_MON = [['天兵統領', '💂', 'metal'], ['星宿魔將', '🌟', 'wood'], ['劫雲幻影', '☁️', 'water'], ['虛空魔靈', '👻', 'fire'], ['鎮塔神獸', '🐲', 'earth'], ['混沌妖尊', '👹', 'fire'], ['九幽鬼帝', '💀', 'water'], ['雷劫元靈', '⚡', 'metal']];
@@ -15846,61 +15851,100 @@ body:not(#z74) i.rd{display:block}
   window.SV90 = { download, fname };
 })();
 
-/* ===== v96 背景音樂 ===== */
+/* ===== v96/v97 背景音樂(少切換、重要時刻才切) ===== */
 (() => {
-  const VOL = .38, FADE = 1500, XF = 3;   /* 音量、換曲淡化毫秒、循環交叉秒數 */
+  const VOL = .38, FADE = 1500, XF = 3, DWELL = 3000, HOLD = 5000;
   const STORY = { battle: 'weiju', demon: 'weiju', night: 'weiju', ruin: 'weiju', village_fire: 'weiju', void: 'weiju', grave: 'libie', dream: 'libie' };
-  let cur = null, want = null, storyMood = 'wenqing', battleHold = 0, failed = {};
-  const P = [];   /* 每首兩個播放器輪流,做循環交叉淡化 */
-  function el(name) {
-    const a = new Audio('music/' + name + '.webm'); a.preload = 'auto'; a.volume = 0; a._n = name;
-    a.addEventListener('error', () => { failed[name] = 1; });
-    return a;
-  }
+  let cur = null, storyMood = 'wenqing', failed = {}, pend = null, pendT = 0, holdT = 0, holdTrack = null, lastB = null;
   const tracks = {};
-  function tr(name) { return tracks[name] || (tracks[name] = { a: el(name), b: null, on: null, v: 0 }); }
+  const fileOK = () => !/^(file|content)/.test(location.protocol);
+  function el(name, pre) { const a = new Audio('music/' + name + '.webm'); a.preload = pre ? 'auto' : 'metadata'; a.volume = 0; a.addEventListener('error', () => { failed[name] = 1; }); return a; }
+  function tr(name) { return tracks[name] || (tracks[name] = { a: el(name, true), b: null, on: null, last: 0 }); }
   function ramp(a, to, ms) {
     clearInterval(a._r); const from = a.volume, t0 = performance.now();
     a._r = setInterval(() => { const k = Math.min(1, (performance.now() - t0) / ms); a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); if (k >= 1) { clearInterval(a._r); if (to === 0) a.pause(); } }, 50);
   }
-  function enabled() { return state && state.bgmOn !== false && !document.hidden && !location.protocol.startsWith('file') && !location.protocol.startsWith('content'); }
-  function pick() {
+  const enabled = () => typeof state !== 'undefined' && state.bgmOn !== false && !document.hidden && fileOK();
+  const tabNow = () => (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
+  function battleKind(B) {
+    const m = B.monster || {}, id = String(m.id || '');
+    if (m.isBoss || B.isJie || /^jie_/.test(id) || id === 'mind_demon' || id === 'tw_100') return 'tianjie';
+    if (B.isTower || B.isWB || B.tb26 || /守山長老|守關者/.test(m.name || '')) return 'zhandou';
+    return null;
+  }
+  function bannerText(B, k) {
+    const m = B.monster || {}, id = String(m.id || ''), nm = m.name || '';
+    if (id === 'mind_demon' || id === 'tw_100') return ['心魔現', nm];
+    if (B.isJie || /^jie_/.test(id)) return ['天劫降臨', nm];
+    if (k === 'tianjie') return [B.isTower ? '登天塔・鎮守' : '境主', nm];
+    if (B.isWB) return ['天地異種', nm];
+    if (B.isTower) return ['九九登天塔', nm];
+    return ['生死交鋒', nm];
+  }
+  function banner(t) {
+    const st = document.getElementById('battle-stage'); if (!st) return;
+    let b = document.getElementById('bn97'); if (!b) { b = document.createElement('div'); b.id = 'bn97'; }
+    st.appendChild(b); b.innerHTML = `<b>${t[0]}</b><span>${t[1]}</span>`; b.classList.remove('go'); void b.offsetWidth; b.classList.add('go');
+  }
+  /* 決定目標曲:回傳 [曲名, 是否立即] */
+  function target() {
     const st = document.getElementById('st28');
-    if (st && window.ST28 && ST28.busy() && getComputedStyle(st).display !== 'none') return storyMood;
-    const B = typeof currentBattle !== 'undefined' ? currentBattle : null;
-    if (B && B.monster) {
-      const m = B.monster, id = String(m.id || '');
-      const big = m.isBoss || B.isJie || /^jie_/.test(id) || id === 'mind_demon' || id === 'tw_100' || (B.isTower && /boss/i.test(String(m.tier || m.name || '')));
-      const tab = (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
-      battleHold = Date.now() + 4000;
-      return big ? 'tianjie' : (B.isTower || B.isWB || B.tb26 || tab !== 'tab-adventure') ? 'zhandou' : 'lilian';
+    if (st && window.ST28 && ST28.busy() && getComputedStyle(st).display !== 'none') return [storyMood, true];
+    const tab = tabNow(), B = typeof currentBattle !== 'undefined' ? currentBattle : null;
+    if (tab === 'tab-adventure') {
+      const k = B && B.monster ? battleKind(B) : null;
+      if (k) { holdTrack = k; holdT = Date.now() + HOLD; if (B !== lastB) { lastB = B; if (cur !== k) banner(bannerText(B, k)); } return [k, true]; }
+      if (holdTrack && Date.now() < holdT) return [holdTrack, true];
+      return ['lilian', false];
     }
-    if (cur && /tianjie|zhandou/.test(cur) && Date.now() < battleHold) return cur;
-    const tab = (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
-    return tab === 'tab-adventure' ? 'lilian' : 'dongfu';
+    holdTrack = null;
+    return ['dongfu', false];
   }
   function play(name) {
-    if (failed[name]) return;
-    const T = tr(name), a = T.on || T.a; T.on = a;
-    if (a.paused) { a.play().catch(() => { }); }
+    if (failed[name]) return; const T = tr(name);
+    if (!T.on) T.on = T.a;
+    const a = T.on;
+    if (/tianjie|zhandou/.test(name) && Date.now() - T.last > 60000) { a.currentTime = 0; a._xf = 0; }
+    if (a.paused) a.play().catch(() => { });
     ramp(a, VOL, FADE);
   }
-  function stop(name) { const T = tracks[name]; if (!T) return; [T.a, T.b].forEach(a => a && !a.paused && ramp(a, 0, FADE)); }
+  function stop(name) { const T = tracks[name]; if (!T) return; T.last = Date.now(); [T.a, T.b].forEach(a => a && !a.paused && ramp(a, 0, FADE)); }
   function sync(force) {
-    if (!enabled()) { Object.keys(tracks).forEach(stop); cur = null; return; }
-    want = pick();
-    if (want !== cur || force) { if (cur && cur !== want) stop(cur); cur = want; play(cur); }
-    /* 循環:曲尾 XF 秒時,另一個播放器從頭淡入 */
+    if (!enabled()) { Object.keys(tracks).forEach(stop); cur = null; pend = null; return; }
+    const [want, now] = target();
+    if (want === cur && !force) { pend = null; }
+    else if (now || !cur || force || /tianjie|zhandou|wenqing|libie|weiju/.test(cur)) { switchTo(want); }   /* 從戰鬥/劇情回來:延續期已過,直接回區域曲 */
+    else { if (pend !== want) { pend = want; pendT = Date.now(); } else if (Date.now() - pendT >= DWELL) switchTo(want); }
     const T = tracks[cur]; if (!T || !T.on) return;
     const a = T.on;
     if (a.duration && a.currentTime > a.duration - XF - .3 && !a._xf) {
-      a._xf = 1; if (!T.b) T.b = el(cur);
+      a._xf = 1; if (!T.b) T.b = el(cur, true);
       const nb = a === T.a ? T.b : T.a; nb._xf = 0; nb.currentTime = 0; nb.volume = 0; nb.play().catch(() => { }); ramp(nb, VOL, XF * 1000); ramp(a, 0, XF * 1000); T.on = nb;
     }
   }
-  setInterval(() => { try { sync(); } catch (e) { } }, 400);
+  function switchTo(w) { if (cur && cur !== w) stop(cur); cur = w; pend = null; play(cur); }
+  /* 預載常用兩首 */
+  if (fileOK()) { tr('dongfu'); tr('lilian'); }
+  setInterval(() => { try { sync(); } catch (e) { } }, 300);
   document.addEventListener('visibilitychange', () => { try { sync(); } catch (e) { } });
+  const css = document.createElement('style');
+  css.textContent = '#battle-stage #bn97{position:absolute;left:0;right:0;top:3%;z-index:60;pointer-events:none;text-align:center;opacity:0;padding:6px 0 7px;background:linear-gradient(90deg,transparent,rgba(16,8,4,.85) 18%,rgba(16,8,4,.85) 82%,transparent)}#battle-stage #bn97 b{display:block;font-family:"Noto Serif TC",serif!important;font-size:24px!important;font-weight:900!important;letter-spacing:.3em;padding-left:.3em;color:#fff3d0!important;text-shadow:0 0 10px #d97706,0 2px 4px #000!important;line-height:1.2}#battle-stage #bn97 span{display:block;margin-top:2px;font-size:12px!important;letter-spacing:.15em;color:#fcd34d!important;text-shadow:0 1px 3px #000!important}#battle-stage #bn97.go{animation:bn97 1.4s ease-out forwards}@keyframes bn97{0%{opacity:0;transform:scaleX(.6)}14%{opacity:1;transform:none}78%{opacity:1}100%{opacity:0}}';
+  document.head.appendChild(css);
   window.BGM96 = { sync, story(bg) { storyMood = STORY[bg] || 'wenqing'; }, cur: () => cur };
+})();
+
+/* ===== v98 存檔防護提示 ===== */
+(() => {
+  function ask() {
+    if (window.LOADFAIL98) { showToast('⚠️ 存檔讀取失敗,原始資料已保留。請到【仙途】→存檔管理→存檔保護「還原救援存檔」。'); return; }
+    if (!window.ORPHAN98) return;
+    const b = (k => { try { const o = JSON.parse(localStorage.getItem(k)); return o && { k, t: o.lastSave || 0, r: (REALM_DATA[o.realmIdx || 0] || {}).name || '', n: o.name || '' }; } catch (e) { return null; } });
+    const c = [b('XIUXIAN_SAVE_BAK1'), b('XIUXIAN_SAVE_BAK2')].filter(Boolean).sort((x, y) => y.t - x.t)[0]; if (!c) return;
+    const d = new Date(c.t).toLocaleString('zh-TW', { hour12: false });
+    if (window.confirm(`發現先前的自動備份:\n${c.n ? c.n + '・' : ''}${c.r}(${d})\n\n要還原這份進度嗎?`)) { try { localStorage.setItem('XIUXIAN_SAVE_V2', localStorage.getItem(c.k)); location.reload(); } catch (e) { } }
+    else window.ORPHAN98 = false;
+  }
+  setTimeout(ask, 1500);
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
