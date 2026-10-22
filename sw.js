@@ -19,7 +19,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('message', e => { if (e.data === 'warm') warm(); });
 self.addEventListener('fetch', e => {
   const r = e.request; if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
-  if (/\/(assets|music)\//.test(r.url) && !/list\.json$/.test(r.url)) {
+  if (/\/(assets|music|sfx)\//.test(r.url) && !/list\.json$/.test(r.url)) {
     e.respondWith(caches.open(MEDIA).then(c => c.match(r).then(m => m || fetch(r).then(res => { if (res && res.status === 200) c.put(r, res.clone()); return res; }))));
     return;
   }

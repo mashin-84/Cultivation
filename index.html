@@ -5703,7 +5703,7 @@ function playerActCore(id) {
   const B = currentBattle, m = B.monster, S = skState(), sk = id ? SK_BY_ID[id] : null;
   if (sk && !S.learned[id]) return;
   if (sk && (skillCds[id] || 0) > 0) { showToast(`【${sk.name}】冷卻中!`); return; }
-  audio.init(); if (!isQuietAuto()) audio.playSlash();
+  audio.init(); if (!isQuietAuto() && !SFX.play(sk ? 'sfx_skill' : 'sfx_hit')) audio.playSlash();
   battleLock = true; updateBattleUI();
   const stats = calculateTotalStats(), sp = state.battleSpeed || 1, lv = sk ? S.learned[id].lv : 0, c = sk ? skCalc(sk, lv) : null;
   const buffMult = (B.buff && B.buff.turns > 0) ? 1 + B.buff.pct : 1, atk = Math.floor(stats.atk * buffMult);
@@ -5771,7 +5771,7 @@ function monsterCounterAttack() {
     let dmg = mDmg, absorbed = 0;
     if (B.shield > 0) { absorbed = Math.min(B.shield, dmg); B.shield -= absorbed; dmg -= absorbed; fx.num('吸收 ' + formatNum(absorbed), 'abs', 'p'); }
     B.playerHp = Math.max(0, B.playerHp - dmg);
-    if (dmg > 0) { fx.num('-' + formatNum(dmg), 'pdmg', 'p'); fx.playerHit(); }
+    if (dmg > 0) { fx.num('-' + formatNum(dmg), 'pdmg', 'p'); fx.playerHit(); if (!isQuietAuto()) SFX.play('sfx_hurt'); }
     logAdventure(special ? `🩸 【${m.name}】發動妖魔絕技【${m.skillName}】，造成 ${formatNum(dmg)} 點傷害${absorbed ? `(護盾吸收 ${formatNum(absorbed)})` : ''}！` : `🩸 【${m.name}】兇狠揮爪撕咬，造成 ${formatNum(dmg)} 點傷害${absorbed ? `(護盾吸收 ${formatNum(absorbed)})` : ''}！`);
     updateBattleUI(); bT(finish, 260 / sp);
   }, 280 / sp);
@@ -9870,7 +9870,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   function ult(B) {
     const sc = main(), U = ULT[sc]; if (!U) return;
     if ((skillCds.ULT26 || 0) > 0) { showToast(`【${U.n}】冷卻中!`); return; }
-    battleLock = true; updateBattleUI(); audio.init(); if (!isQuietAuto()) audio.playSlash();
+    battleLock = true; updateBattleUI(); audio.init(); if (!isQuietAuto() && !SFX.play('sfx_ult')) audio.playSlash();
     const m = B.monster, sp = state.battleSpeed || 1, base = baseDmg(B), bs = ultBest(), dm = window.sectDmgMult ? sectDmgMult(bs.sk) : 1;
     skillCds.ULT26 = U.cd; fx.pulse(stageEl('bs-p'), 'cast', 700); fx.banner(`${U.ic} ${U.n}`, '#f59e0b'); logAdventure(`${U.ic} 道友祭出本命絕學【${U.n}】!`);
     const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
@@ -16009,6 +16009,32 @@ body:not(#z74) i.rd{display:block}
     if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; }
   }
   setInterval(() => { render().catch(() => { }); }, 1500);
+})();
+
+/* ===== v101 真實音效檔:SFX.play(名稱) → true 已播放 / false 改用合成音效 ===== */
+window.SFX = (() => {
+  const MAP = {"sfx_hit": "da0526e6", "sfx_hurt": "715350a4", "sfx_skill": "7ab1367c", "sfx_ult": "aa628d58"}, buf = {}, busy = {};
+  const GAIN = { sfx_hit: .7, sfx_skill: .8, sfx_ult: 1, sfx_hurt: .6 };
+  const ok = () => location.protocol.startsWith('http') && audio && audio.ctx;
+  function load(n) {
+    if (buf[n] || busy[n] || !MAP[n] || !ok()) return; busy[n] = 1;
+    fetch('sfx/' + n + '.mp3?v=' + MAP[n]).then(r => r.arrayBuffer()).then(a => new Promise((y, x) => audio.ctx.decodeAudioData(a, y, x))).then(b => { buf[n] = b; }).catch(() => { }).finally(() => { busy[n] = 0; });
+  }
+  function preload() { Object.keys(MAP).forEach(load); }
+  function play(n) {
+    if (!MAP[n] || !ok()) return false;
+    if (!audio.enabled) return true;            // 音效關閉:視為已處理,不再改播合成音
+    const b = buf[n]; if (!b) { load(n); return false; }
+    try {
+      const c = audio.ctx, s = c.createBufferSource(), g = c.createGain();
+      s.buffer = b; s.playbackRate.value = 1 + (Math.random() - .5) * .06;   // 微幅變調,連續普攻不死板
+      g.gain.value = (GAIN[n] || .8) * audio.volume * 1.2; s.connect(g); g.connect(c.destination); s.start();
+      return true;
+    } catch (e) { return false; }
+  }
+  const _init = audio.init.bind(audio);
+  audio.init = function () { const r = _init.apply(this, arguments); preload(); return r; };
+  return { play, preload, has: n => !!MAP[n] };
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
