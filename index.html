@@ -16376,6 +16376,9 @@ window.SFX = (() => {
 /* v115 主角背面戰鬥動作圖(重要戰鬥用) */
 window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/BP/F_o1_2.webp?v=63e0ea8a", "F_o1_3": "assets/BP/F_o1_3.webp?v=4c8fedf0", "F_o1_4": "assets/BP/F_o1_4.webp?v=2d3a9938", "F_o1_5": "assets/BP/F_o1_5.webp?v=39089390", "F_o1_6": "assets/BP/F_o1_6.webp?v=665fdf49", "F_o1_7": "assets/BP/F_o1_7.webp?v=a421ed48", "F_o1_8": "assets/BP/F_o1_8.webp?v=46d02e9f", "F_o1_9": "assets/BP/F_o1_9.webp?v=71e7e51b", "M_o1_1": "assets/BP/M_o1_1.webp?v=2560faa7", "M_o1_2": "assets/BP/M_o1_2.webp?v=7ad66686", "M_o1_3": "assets/BP/M_o1_3.webp?v=49844ea7", "M_o1_4": "assets/BP/M_o1_4.webp?v=e28f9fdc", "M_o1_5": "assets/BP/M_o1_5.webp?v=b9ccd80b", "M_o1_6": "assets/BP/M_o1_6.webp?v=e9083ee8", "M_o1_7": "assets/BP/M_o1_7.webp?v=58ceecdd", "M_o1_8": "assets/BP/M_o1_8.webp?v=cfe7d049", "M_o1_9": "assets/BP/M_o1_9.webp?v=c5d17e5e"};
 
+/* v122 本命絕學過場特寫 */
+window.UC121 = {"F_sword": "assets/UC/F_sword.webp?v=d6b677e1", "F_magic": "assets/UC/F_magic.webp?v=c86b9151", "F_body": "assets/UC/F_body.webp?v=ed430cdf", "F_pill": "assets/UC/F_pill.webp?v=a4586067", "M_sword": "assets/UC/M_sword.webp?v=64061f99", "M_magic": "assets/UC/M_magic.webp?v=8ec4d8b1", "M_body": "assets/UC/M_body.webp?v=26453e35", "M_pill": "assets/UC/M_pill.webp?v=3ebd54ef"};
+
 /* ===== v113 重要戰鬥:獨立戰鬥介面 + 回合制 QTE + Boss 階段演出 ===== */
 (() => {
   const $ = id => document.getElementById(id);
@@ -16458,12 +16461,12 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 @keyframes ucBand{from{transform:skewY(-9deg) scaleY(0)}to{transform:skewY(-9deg) scaleY(1)}}
 #bf-ucut .lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(255,255,255,.18) 22px 24px);animation:ucLines .5s linear infinite;opacity:.8}
 @keyframes ucLines{from{background-position:0 0}to{background-position:-240px 0}}
-#bf-ucut img{position:absolute;left:-6%;top:12%;height:66%;max-width:none;filter:drop-shadow(0 0 16px var(--uc));animation:ucImg 1.5s cubic-bezier(.15,.9,.3,1) forwards}
+#bf-ucut img{position:absolute;left:-16%;top:20%;height:44%;max-width:none;filter:drop-shadow(0 0 16px var(--uc));-webkit-mask-image:linear-gradient(to bottom,#000 72%,transparent 98%);mask-image:linear-gradient(to bottom,#000 72%,transparent 98%);animation:ucImg 1.5s cubic-bezier(.15,.9,.3,1) forwards}
 @keyframes ucImg{0%{transform:translateX(-60%);opacity:0}18%{transform:translateX(0);opacity:1}100%{transform:translateX(6%)}}
-#bf-ucut .tx{position:absolute;right:6%;top:40%;text-align:right;transform:skewY(-9deg);animation:ucTx 1.5s cubic-bezier(.15,.9,.3,1) forwards}
+#bf-ucut .tx{position:absolute;right:5%;top:50%;text-align:right;transform:skewY(-9deg);animation:ucTx 1.5s cubic-bezier(.15,.9,.3,1) forwards}
 @keyframes ucTx{0%{transform:skewY(-9deg) translateX(70%);opacity:0}22%{transform:skewY(-9deg) translateX(0);opacity:1}100%{transform:skewY(-9deg) translateX(-5%)}}
 #bf-ucut .s{font-size:13px;font-weight:800;letter-spacing:6px;color:var(--uc)}
-#bf-ucut .n{font-size:46px;line-height:1.1;font-weight:900;letter-spacing:6px;font-family:'Noto Serif TC',serif;color:#fff;text-shadow:0 0 18px var(--uc),2px 2px 0 #000,-2px 2px 0 #000}
+#bf-ucut .n{font-size:40px;line-height:1.1;font-weight:900;letter-spacing:6px;font-family:'Noto Serif TC',serif;color:#fff;text-shadow:0 0 18px var(--uc),2px 2px 0 #000,-2px 2px 0 #000}
 #bf-ucut .fl{position:absolute;inset:0;background:#fff;animation:ucFl .35s ease-out forwards;pointer-events:none}
 @keyframes ucFl{from{opacity:.8}to{opacity:0}}
 .fx-star{width:200px;height:200px;margin:-100px 0 0 -100px;background:radial-gradient(circle,#fff 0 22%,var(--c) 38%,transparent 62%);clip-path:polygon(50% 0,58% 36%,100% 30%,64% 52%,88% 96%,50% 68%,12% 96%,36% 52%,0 30%,42% 36%);animation:fxStar .36s ease-out forwards}
