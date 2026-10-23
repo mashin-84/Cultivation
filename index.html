@@ -621,7 +621,7 @@
               <i class="ii ui ii-u_pill"></i> 回春妙藥
             </button>
             <button id="btn-battle-flee" class="tap-effect py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-serif-tc text-xs rounded border border-slate-700">
-              <i class="ii ui ii-tab_wind"></i> 靈狐遁術 (扣5%靈石)
+              <i class="ii ui ii-tab_wind"></i> 靈狐遁術<span class="f105">扣 5% 靈石</span>
             </button>
           </div>
         </div><div id="sr17"></div>
@@ -15312,7 +15312,9 @@ ${nb('.text-purple-300,.text-purple-400,.text-violet-300,.text-fuchsia-300,.text
 #tab-adventure .bg-slate-950:has(#adventure-log-box){padding:6px 8px!important}
 #monster-avatar{display:none!important}
 #battle-modal{padding:8px!important}
-#battle-modal .grid:has(#btn-battle-attack){grid-template-columns:repeat(3,1fr)!important}
+#battle-modal .grid:has(#btn-battle-attack){grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#btn-battle-flee{min-width:0!important;line-height:1.15!important}
+#btn-battle-flee .f105{display:block;font-size:9px;opacity:.7;font-weight:400;margin-top:1px}
 #btn-battle-attack{grid-column:auto!important}
 #battle-skill-bar{grid-template-columns:repeat(3,1fr)!important}
 `;
