@@ -16448,6 +16448,17 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 #bf-pi.chg{filter:drop-shadow(0 0 10px var(--uc,#bfe3ff)) drop-shadow(0 0 22px var(--uc,#bfe3ff));animation:bfChg .5s infinite alternate}
 @keyframes bfChg{from{filter:drop-shadow(0 0 6px var(--uc,#bfe3ff))}to{filter:drop-shadow(0 0 18px var(--uc,#bfe3ff)) drop-shadow(0 0 30px var(--uc,#bfe3ff))}}
 .bfx{position:absolute;pointer-events:none;z-index:20}
+.fx-star{width:200px;height:200px;margin:-100px 0 0 -100px;background:radial-gradient(circle,#fff 0 22%,var(--c) 38%,transparent 62%);clip-path:polygon(50% 0,58% 36%,100% 30%,64% 52%,88% 96%,50% 68%,12% 96%,36% 52%,0 30%,42% 36%);animation:fxStar .36s ease-out forwards}
+@keyframes fxStar{from{transform:scale(.3);opacity:1}to{transform:scale(1.3);opacity:0}}
+.fx-hitflash{width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),color-mix(in srgb,var(--c) 60%,transparent) 40%,transparent 70%);animation:fxHF .26s ease-out forwards}
+@keyframes fxHF{from{transform:scale(.5);opacity:1}to{transform:scale(1.2);opacity:0}}
+.fx-shard{width:10px;height:22px;margin:-11px 0 0 -5px;background:linear-gradient(#fff,var(--c));clip-path:polygon(50% 0,100% 100%,0 100%)}
+.fx-speed{left:0!important;top:0!important;width:100%;height:100%;background:repeating-conic-gradient(from 0deg at 62% 38%,rgba(255,255,255,.55) 0 1.2deg,transparent 1.2deg 9deg);-webkit-mask:radial-gradient(circle at 62% 38%,transparent 18%,#000 60%);mask:radial-gradient(circle at 62% 38%,transparent 18%,#000 60%);animation:fxSpd .7s ease-out forwards}
+@keyframes fxSpd{from{opacity:1}to{opacity:0}}
+.fx-go{font-size:118px;line-height:1;font-weight:900;font-family:'Noto Serif TC','Songti TC',serif;color:#fde68a;text-shadow:3px 3px 0 #7c2d12,-3px 3px 0 #7c2d12,3px -3px 0 #7c2d12,-3px -3px 0 #7c2d12,0 8px 0 #7c2d12,0 0 34px #f59e0b;white-space:nowrap;transform:translate(-50%,-50%);animation:fxGo 1.2s cubic-bezier(.2,1.5,.4,1) forwards;z-index:46}
+@keyframes fxGo{0%{transform:translate(-50%,-50%) scale(3);opacity:0}20%{transform:translate(-50%,-50%) scale(1);opacity:1}75%{opacity:1}100%{transform:translate(-50%,-50%) scale(1.1);opacity:0}}
+.fx-goring{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:6px solid #fff;animation:fxGoR .9s .15s ease-out forwards;opacity:0;z-index:45}
+@keyframes fxGoR{from{transform:scale(.5);opacity:1}to{transform:scale(5);opacity:0}}
 .fx-arc{width:190px;height:190px;margin:-95px 0 0 -95px;border-radius:50%;border-top:9px solid var(--c);filter:drop-shadow(0 0 10px var(--c));animation:fxArc .4s ease-out forwards}
 @keyframes fxArc{from{transform:rotate(-70deg) scale(.6);opacity:1}to{transform:rotate(50deg) scale(1.15);opacity:0}}
 .fx-bolt{width:110px;height:7px;margin:-3px 0 0 0;transform-origin:left center;border-radius:4px;background:linear-gradient(90deg,transparent,var(--c) 45%,#fff);box-shadow:0 0 12px var(--c)}
@@ -16590,6 +16601,17 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     await e.animate([{ translate: '0 0', scale: '1' }, { translate: `${(px - ex) * k}px ${(py - ey) * k}px`, scale: big ? '1.35' : '1.18' }], { duration: big ? 240 : 180, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => { });
     setTimeout(() => { e.getAnimations().forEach(a => a.cancel()); e.animate([{ translate: `${(px - ex) * k}px ${(py - ey) * k}px`, scale: big ? '1.35' : '1.18' }, { translate: '0 0', scale: '1' }], { duration: 300, easing: 'ease-out' }); }, big ? 220 : 120);
   }
+  /* v117 命中特效(參考 Pokémon GO):星芒爆光、敵人閃白並被擊退、放射速度線、碎片飛散、命中停頓 */
+  function impact(col, big) {
+    const [x, y] = center('bf-ei'), j = () => rnd(-28, 28);
+    const st = fxEl('fx-star', x + j(), y + j(), { '--c': col }); st.style.rotate = rnd(0, 90) + 'deg'; if (big) st.style.scale = '1.5'; setTimeout(() => st.remove(), 380);
+    const fl = fxEl('fx-hitflash', x, y, { '--c': col }); setTimeout(() => fl.remove(), 260);
+    for (let k = 0; k < (big ? 9 : 5); k++) { const d = fxEl('fx-shard', x, y, { '--c': col }), a = rnd(0, Math.PI * 2), r = rnd(60, big ? 170 : 120); d.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) rotate(${rnd(-300, 300)}deg)`, opacity: 0 }], { duration: 420, easing: 'ease-out' }).onfinish = () => d.remove(); }
+    const e = $('bf-ei'); if (e) { e.animate([{ filter: 'brightness(3.2) saturate(.2)' }, { filter: 'brightness(1)' }], { duration: 180 }); e.animate([{ translate: '0 0' }, { translate: `${big ? 26 : 14}px ${big ? -16 : -8}px` }, { translate: '0 0' }], { duration: 220, easing: 'ease-out', composite: 'add' }); }
+    if (big) shake();
+  }
+  function speed(col) { const d = fxEl('fx-speed', 0, 0, { '--c': col || '#fff' }); setTimeout(() => d.remove(), 700); }
+  function goBurst() { const s = $('bf-stg'); if (!s) return; const d = fxEl('fx-go', s.clientWidth / 2, s.clientHeight * .4); d.textContent = '戰'; const r = fxEl('fx-goring', s.clientWidth / 2, s.clientHeight * .4); sfx('sfx_boss', () => { try { audio.playThunder(); } catch (e) { } }); setTimeout(() => { d.remove(); r.remove(); }, 1300); }
   function i114lunge() { const i = $('bf-pi'); if (!i) return; i.animate([{ translate: '0 0' }, { translate: '6% -3%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' }); }
   function hitFx(who) { const i = $(who === 'e' ? 'bf-ei' : 'bf-pi'); if (!i) return; i.classList.remove('hit'); void i.offsetWidth; i.classList.add('hit'); }
   function shake() { root.classList.remove('shake'); void root.offsetWidth; root.classList.add('shake'); }
@@ -16731,8 +16753,8 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   async function dealE(total, hits, crit, key) {
     hits = Math.max(1, hits); const per = total / hits;
     for (let i = 0; i < hits; i++) {
-      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(0, B.e.hp - v); hitFx('e'); num('e', fm(v), crit ? 'cr' : '');
-      sfx(crit ? 'sfx_crit' : 'sfx_hit', () => audio.playSlash()); ui(); await sleep(hits > 1 ? 170 : 260);
+      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(0, B.e.hp - v); impact(B.fxc || '#ffffff', crit); num('e', fm(v), crit ? 'cr' : '');
+      sfx(crit ? 'sfx_crit' : 'sfx_hit', () => audio.playSlash()); ui(); await sleep(70); await sleep(hits > 1 ? 120 : 200);
       if (B.e.hp <= 0) break;
     }
   }
@@ -16741,11 +16763,14 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   /* ---------- 玩家行動 ---------- */
   async function doAtk() {
     setPose(1); const q = await qTiming('⚔ 仙劍普攻');
-    await go(.72, .62, 190); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
-    const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q);
-    log(q === 'pf' ? '劍光如虹,一擊命中要害!' : q === 'gd' ? '道友揮劍斬出。' : '劍勢一偏,只削到衣角。');
-    await dealE(base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 1, cr);
-    setPose(1); await back(260);
+    const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q), n = q === 'pf' ? 3 : q === 'gd' ? 2 : 1;
+    log(q === 'pf' ? '劍光如虹,三連斬命中要害!' : q === 'gd' ? '道友連斬兩劍。' : '劍勢一偏,只削到衣角。');
+    const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
+    for (let k = 0; k < n && B.e.hp > 0; k++) {   /* 每一斬:衝上去 → 命中 → 退回(像 Pokémon GO 連打) */
+      await go(.72, .62, k ? 120 : 170); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
+      await dealE(tot / n, 1, cr && k === n - 1);
+      setPose(1); await back(k === n - 1 ? 240 : 110);
+    }
   }
   async function doSkill(i) {
     const k = B.sk[i]; if (!k || (B.cd[k.id] || 0) > 0) return; const sk = k.sk, c = k.c;
@@ -16760,7 +16785,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
       ui(); await sleep(400); return;
     }
     const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
-    go(.22, .9, 160); setPose(3); setTimeout(() => { if (B && !B.over) { setPose(1); back(240); } }, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
+    B.fxc = sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff'; go(.22, .9, 160); setPose(3); setTimeout(() => { if (B && !B.over) { setPose(1); back(240); } }, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
     const hits = sk.type === 'atk' ? c.hits : 1, cr = r >= 1 || Math.random() * 100 < B.s.crit;
     const total = base(c.mult * (sk.type === 'atk' ? c.hits : 1) * f) * (cr ? critM() : 1) * dm;
     log(`施展【${sk.name}】${r >= 1 ? ',法訣圓滿!' : ''}`);
@@ -16775,7 +16800,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
-    pi.classList.remove('chg'); setPose(8); await go(.8, .55, 230, 40); fxBurst(uc);
+    pi.classList.remove('chg'); setPose(8); await go(.8, .55, 230, 40); fxBurst(uc); B.fxc = uc; speed(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
     setPose(1); await back(320);
@@ -16877,7 +16902,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     ui(); log('');
     await cut({ img: B.pt || B.e.art.src, flip: !B.pt && B.e.art.flip, sub: cfg.label || B.d.title || '', big: cfg.name, say: B.d.intro || cfg.intro || '來吧!' });
-    log('輪到道友出手。'); ui();
+    goBurst(); log('輪到道友出手。'); ui();
   }
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || !B) return;
