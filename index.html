@@ -16445,9 +16445,9 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 #bf113,#bf113 *{-webkit-touch-callout:none}
 #bf113 .stg img{position:absolute;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .18s;pointer-events:none;-webkit-user-drag:none}
 /* 站位(參考 Pokémon GO 對戰):主角在前景左下、背對鏡頭;敵人在場地中後方 */
-#bf-gd{position:absolute;left:33%;width:52%;height:8%;bottom:39%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.5),rgba(0,0,0,.15) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
-#bf-ei{left:30%;width:58%;height:44%;bottom:42%;z-index:1}
-#bf-pi{left:27%;width:auto!important;max-width:none!important;height:92%;bottom:-20%;z-index:2;transform:translateX(-50%);transition:translate .18s ease-out}
+#bf-gd{position:absolute;left:41%;width:50%;height:8%;bottom:39%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.5),rgba(0,0,0,.15) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+#bf-ei{left:38%;width:56%;height:44%;bottom:42%;z-index:1}
+#bf-pi{left:27%;width:auto!important;max-width:none!important;height:92%;bottom:-20%;z-index:2;transform:translateX(-50%);transform-origin:0% 100%;transition:translate .18s ease-out}
 #bf-pi.chg{filter:drop-shadow(0 0 10px var(--uc,#bfe3ff)) drop-shadow(0 0 22px var(--uc,#bfe3ff));animation:bfChg .5s infinite alternate}
 @keyframes bfChg{from{filter:drop-shadow(0 0 6px var(--uc,#bfe3ff))}to{filter:drop-shadow(0 0 18px var(--uc,#bfe3ff)) drop-shadow(0 0 30px var(--uc,#bfe3ff))}}
 .bfx{position:absolute;pointer-events:none;z-index:20}
@@ -16591,12 +16591,16 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   /* 突進目標:讓主角身上的出招點(fx,fy:圖框內比例)縮放後正好落在敵人身上;frac<1 只走一部分 */
   function aim(fx, fy, sc, frac) {
     const i = $('bf-pi'), s = $('bf-stg'); const r = i.getBoundingClientRect(), q = s.getBoundingClientRect();
-    const L = r.left - q.left, Tp = r.top - q.top, w = r.width, h = r.height, ox = L + w, oy = Tp + h / 2;   /* 縮放中心 = 版面框中心(圖片有 translateX(-50%)) */
+    const L = r.left - q.left, Tp = r.top - q.top, w = r.width, h = r.height, ox = L + w / 2, oy = Tp + h;   /* 縮放中心 = 腳底中央(transform-origin 0% 100%,配合 translateX(-50%)),位移與縮放同步 → 直線往右上 */
     const px = L + fx * w, py = Tp + fy * h, [ex, ey] = center('bf-ei');
-    return [(ex - ox - sc * (px - ox)) * frac, (ey - oy - sc * (py - oy)) * frac];
+    /* 一律往右上直線:若劍尖本來就在敵人右邊,改用較小的縮放(往場內走得更遠),讓腳步不必往左退 */
+    if (px - ox > 1 && ex - ox > 0) sc = Math.max(.3, Math.min(sc, (ex - ox) / (px - ox) * .97));
+    let dx = (ex - ox - sc * (px - ox)) * frac, dy = (ey - oy - sc * (py - oy)) * frac;
+    if (dy > 0) dy = 0; dx = Math.max(dx, -dy * .3);   /* 至少帶一點往右的斜度 */
+    return [dx, dy, sc];
   }
   function go(k, sc, ms, lift, pt) {
-    const i = $('bf-pi'); if (!i) return Promise.resolve(); const [dx, dy] = pt ? aim(pt[0], pt[1], sc, k) : vec(k);
+    const i = $('bf-pi'); if (!i) return Promise.resolve(); const v = pt ? aim(pt[0], pt[1], sc, k) : vec(k), dx = v[0], dy = v[1]; if (v[2]) sc = v[2];
     i.style.transition = 'none';
     const a = i.animate([{ translate: '0 0', scale: '1' }, { translate: `${dx}px ${dy - (lift || 0)}px`, scale: String(sc) }], { duration: ms || 200, easing: 'cubic-bezier(.3,.0,.4,1)', fill: 'forwards' });
     i._mv = a; return a.finished.catch(() => { });
