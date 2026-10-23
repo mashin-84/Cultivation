@@ -16415,9 +16415,13 @@ window.SFX = (() => {
 #bf-ph i.v{background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)}
 #bf-ph i.sh{background:rgba(147,197,253,.65)}
 .bf-hpt{display:flex;justify-content:space-between;font-size:11px;margin-top:2px;opacity:.9}
-#bf113 .stg{flex:1;min-height:0;position:relative}
-#bf113 .stg img{position:absolute;bottom:4%;height:74%;width:48%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .18s}
-#bf-pi{left:2%}#bf-ei{right:0;height:86%!important;width:52%!important}
+#bf113 .stg{flex:1;min-height:0;position:relative;overflow:hidden}
+#bf113,#bf113 *{-webkit-touch-callout:none}
+#bf113 .stg img{position:absolute;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .18s;pointer-events:none;-webkit-user-drag:none}
+/* 站位(參考 Pokémon GO 對戰):主角在前景左下、背對鏡頭;敵人在場地中後方 */
+#bf-gd{position:absolute;left:33%;width:52%;height:8%;bottom:39%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.5),rgba(0,0,0,.15) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+#bf-ei{left:30%;width:58%;height:44%;bottom:42%;z-index:1}
+#bf-pi{left:-10%;width:66%;height:86%;bottom:-22%;z-index:2}
 #bf-ei.fl{transform:scaleX(-1)}
 #bf-ei.hit{animation:bfHit .35s}#bf-ei.fl.hit{animation:bfHitF .35s}
 #bf-pi.hit{animation:bfHit .35s}
@@ -16442,7 +16446,7 @@ window.SFX = (() => {
 #bf-auto{margin-left:auto;padding:4px 10px;border-radius:9px;font-weight:800;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.35);color:#f6efe0}
 #bf-auto.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
 /* QTE */
-#bf-q{position:absolute;inset:0;z-index:30;display:none}
+#bf-q{position:absolute;inset:0;z-index:30;display:none;touch-action:none}
 #bf-q.on{display:block}
 .bf-qhint{position:absolute;left:0;right:0;top:8%;text-align:center;font-weight:900;font-size:16px;text-shadow:0 2px 6px #000;letter-spacing:2px}
 .bf-track{position:absolute;left:8%;right:8%;top:46%;height:26px;border-radius:14px;background:rgba(0,0,0,.6);border:2px solid #f6efe0;overflow:hidden}
@@ -16454,8 +16458,8 @@ window.SFX = (() => {
 @keyframes bfPop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
 @keyframes bfGone{to{transform:scale(1.8);opacity:0}}
 .bf-time{position:absolute;left:10%;right:10%;bottom:6%;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}.bf-time i{position:absolute;inset:0;background:#fbbf24;transform-origin:left}
-.bf-tg{position:absolute;left:24%;top:58%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:4px solid #fde68a;box-shadow:0 0 14px #fde68a inset,0 0 14px #fde68a}
-.bf-ring{position:absolute;left:24%;top:58%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:5px solid #f87171;box-shadow:0 0 16px #ef4444}
+.bf-tg{position:absolute;left:24%;top:70%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:4px solid #fde68a;box-shadow:0 0 14px #fde68a inset,0 0 14px #fde68a}
+.bf-ring{position:absolute;left:24%;top:70%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:5px solid #f87171;box-shadow:0 0 16px #ef4444}
 .bf-hold{position:absolute;left:50%;top:52%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;background:conic-gradient(#f59e0b var(--v,0%),rgba(0,0,0,.55) 0);display:flex;align-items:center;justify-content:center;border:3px solid #fde68a}
 .bf-hold span{width:118px;height:118px;border-radius:50%;background:#2a1a0c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;text-align:center;line-height:1.3}
 .bf-hold .z{position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(transparent 0 306deg,rgba(253,224,71,.85) 306deg 352deg,transparent 352deg);pointer-events:none;-webkit-mask:radial-gradient(circle,transparent 62px,#000 63px);mask:radial-gradient(circle,transparent 62px,#000 63px)}
@@ -16490,13 +16494,15 @@ window.SFX = (() => {
   const root = document.createElement('div'); root.id = 'bf113';
   root.innerHTML = `<div class="tp"><div class="nm"><span id="bf-en"></span><small id="bf-el"></small><span class="st" id="bf-es"></span></div>
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
-<div class="stg" id="bf-stg"><img id="bf-pi" alt=""><img id="bf-ei" alt=""><div id="bf-sk"></div><div id="bf-q"></div></div>
+<div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
 <div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span><button id="bf-auto">自動:關</button></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div><div id="bf-acts"></div></div>
 <div id="bf-cut"><img alt=""><div class="cap"><div class="sub"></div><div class="big"></div><div class="say"></div><div class="tap">點擊繼續</div></div></div>
 <div id="bf-end"></div>`;
   document.body.appendChild(root);
+  root.addEventListener('contextmenu', e => e.preventDefault());   /* 長按不跳出「下載圖片」選單 */
+  root.addEventListener('selectstart', e => e.preventDefault());
   /* ---------- 狀態 ---------- */
   let B = null;
   const on = () => !!B;
