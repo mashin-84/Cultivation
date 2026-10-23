@@ -16373,6 +16373,9 @@ window.SFX = (() => {
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-rp112]'); if (b) GUARD112.restore(+b.dataset.rp112); });
 })();
 
+/* v115 主角背面戰鬥動作圖(重要戰鬥用) */
+window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/BP/F_o1_2.webp?v=63e0ea8a", "F_o1_3": "assets/BP/F_o1_3.webp?v=4c8fedf0", "F_o1_4": "assets/BP/F_o1_4.webp?v=2d3a9938", "F_o1_5": "assets/BP/F_o1_5.webp?v=39089390", "F_o1_6": "assets/BP/F_o1_6.webp?v=665fdf49", "F_o1_7": "assets/BP/F_o1_7.webp?v=a421ed48", "F_o1_8": "assets/BP/F_o1_8.webp?v=46d02e9f", "F_o1_9": "assets/BP/F_o1_9.webp?v=71e7e51b", "M_o1_1": "assets/BP/M_o1_1.webp?v=2560faa7", "M_o1_2": "assets/BP/M_o1_2.webp?v=7ad66686", "M_o1_3": "assets/BP/M_o1_3.webp?v=49844ea7", "M_o1_4": "assets/BP/M_o1_4.webp?v=e28f9fdc", "M_o1_5": "assets/BP/M_o1_5.webp?v=b9ccd80b", "M_o1_6": "assets/BP/M_o1_6.webp?v=e9083ee8", "M_o1_7": "assets/BP/M_o1_7.webp?v=58ceecdd", "M_o1_8": "assets/BP/M_o1_8.webp?v=cfe7d049", "M_o1_9": "assets/BP/M_o1_9.webp?v=c5d17e5e"};
+
 /* ===== v113 重要戰鬥:獨立戰鬥介面 + 回合制 QTE + Boss 階段演出 ===== */
 (() => {
   const $ = id => document.getElementById(id);
@@ -16394,6 +16397,26 @@ window.SFX = (() => {
     try { const k = window.art45 && art45({ monster: { name, id: id || '' } }); if (k && window.A45 && A45[k]) return { src: A45[k], flip: FL.includes(k) }; } catch (e) { }
     return null;
   }
+  /* v114 主角背面戰鬥動作:1 待機 2 普攻 3 攻擊神通 4 輔助神通 5 格擋 6 受擊 7 蓄力 8 爆發 9 勝利(其他外觀暫用新手服) */
+  const BPX = window.BP114 || {};
+  const pose = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1'; return BPX[g + lk + '_' + n] || BPX[g + 'o1_' + n] || ''; };
+  const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
+  let poseT = 0;
+  function setPose(n, back, lift) {
+    const i = $('bf-pi'); if (!i) return; const s = pose(n); if (!s) return;
+    i.src = s; i.style.translate = lift ? `0 ${-lift}%` : ''; clearTimeout(poseT);
+    if (back) poseT = setTimeout(() => { if (B && !B.over) { i.src = pose(1); i.style.translate = ''; } }, back);
+  }
+  const center = id => { const e = $(id), s = $('bf-stg'); if (!e || !s) return [0, 0]; const r = e.getBoundingClientRect(), q = s.getBoundingClientRect(); return [r.left - q.left + r.width / 2, r.top - q.top + r.height * .45]; };
+  function fxEl(cls, x, y, css) { const d = document.createElement('div'); d.className = 'bfx ' + cls; d.style.left = x + 'px'; d.style.top = y + 'px'; if (css) Object.assign(d.style, css); $('bf-stg').appendChild(d); return d; }
+  function fxArc(col) { const [x, y] = center('bf-ei'); const d = fxEl('fx-arc', x, y, { '--c': col || '#dff1ff' }); setTimeout(() => d.remove(), 450); }
+  function fxBolt(col, n) {
+    const p = $('bf-pi'), s = $('bf-stg'); if (!p || !s) return; const r = p.getBoundingClientRect(), q = s.getBoundingClientRect();
+    const sx = r.left - q.left + r.width * .62, sy = r.top - q.top + r.height * .3, [ex, ey] = center('bf-ei'), a = Math.atan2(ey - sy, ex - sx) * 180 / Math.PI;
+    for (let k = 0; k < (n || 1); k++) setTimeout(() => { const d = fxEl('fx-bolt', sx, sy, { '--c': col || '#bfe3ff' }); d.animate([{ transform: `translate(0,0) rotate(${a}deg) scaleX(.4)`, opacity: 1 }, { transform: `translate(${ex - sx}px,${ey - sy + (k % 2 ? 14 : -14)}px) rotate(${a}deg) scaleX(1)`, opacity: .9 }], { duration: 260, easing: 'ease-in' }).onfinish = () => { d.remove(); fxArc(col); }; }, k * 110);
+  }
+  function fxAura(cls) { const [x, y] = center('bf-pi'); const d = fxEl('fx-aura ' + cls, x, y); setTimeout(() => d.remove(), 900); }
+  function fxBurst(col) { const [x, y] = center('bf-ei'); const d = fxEl('fx-burst', x, y, { '--c': col }); const f = fxEl('fx-flash', 0, 0, { '--c': col }); setTimeout(() => { d.remove(); f.remove(); }, 900); }
   const playerArt = () => { try { const g = state.gender === 'f' ? 'F_' : 'M_'; return (window.LOOK_IMG && LOOK_IMG[g + (state.look || 'o1')]) || GEN3.S0; } catch (e) { return ''; } };
   const sfx = (n, fb) => { try { if (!(window.SFX && SFX.play(n))) fb && fb(); } catch (e) { } };
   /* ---------- 樣式 ---------- */
@@ -16421,7 +16444,22 @@ window.SFX = (() => {
 /* 站位(參考 Pokémon GO 對戰):主角在前景左下、背對鏡頭;敵人在場地中後方 */
 #bf-gd{position:absolute;left:33%;width:52%;height:8%;bottom:39%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.5),rgba(0,0,0,.15) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
 #bf-ei{left:30%;width:58%;height:44%;bottom:42%;z-index:1}
-#bf-pi{left:-10%;width:66%;height:86%;bottom:-22%;z-index:2}
+#bf-pi{left:27%;width:auto!important;max-width:none!important;height:92%;bottom:-20%;z-index:2;transform:translateX(-50%);transition:translate .18s ease-out}
+#bf-pi.chg{filter:drop-shadow(0 0 10px var(--uc,#bfe3ff)) drop-shadow(0 0 22px var(--uc,#bfe3ff));animation:bfChg .5s infinite alternate}
+@keyframes bfChg{from{filter:drop-shadow(0 0 6px var(--uc,#bfe3ff))}to{filter:drop-shadow(0 0 18px var(--uc,#bfe3ff)) drop-shadow(0 0 30px var(--uc,#bfe3ff))}}
+.bfx{position:absolute;pointer-events:none;z-index:20}
+.fx-arc{width:190px;height:190px;margin:-95px 0 0 -95px;border-radius:50%;border-top:9px solid var(--c);filter:drop-shadow(0 0 10px var(--c));animation:fxArc .4s ease-out forwards}
+@keyframes fxArc{from{transform:rotate(-70deg) scale(.6);opacity:1}to{transform:rotate(50deg) scale(1.15);opacity:0}}
+.fx-bolt{width:110px;height:7px;margin:-3px 0 0 0;transform-origin:left center;border-radius:4px;background:linear-gradient(90deg,transparent,var(--c) 45%,#fff);box-shadow:0 0 12px var(--c)}
+.fx-aura{width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;animation:fxAura .9s ease-out forwards}
+.fx-aura.sh{border:4px solid rgba(147,197,253,.9);background:radial-gradient(circle,rgba(147,197,253,.05) 55%,rgba(147,197,253,.35))}
+.fx-aura.hl{background:radial-gradient(circle,rgba(110,231,183,.55),transparent 65%)}
+.fx-aura.bf{background:radial-gradient(circle,rgba(248,113,113,.55),transparent 65%)}
+@keyframes fxAura{from{transform:scale(.4);opacity:0}30%{opacity:1}to{transform:scale(1.25);opacity:0}}
+.fx-burst{width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,#fff 0,var(--c) 25%,transparent 65%);animation:fxBurst .8s ease-out forwards}
+@keyframes fxBurst{from{transform:scale(.2);opacity:1}to{transform:scale(2.2);opacity:0}}
+.fx-flash{left:0!important;top:0!important;width:100%;height:100%;background:var(--c);mix-blend-mode:screen;animation:fxFlash .6s ease-out forwards}
+@keyframes fxFlash{from{opacity:.75}to{opacity:0}}
 #bf-ei.fl{transform:scaleX(-1)}
 #bf-ei.hit{animation:bfHit .35s}#bf-ei.fl.hit{animation:bfHitF .35s}
 #bf-pi.hit{animation:bfHit .35s}
@@ -16534,6 +16572,7 @@ window.SFX = (() => {
     d.style.left = (r.left - s.left + r.width / 2 + rnd(-24, 24)) + 'px'; d.style.top = (r.top - s.top + r.height * rnd(.15, .4)) + 'px';
     stg.appendChild(d); setTimeout(() => d.remove(), 1050);
   }
+  function i114lunge() { const i = $('bf-pi'); if (!i) return; i.animate([{ translate: '0 0' }, { translate: '6% -3%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' }); }
   function hitFx(who) { const i = $(who === 'e' ? 'bf-ei' : 'bf-pi'); if (!i) return; i.classList.remove('hit'); void i.offsetWidth; i.classList.add('hit'); }
   function shake() { root.classList.remove('shake'); void root.offsetWidth; root.classList.add('shake'); }
   function result(q) { const t = { pf: '完美!', gd: '不錯', ms: '失誤' }[q]; const d = document.createElement('div'); d.className = 'bf-res ' + q; d.textContent = t; $('bf-stg').appendChild(d); setTimeout(() => d.remove(), 1100); }
@@ -16683,7 +16722,8 @@ window.SFX = (() => {
   const critM = () => window.sectCritMult ? sectCritMult() : 1.5;
   /* ---------- 玩家行動 ---------- */
   async function doAtk() {
-    const q = await qTiming('⚔ 仙劍普攻');
+    setPose(1); const q = await qTiming('⚔ 仙劍普攻');
+    setPose(2, 650, 0); i114lunge(); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q);
     log(q === 'pf' ? '劍光如虹,一擊命中要害!' : q === 'gd' ? '道友揮劍斬出。' : '劍勢一偏,只削到衣角。');
     await dealE(base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 1, cr);
@@ -16694,12 +16734,14 @@ window.SFX = (() => {
     const dm = window.sectDmgMult ? sectDmgMult(sk) : 1;
     if (sk.type === 'shield' || sk.type === 'heal' || sk.type === 'buff') {
       const q = await qTiming(`✨ ${sk.name}`, .85), f = q === 'pf' ? 1.35 : q === 'gd' ? 1 : .65;
+      setPose(4, 900); fxAura(sk.type === 'shield' ? 'sh' : sk.type === 'heal' ? 'hl' : 'bf');
       if (sk.type === 'shield') { B.p.sh = Math.max(B.p.sh, Math.floor(B.p.max * c.pct * f)); num('p', '🛡' + fm(B.p.sh), 'hl'); log(`護體靈光籠罩全身,護盾 ${fm(B.p.sh)}。`); }
       else if (sk.type === 'heal') { const h = Math.floor(B.p.max * c.pct * f); B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); log(`生機湧現,恢復 ${fm(h)} 氣血。`); }
       else { B.p.buff = { pct: c.pct * f, turns: c.turns + 1 }; num('p', '攻↑', 'tx'); log(`戰意沸騰!攻擊提升 ${Math.round(c.pct * f * 100)}%。`); }
       ui(); await sleep(400); return;
     }
     const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
+    setPose(3, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
     const hits = sk.type === 'atk' ? c.hits : 1, cr = r >= 1 || Math.random() * 100 < B.s.crit;
     const total = base(c.mult * (sk.type === 'atk' ? c.hits : 1) * f) * (cr ? critM() : 1) * dm;
     log(`施展【${sk.name}】${r >= 1 ? ',法訣圓滿!' : ''}`);
@@ -16712,7 +16754,9 @@ window.SFX = (() => {
   async function doUlt() {
     if (!B.ult || (B.cd.ULT || 0) > 0) return; B.cd.ULT = B.ult.cd + 1;
     await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
+    const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
+    pi.classList.remove('chg'); setPose(8, 1300, 10); fxBurst(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
     log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!`);
@@ -16736,7 +16780,7 @@ window.SFX = (() => {
     if (E.charge) {
       E.charge = 0; const nm = (B.d.charge && B.d.charge[1]) || '必殺一擊';
       skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(500);
-      q = await qRing(`⚠ ${nm}`);
+      q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') fxAura('sh');
       dmg = B.dM() * 2.4 * atkM * (q === 'pf' ? 0 : q === 'gd' ? .45 : 1);
     } else {
       dmg = B.dM() * atkM * rnd(.9, 1.1);
@@ -16748,7 +16792,7 @@ window.SFX = (() => {
     if (q === 'pf') { num('p', '完美格擋', 'hl'); log('看準時機,完全化解!'); sfx('sfx_click'); }
     if (dmg > 0) {
       dmg = Math.floor(dmg); let ab = 0; if (B.p.sh > 0) { ab = Math.min(B.p.sh, dmg); B.p.sh -= ab; dmg -= ab; }
-      B.p.hp = Math.max(0, B.p.hp - dmg); hitFx('p'); num('p', '-' + fm(dmg) + (ab ? `(🛡${fm(ab)})` : ''), 'pd'); sfx('sfx_hurt');
+      B.p.hp = Math.max(0, B.p.hp - dmg); hitFx('p'); if (!q) setPose(6, 600); num('p', '-' + fm(dmg) + (ab ? `(🛡${fm(ab)})` : ''), 'pd'); sfx('sfx_hurt');
       if (q) shake(); if (!q) log(`【${E.name}】出手,造成 ${fm(dmg)} 傷害。`);
     }
     if (E.charge) { log(`⚠【${E.name}】正在蓄力(${(B.d.charge && B.d.charge[0]) || '凝聚殺機'})……下回合小心!`); }
@@ -16789,7 +16833,7 @@ window.SFX = (() => {
   async function end(win) {
     if (!B || B.over) return; B.over = true; B.busy = true; qClose();
     const E = B.e, d = B.d; await sleep(400);
-    if (win) { sfx('sfx_win', () => audio.playFanfare()); $('bf-ei').style.transition = 'opacity 1s'; $('bf-ei').style.opacity = '.15'; }
+    if (win) { setPose(9); sfx('sfx_win', () => audio.playFanfare()); $('bf-ei').style.transition = 'opacity 1s'; $('bf-ei').style.opacity = '.15'; }
     else sfx('sfx_lose');
     const box = $('bf-end');
     box.innerHTML = `<div class="stamp ${win ? 'w' : 'l'}">${win ? '勝' : '敗'}</div><div class="say">${B.pt || E.art.src ? `【${E.name}】` : ''}${win ? (d.win || '敗了……') : (d.lose || '不過如此。')}</div>
@@ -16808,7 +16852,7 @@ window.SFX = (() => {
     const bgk = B.d.bg || cfg.bg;
     root.style.backgroundImage = `url("${(bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
     $('bf-en').textContent = cfg.name; $('bf-el').textContent = cfg.label || B.d.title || '';
-    $('bf-pi').src = playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
+    $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('fl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     ui(); log('');
