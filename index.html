@@ -2721,7 +2721,7 @@ function toggleTribPill() {
 
 // OPT-O3: 心魔試煉戰鬥
 function triggerDemonTribulation() {
-  if (currentBattle) { showToast('戰鬥中，無法引動心魔！'); return; }
+  if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { showToast('戰鬥中，無法引動心魔！'); return; }
   if (state.demonDefeated) { showToast('心魔已斬，無需再戰！'); return; }
   const stats = calculateTotalStats();
   const modal = document.getElementById('modal-tribulation');
@@ -5667,7 +5667,7 @@ function renderSkillBar() {
   S.equipped.slice(0, slots).forEach(id => {
     if (!id || !S.learned[id]) return;
     const sk = SK_BY_ID[id], cd = skillCds[id] || 0, c = skCalc(sk, S.learned[id].lv), on = cd <= 0 && !battleLock, col = sk.el ? SK_EL_COLOR[sk.el] : '#c4b5fd';
-    h += `<button data-skbtn="${id}" ${on ? '' : 'disabled'} class="tap-effect py-1.5 px-1 rounded border text-xs font-bold flex items-center justify-center space-x-1 ${on ? 'bg-slate-900 text-amber-100' : 'bg-slate-900 text-slate-500 opacity-60'}" style="border-color:${col}"><span class="w-6 h-6 inline-block">${skArt(id, !on && cd > 0)}</span><span>${sk.name}${cd > 0 ? `(${cd})` : ''}</span></button>`;
+    h += `<button data-skbtn="${id}" ${on ? '' : 'disabled'} class="tap-effect py-1.5 px-1 rounded border text-xs font-bold flex items-center justify-center space-x-1 ${on ? 'bg-slate-900 text-amber-100' : 'bg-slate-900 text-slate-500 opacity-60'}" style="border-color:${col}"><span class="w-6 h-6 inline-block ic108">${skArt(id, !on && cd > 0)}${cd > 0 ? `<span class="cd108">${cd}</span>` : ''}</span><span class="nm108">${sk.name}</span></button>`;
   });
   bar.innerHTML = h || '<div class="col-span-2 text-center text-[11px] text-slate-500">尚未裝備神通,請至人物→修行→神通配置</div>';
 }
@@ -5868,10 +5868,10 @@ function redFlags() {
   f['tab-ming'] = f.body || f.treasure || f.pet;
   f['tab-techniques'] = skAnyAlert() || f.body || !!(window.CH51 && CH51.alert());
   f['tab-adventure'] = (state.pendingEvents || []).length > 0 || wbReady();
-  f['tab-abode'] = !!(window.AB53 && AB53.alert());
+  f['tab-abode'] = !!(window.AB53 && AB53.alert()) || f.body || f.treasure || f.pet;
   f['tab-records'] = !!(window.RC54 && RC54.alert());
   f['tab-crafting'] = !!(window.CR52 && CR52.alert && CR52.alert());
-  f['tab-inventory'] = Object.keys(state.inventory || {}).some(k => k.startsWith('wbox_') && state.inventory[k] > 0) || f.treasure || f.pet;
+  f['tab-inventory'] = Object.keys(state.inventory || {}).some(k => k.startsWith('wbox_') && state.inventory[k] > 0);
   // —— 擴充步驟(原為 2 層包裝)——
   XT.flags85Garden && XT.flags85Garden(f);   // v8.5 靈田可收成 → 洞府紅點(034)
   XT.flags87Secret && XT.flags87Secret(f);   // v8.7 秘境派遣完成 → 歷練紅點(036)
@@ -6958,7 +6958,7 @@ const GEN3={"A0": "assets/GEN3/A0.webp?v=5607b08f", "A1": "assets/GEN3/A1.webp?v
     const p = stageEl('bs-p'), svg = p && p.querySelector('svg');
     if (svg) svg.outerHTML = `<img id="bs-ps" class="bs-ps" src="${G.S0}" alt="" draggable="false">`;
     const mk = monKey(B.monster), me = s.querySelector('.bs-memo');
-    if (me && mk) me.innerHTML = `<img class="bs-mi ${mk[0].toLowerCase()}${['K1', 'K7', 'M06', 'M07', 'M10', 'W8'].includes(mk) ? ' fl87' : ''}" src="${G[mk]}" alt="" draggable="false">`;
+    if (me && mk) me.innerHTML = `<img class="bs-mi ${mk[0].toLowerCase()}${['K1', 'K7', 'M06', 'M07', 'M08', 'M10', 'W5', 'W8'].includes(mk) ? ' fl87' : ''}" src="${G[mk]}" alt="" draggable="false">`;
   };
   const pose = (n, ms) => { const im = stageEl('bs-ps'); if (!im) return; im.src = G[n]; clearTimeout(pose.t); pose.t = setTimeout(() => { const i2 = stageEl('bs-ps'); if (i2) i2.src = G.S0; }, ms / (state.battleSpeed || 1) + 60); };
   XT.fxAct76 = _pa => function (sk) { _pa.apply(this, arguments); if (!stageOn()) return; if (!sk || ['atk', 'burn', 'stun', 'drain'].includes(sk.type)) pose('S1', 560); };
@@ -7427,7 +7427,7 @@ const SECT_BY = Object.fromEntries(SECTS.map(s => [s.id, s]));
   const equippedCount = () => Object.keys(state.sectSk).filter(k => state.sectSk[k] && state.sectSk[k].eq).length;
   function toggleEq(id) { const e = state.sectSk[id]; if (!e) return; if (!e.eq && equippedCount() >= equipCap()) { showToast(`功法欄已滿(上限 ${equipCap()})`); return; } e.eq = !e.eq; saveGame(); render(); updateTopBar(); }
   function trial() {
-    const s = cur(); if (!s || !canGrad()) return; if (currentBattle) { showToast('戰鬥中無法接受試煉。'); return; }
+    const s = cur(); if (!s || !canGrad()) return; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { showToast('戰鬥中無法接受試煉。'); return; }
     const base = AREAS_DATA[Math.min(7, s.r)], b = base.monsters.find(m => m.isBoss) || base.monsters[base.monsters.length - 1];
     const mon = Object.assign({}, b, { name: `${s.n}守山長老`, emoji: '🧙', hp: Math.floor(b.hp * 1.4), atk: Math.floor(b.atk * 1.15), def: Math.floor(b.def * 1.15), isBoss: true, drops: [], skillName: '鎮山掌' });
     const area = { id: 'sect9', name: `${s.n}・出師試煉`, maxSteps: 10, realmReq: 0, monsters: [mon] };
@@ -9023,10 +9023,10 @@ ${R.bonus ? `<div class="x5-cd" style="margin-top:8px;border-color:#f59e0b"><b s
   function startJie(n) {
     if (!open0() || !jieOK()) { showToast('【九重劫】劫印未傳——隨劇情開啟。'); return; }
     const J = JI(); if (n > J.cleared + 1) { showToast('須先渡過前一重劫。'); return; }
-    if (currentBattle) { showToast('正在戰鬥中。'); return; }
     const first = n > J.cleared; if (!first) { if (J.d !== today()) { J.d = today(); J.n = 0; } if (J.n >= 5) { showToast('今日重修次數已滿(5 次)。'); return; } }
     const st = calculateTotalStats(); if (hpGate(st)) return;
-    window.JIE49 = { show: false, n, was: !!state.autoExplore || !!(window.JIE49 && JIE49.chain && JIE49.was) }; try { HO43.mark({ kind: 'jie' }); } catch (e) { }
+    const wasA108 = !!state.autoExplore; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { showToast('正在戰鬥中。'); return; }   /* v108 一般歷練戰鬥自動讓出 */
+    window.JIE49 = { show: false, n, was: wasA108 || !!(window.JIE49 && JIE49.chain && JIE49.was) }; try { HO43.mark({ kind: 'jie' }); } catch (e) { }
     if (state.autoExplore) stopAutoExplore('九重劫降臨,自動歷練暫停。');
     const mon = jieMon(n, st); X.close('xian'); goToTab('tab-adventure');
     startMonsterBattle({ id: 98, name: '九重劫', maxSteps: 9999, element: mon.element, monsters: [mon] }, true);
@@ -9052,6 +9052,7 @@ ${R.bonus ? `<div class="x5-cd" style="margin-top:8px;border-color:#f59e0b"><b s
   X.srHooks.push((out, r, c) => { if (r.t >= 4) { const x = Math.round((r.t - 3) * (1 + r.d) * c.m * .8); if (x > 0) out.xian = (out.xian || 0) + x; } });
   { XT.towerWin88 = _t => function () { const f = currentBattle && currentBattle.floor; const r = _t.apply(this, arguments); if (f && (f % 9 === 0 || f === 100) && open0()) { const x = 2 + Math.floor(f / 20); X.give({ xian: x }, true); logAdventure(`🌸 塔頂仙氣縈繞,獲得仙緣 ×${x}`); } return r; }; }
   { XT.wbWin88 = _w => function () { const r = _w.apply(this, arguments); if (open0()) { X.give({ xian: 4 }, true); logAdventure('🌸 天地異種 遺落仙緣 ×4'); } return r; }; }
+  window.XJ37 = { alert: () => { try { if (!open0()) return false; const s = SH(), cap = shenCap(); if (BR.some(b => s[b.k] < cap && state.stones >= shenCost(s[b.k]))) return true; const g = GU(); return GO.some(o => g[o.k] < GMAX && (state.xian || 0) >= gCost(g[o.k])); } catch (e) { return false; } } };   /* v108 天機紅點 */
   /* ---------- 介面 ---------- */
   const st = document.createElement('style');
   st.textContent = `#xr18{display:flex;gap:6px;margin-top:6px}#xr18 button{flex:1;padding:9px 6px;border-radius:10px;background:linear-gradient(135deg,#312e81,#0f172a);border:1px solid #6366f1;color:#e0e7ff;font-weight:800;font-size:12px;position:relative}#xr18 button.lk{opacity:.55;background:#0f172a;border-color:#334155;color:#94a3b8}
@@ -9220,6 +9221,7 @@ ${R.bonus ? `<div class="x5-cd" style="margin-top:8px;border-color:#f59e0b"><b s
     const c = nCost(i, L + 1); if (s.dao < c) { showToast(`道行不足,需 ${c}。`); return; }
     s.dao -= c; s.nodes[sc + i] = L + 1; X.dirty(); saveGame(); render();
   }
+  window.SC38 = { alert: () => { try { if (!schOK()) return false; const s = SCH(); return [s.main, s.sub].filter(Boolean).some(sc => SC[sc] && SC[sc].nodes.some((nd, i) => { const L = nodeLv(sc, i); return L < 3 && R() >= tierOf(i) && s.dao >= nCost(i, L + 1); })); } catch (e) { return false; } } };   /* v108 流派紅點 */
   /* ---------- 介面 ---------- */
   let tab = 'pick', view = null;
   const fxLine = o => X.fxText(o);
@@ -14815,7 +14817,8 @@ window.A45={"ef_atk": "assets/A45/ef_atk.webp?v=964164cd", "ef_cd": "assets/A45/
     const c = enhCost(e); return state.stones >= c.stone && ((state.inventory || {})[c.oreKey] || 0) >= c.ore;
   }
   const slotDot = sl => !!better(sl) || canEnh(sl);
-  window.CH51 = { alert: () => { try { return ORDER.some(slotDot) || techDot() || talDot(); } catch (e) { return false; } } };
+  const xDot = { sch: () => !!(window.SC38 && SC38.alert()), body: () => { try { return (state.body || 0) < bodyCap() && state.stones >= bodyCost(); } catch (e) { return false; } }, xian: () => !!(window.XJ37 && XJ37.alert()) };   /* v108 */
+  window.CH51 = { alert: () => { try { return ORDER.some(slotDot) || techDot() || talDot() || xDot.sch() || xDot.body() || xDot.xian(); } catch (e) { return false; } } };
 
   /* ---------- 樣式 ---------- */
   const css = document.createElement('style');
@@ -14978,7 +14981,7 @@ window.A45={"ef_atk": "assets/A45/ef_atk.webp?v=964164cd", "ef_cd": "assets/A45/
 <div class="stg"><div class="col">${LEFT.map(slotH).join('')}</div><div class="art">${lookSrc() ? `<img src="${lookSrc()}" alt="">` : ''}</div><div class="col">${RIGHT.map(slotH).join('')}</div></div>
 <div class="sts"><div><span>氣血</span><b>${fm(st.hp)}</b></div><div><span>攻擊</span><b>${fm(st.atk)}</b></div><div><span>防禦</span><b>${fm(st.def)}</b></div><div><span>會心率</span><b>${crit}%</b></div><button data-a51="attr">詳細<br>屬性</button></div>
 <div class="acts"><button data-a51="auto">一鍵換裝${ORDER.some(better) ? '<i class="rd"></i>' : ''}</button><button class="pr" data-enhall="1">一鍵強化${ORDER.some(canEnh) ? '<i class="rd"></i>' : ''}</button><button data-x5="af.open">器紋・套裝</button></div>
-<div class="xl">${xlBtn('功', '功法', 'data-a51="sec" data-k="tech"', techDot() ? '<i class="rd"></i>' : '')}${xlBtn('賦', '天賦', `data-a51="sec" data-k="tal" class="${on('talent') ? '' : 'lk'}"`, talDot() ? '<i class="rd"></i>' : '')}${xlBtn('通', '神通', 'data-a51="sec" data-k="sk"', skd ? '<i class="rd"></i>' : '')}${xlBtn('派', '流派', 'data-m6="0"')}${xlBtn('體', '煉體', 'data-m6="5"')}${xlBtn('機', '天機', 'data-m6="1"')}${xlBtn('根', '靈根', 'data-a51="sec" data-k="root"')}</div>`;
+<div class="xl">${xlBtn('功', '功法', 'data-a51="sec" data-k="tech"', techDot() ? '<i class="rd"></i>' : '')}${xlBtn('賦', '天賦', `data-a51="sec" data-k="tal" class="${on('talent') ? '' : 'lk'}"`, talDot() ? '<i class="rd"></i>' : '')}${xlBtn('通', '神通', 'data-a51="sec" data-k="sk"', skd ? '<i class="rd"></i>' : '')}${xlBtn('派', '流派', 'data-m6="0"', xDot.sch() ? '<i class="rd"></i>' : '')}${xlBtn('體', '煉體', 'data-m6="5"', xDot.body() ? '<i class="rd"></i>' : '')}${xlBtn('機', '天機', 'data-m6="1"', xDot.xian() ? '<i class="rd"></i>' : '')}${xlBtn('根', '靈根', 'data-a51="sec" data-k="root"')}</div>`;
     if (h !== sig) {
       // 保留 data-m6 按鈕上同步過來的 data-x5 / lk / 紅點
       const keep = {}; ch.querySelectorAll('[data-m6]').forEach(b => { keep[b.dataset.m6] = { x5: b.dataset.x5, k: b.dataset.k, lk: b.classList.contains('lk'), dot: !!b.querySelector('.x5-dot') }; });
@@ -15316,7 +15319,11 @@ ${nb('.text-purple-300,.text-purple-400,.text-violet-300,.text-fuchsia-300,.text
 #btn-battle-flee{min-width:0!important;line-height:1.15!important}
 #btn-battle-flee .f105{display:block;font-size:9px;opacity:.7;font-weight:400;margin-top:1px}
 #btn-battle-attack{grid-column:auto!important}
-#battle-skill-bar{grid-template-columns:repeat(3,1fr)!important}
+#battle-skill-bar{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#battle-skill-bar>button{min-width:0!important;max-width:100%!important;overflow:hidden}
+#battle-skill-bar .nm108{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#battle-skill-bar .ic108{position:relative;flex:none}
+#battle-skill-bar .cd108{position:absolute;right:-6px;top:-6px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:#5b4a36;color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 0 0 1.5px #fff}
 `;
   document.head.appendChild(css);
   ['tab-abode', 'tab-adventure', 'tab-techniques', 'tab-crafting', 'tab-inventory', 'tab-records'].forEach(id => { const e = $(id); if (e) e.classList.add('ink53'); });
@@ -16085,6 +16092,26 @@ window.SFX = (() => {
   const strip = x => typeof x === 'string' ? x.replace(RE, '').replace(/ {2,}/g, ' ') : x;
   ['alert', 'confirm', 'prompt'].forEach(k => { const o = window[k]; if (typeof o === 'function') window[k] = function (a, ...r) { return o.call(window, strip(a), ...r); }; });
   window.ICONTXT106 = { strip };
+})();
+
+/* ===== v108 洞府場景熱點紅點 ===== */
+(() => {
+  const st = document.createElement('style');
+  st.textContent = '#hub44 .h44 .nm{position:relative}#hub44 .h44 .nm>i.rd{display:block!important;position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#d13b2f;box-shadow:0 0 0 2px #f6efe0}';
+  document.head.appendChild(st);
+  function tick() {
+    const hub = document.getElementById('hub44'); if (!hub || !hub.offsetParent) return;
+    let f = {}; try { f = redFlags(); } catch (e) { }
+    const gd = hub.querySelector('[data-s="gd"]');
+    const want = { '5': f.body, '6': f.treasure, '7': f.pet, gd: /可收/.test(gd ? gd.textContent : '') };
+    hub.querySelectorAll('.h44').forEach(b => {
+      const k = b.dataset.m6 || b.dataset.h44, nm = b.querySelector('.nm'); if (!nm || !(k in want)) return;
+      let d = nm.querySelector(':scope>i.rd');
+      if (want[k] && !d) { d = document.createElement('i'); d.className = 'rd'; nm.appendChild(d); }
+      else if (!want[k] && d) d.remove();
+    });
+  }
+  setInterval(tick, 800); setTimeout(tick, 400);
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
