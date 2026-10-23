@@ -16572,6 +16572,24 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     d.style.left = (r.left - s.left + r.width / 2 + rnd(-24, 24)) + 'px'; d.style.top = (r.top - s.top + r.height * rnd(.15, .4)) + 'px';
     stg.appendChild(d); setTimeout(() => d.remove(), 1050);
   }
+  /* v116 突進:主角衝到敵人面前出招,再退回原位(往場內走會變小,有遠近感) */
+  function vec(k) { const [px, py] = center('bf-pi'), [ex, ey] = center('bf-ei'); return [(ex - px) * k, (ey - py) * k]; }
+  function go(k, sc, ms, lift) {
+    const i = $('bf-pi'); if (!i) return Promise.resolve(); const [dx, dy] = vec(k);
+    i.style.transition = 'none';
+    const a = i.animate([{ translate: '0 0', scale: '1' }, { translate: `${dx}px ${dy - (lift || 0)}px`, scale: String(sc) }], { duration: ms || 200, easing: 'cubic-bezier(.3,.0,.4,1)', fill: 'forwards' });
+    i._mv = a; return a.finished.catch(() => { });
+  }
+  function back(ms) {
+    const i = $('bf-pi'); if (!i || !i._mv) return Promise.resolve(); const kf = i._mv.effect.getKeyframes(), last = kf[kf.length - 1]; i._mv.cancel();
+    const a = i.animate([{ translate: last.translate, scale: last.scale }, { translate: '0 0', scale: '1' }], { duration: ms || 260, easing: 'ease-out' }); i._mv = null;
+    return a.finished.catch(() => { }).then(() => { i.style.transition = ''; });
+  }
+  async function eLunge(big) {
+    const e = $('bf-ei'); if (!e) return; const [px, py] = center('bf-pi'), [ex, ey] = center('bf-ei'), k = big ? .55 : .35;
+    await e.animate([{ translate: '0 0', scale: '1' }, { translate: `${(px - ex) * k}px ${(py - ey) * k}px`, scale: big ? '1.35' : '1.18' }], { duration: big ? 240 : 180, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => { });
+    setTimeout(() => { e.getAnimations().forEach(a => a.cancel()); e.animate([{ translate: `${(px - ex) * k}px ${(py - ey) * k}px`, scale: big ? '1.35' : '1.18' }, { translate: '0 0', scale: '1' }], { duration: 300, easing: 'ease-out' }); }, big ? 220 : 120);
+  }
   function i114lunge() { const i = $('bf-pi'); if (!i) return; i.animate([{ translate: '0 0' }, { translate: '6% -3%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' }); }
   function hitFx(who) { const i = $(who === 'e' ? 'bf-ei' : 'bf-pi'); if (!i) return; i.classList.remove('hit'); void i.offsetWidth; i.classList.add('hit'); }
   function shake() { root.classList.remove('shake'); void root.offsetWidth; root.classList.add('shake'); }
@@ -16723,10 +16741,11 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   /* ---------- 玩家行動 ---------- */
   async function doAtk() {
     setPose(1); const q = await qTiming('⚔ 仙劍普攻');
-    setPose(2, 650, 0); i114lunge(); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
+    await go(.72, .62, 190); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q);
     log(q === 'pf' ? '劍光如虹,一擊命中要害!' : q === 'gd' ? '道友揮劍斬出。' : '劍勢一偏,只削到衣角。');
     await dealE(base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 1, cr);
+    setPose(1); await back(260);
   }
   async function doSkill(i) {
     const k = B.sk[i]; if (!k || (B.cd[k.id] || 0) > 0) return; const sk = k.sk, c = k.c;
@@ -16741,7 +16760,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
       ui(); await sleep(400); return;
     }
     const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
-    setPose(3, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
+    go(.22, .9, 160); setPose(3); setTimeout(() => { if (B && !B.over) { setPose(1); back(240); } }, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
     const hits = sk.type === 'atk' ? c.hits : 1, cr = r >= 1 || Math.random() * 100 < B.s.crit;
     const total = base(c.mult * (sk.type === 'atk' ? c.hits : 1) * f) * (cr ? critM() : 1) * dm;
     log(`施展【${sk.name}】${r >= 1 ? ',法訣圓滿!' : ''}`);
@@ -16756,9 +16775,10 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
-    pi.classList.remove('chg'); setPose(8, 1300, 10); fxBurst(uc);
+    pi.classList.remove('chg'); setPose(8); await go(.8, .55, 230, 40); fxBurst(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
+    setPose(1); await back(320);
     log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!`);
   }
   async function doPill() {
@@ -16779,11 +16799,11 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     let dmg, q = null;
     if (E.charge) {
       E.charge = 0; const nm = (B.d.charge && B.d.charge[1]) || '必殺一擊';
-      skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(500);
+      skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(400); eLunge(true);
       q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') fxAura('sh');
       dmg = B.dM() * 2.4 * atkM * (q === 'pf' ? 0 : q === 'gd' ? .45 : 1);
     } else {
-      dmg = B.dM() * atkM * rnd(.9, 1.1);
+      dmg = B.dM() * atkM * rnd(.9, 1.1); await eLunge(false);
       if (window.sectDodge && Math.random() < sectDodge()) { num('p', '閃避', 'tx'); dmg = 0; }
     }
     E.cnt++;
