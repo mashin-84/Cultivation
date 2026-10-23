@@ -16400,6 +16400,9 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   /* v114 主角背面戰鬥動作:1 待機 2 普攻 3 攻擊神通 4 輔助神通 5 格擋 6 受擊 7 蓄力 8 爆發 9 勝利(其他外觀暫用新手服) */
   const BPX = window.BP114 || {};
   const pose = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1'; return BPX[g + lk + '_' + n] || BPX[g + 'o1_' + n] || ''; };
+  /* 各出招動作的「劍尖附近」在圖框內的位置(由圖自動量出;其他外觀暫用新手服的值) */
+  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053] };
+  const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
   const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
   let poseT = 0;
   function setPose(n, back, lift) {
@@ -16412,7 +16415,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   function fxArc(col) { const [x, y] = center('bf-ei'); const d = fxEl('fx-arc', x, y, { '--c': col || '#dff1ff' }); setTimeout(() => d.remove(), 450); }
   function fxBolt(col, n) {
     const p = $('bf-pi'), s = $('bf-stg'); if (!p || !s) return; const r = p.getBoundingClientRect(), q = s.getBoundingClientRect();
-    const sx = r.left - q.left + r.width * .62, sy = r.top - q.top + r.height * .3, [ex, ey] = center('bf-ei'), a = Math.atan2(ey - sy, ex - sx) * 180 / Math.PI;
+    const tp = tip(3), sx = r.left - q.left + r.width * tp[0], sy = r.top - q.top + r.height * tp[1], [ex, ey] = center('bf-ei'), a = Math.atan2(ey - sy, ex - sx) * 180 / Math.PI;
     for (let k = 0; k < (n || 1); k++) setTimeout(() => { const d = fxEl('fx-bolt', sx, sy, { '--c': col || '#bfe3ff' }); d.animate([{ transform: `translate(0,0) rotate(${a}deg) scaleX(.4)`, opacity: 1 }, { transform: `translate(${ex - sx}px,${ey - sy + (k % 2 ? 14 : -14)}px) rotate(${a}deg) scaleX(1)`, opacity: .9 }], { duration: 260, easing: 'ease-in' }).onfinish = () => { d.remove(); fxArc(col); }; }, k * 110);
   }
   function fxAura(cls) { const [x, y] = center('bf-pi'); const d = fxEl('fx-aura ' + cls, x, y); setTimeout(() => d.remove(), 900); }
@@ -16774,7 +16777,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     log(q === 'pf' ? '劍光如虹,三連斬命中要害!' : q === 'gd' ? '道友連斬兩劍。' : '劍勢一偏,只削到衣角。');
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
     for (let k = 0; k < n && B.e.hp > 0; k++) {   /* 每一斬:衝上去 → 命中 → 退回(像 Pokémon GO 連打) */
-      await go(1, .62, k ? 120 : 170, 0, [.6, .4]); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
+      setPose(2); await go(1, .62, k ? 120 : 170, 0, tip(2)); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
       await dealE(tot / n, 1, cr && k === n - 1);
       setPose(1); await back(k === n - 1 ? 240 : 110);
     }
@@ -16807,7 +16810,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
-    pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, [.6, .32]); fxBurst(uc); B.fxc = uc; speed(uc);
+    pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, tip(8)); fxBurst(uc); B.fxc = uc; speed(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
     setPose(1); await back(320);
