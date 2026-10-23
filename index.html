@@ -15742,7 +15742,7 @@ body:not(#z74) i.rd{display:block}
   const PRE = { '[data-c52="alch"]': 'alch', '[data-c52="forge"]': 'forge', '[data-c52="mk"]': 'market' };
   const TABS = '[data-c52],[data-x32a],[data-x5$=".tab"],[data-act="ming-tab"],[data-l14="g"],[id^="subtab-"]';
   const CHIPS = '[data-k52],[data-c13],.sk27c button';
-  const EXCL = '#nav25 *,#nav25,.inv13-cell,.rc,.sl,.h44,[data-area],.gd-t,[data-r52],[data-s51],[data-l14="gp"],.sealb,#ch51 .xl button,#rc54 .gr button,#ab53r .sb53,#btn-tap-cultivate,[data-x5="st28.hub"],#title34 *,#st28 *,#modal-gender14 *,#btn-edit-name,[data-skbtn] img';
+  const EXCL = '#bf113 *,#nav25 *,#nav25,.inv13-cell,.rc,.sl,.h44,[data-area],.gd-t,[data-r52],[data-s51],[data-l14="gp"],.sealb,#ch51 .xl button,#rc54 .gr button,#ab53r .sb53,#btn-tap-cultivate,[data-x5="st28.hub"],#title34 *,#st28 *,#modal-gender14 *,#btn-edit-name,[data-skbtn] img';
   const isX = t => /^[✕×✖]$/.test(t);
 
   function rgbs(el) {
@@ -16451,6 +16451,21 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 #bf-pi.chg{filter:drop-shadow(0 0 10px var(--uc,#bfe3ff)) drop-shadow(0 0 22px var(--uc,#bfe3ff));animation:bfChg .5s infinite alternate}
 @keyframes bfChg{from{filter:drop-shadow(0 0 6px var(--uc,#bfe3ff))}to{filter:drop-shadow(0 0 18px var(--uc,#bfe3ff)) drop-shadow(0 0 30px var(--uc,#bfe3ff))}}
 .bfx{position:absolute;pointer-events:none;z-index:20}
+#bf-ucut{position:absolute;inset:0;z-index:55;overflow:hidden;background:rgba(0,0,0,.35);animation:ucIn .15s}
+#bf-ucut.out{animation:ucOut .25s forwards}
+@keyframes ucIn{from{opacity:0}}@keyframes ucOut{to{opacity:0}}
+#bf-ucut .band{position:absolute;left:-10%;right:-10%;top:30%;height:34%;transform:skewY(-9deg);background:linear-gradient(90deg,rgba(10,6,3,.95),rgba(30,20,10,.92) 55%,color-mix(in srgb,var(--uc) 45%,#000));border-top:3px solid var(--uc);border-bottom:3px solid var(--uc);box-shadow:0 0 30px var(--uc);animation:ucBand .3s cubic-bezier(.2,.9,.3,1)}
+@keyframes ucBand{from{transform:skewY(-9deg) scaleY(0)}to{transform:skewY(-9deg) scaleY(1)}}
+#bf-ucut .lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(255,255,255,.18) 22px 24px);animation:ucLines .5s linear infinite;opacity:.8}
+@keyframes ucLines{from{background-position:0 0}to{background-position:-240px 0}}
+#bf-ucut img{position:absolute;left:-6%;top:12%;height:66%;max-width:none;filter:drop-shadow(0 0 16px var(--uc));animation:ucImg 1.5s cubic-bezier(.15,.9,.3,1) forwards}
+@keyframes ucImg{0%{transform:translateX(-60%);opacity:0}18%{transform:translateX(0);opacity:1}100%{transform:translateX(6%)}}
+#bf-ucut .tx{position:absolute;right:6%;top:40%;text-align:right;transform:skewY(-9deg);animation:ucTx 1.5s cubic-bezier(.15,.9,.3,1) forwards}
+@keyframes ucTx{0%{transform:skewY(-9deg) translateX(70%);opacity:0}22%{transform:skewY(-9deg) translateX(0);opacity:1}100%{transform:skewY(-9deg) translateX(-5%)}}
+#bf-ucut .s{font-size:13px;font-weight:800;letter-spacing:6px;color:var(--uc)}
+#bf-ucut .n{font-size:46px;line-height:1.1;font-weight:900;letter-spacing:6px;font-family:'Noto Serif TC',serif;color:#fff;text-shadow:0 0 18px var(--uc),2px 2px 0 #000,-2px 2px 0 #000}
+#bf-ucut .fl{position:absolute;inset:0;background:#fff;animation:ucFl .35s ease-out forwards;pointer-events:none}
+@keyframes ucFl{from{opacity:.8}to{opacity:0}}
 .fx-star{width:200px;height:200px;margin:-100px 0 0 -100px;background:radial-gradient(circle,#fff 0 22%,var(--c) 38%,transparent 62%);clip-path:polygon(50% 0,58% 36%,100% 30%,64% 52%,88% 96%,50% 68%,12% 96%,36% 52%,0 30%,42% 36%);animation:fxStar .36s ease-out forwards}
 @keyframes fxStar{from{transform:scale(.3);opacity:1}to{transform:scale(1.3);opacity:0}}
 .fx-hitflash{width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),color-mix(in srgb,var(--c) 60%,transparent) 40%,transparent 70%);animation:fxHF .26s ease-out forwards}
@@ -16495,6 +16510,23 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 #bf-acts button .cd{position:absolute;right:5px;top:3px;font-size:10px;background:#3b2510;color:#fff;border-radius:8px;padding:0 5px}
 #bf-acts button:active:not([disabled]){transform:translateY(2px);box-shadow:none}
 .bf-row{display:flex;align-items:center;gap:8px;font-size:11px}
+/* v121 操作盤:右下大普攻鍵,神通圓鈕環繞,本命絕學金色大鈕;左側丹藥、自動 */
+#bf-acts{display:block!important;position:relative;height:178px;margin-top:6px}
+#bf-acts .b{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;padding:0!important;font-weight:900;color:#fff;background:radial-gradient(circle at 35% 30%,#4a3a2a,#1f150c);border:2px solid #d6b56a;box-shadow:0 4px 10px rgba(0,0,0,.6),inset 0 0 10px rgba(253,230,138,.25);overflow:visible;white-space:normal}
+#bf-acts .b .ic{width:70%;height:70%;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#bf-acts .b .ic img,#bf-acts .b .ic svg{width:100%;height:100%;object-fit:cover}
+#bf-acts .b .lb{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;white-space:nowrap;color:#f6efe0;text-shadow:0 1px 2px #000}
+#bf-acts .b.atk{width:86px;height:86px;right:6px;bottom:18px;background:radial-gradient(circle at 35% 30%,#f87171,#991b1b);border-color:#fecaca;font-size:30px;font-family:'Noto Serif TC',serif}
+#bf-acts .b.atk small{font-size:10px;font-family:inherit;margin-top:-2px}
+#bf-acts .b.sk{width:56px;height:56px}
+#bf-acts .b.ult{width:72px;height:72px;background:radial-gradient(circle at 35% 30%,#fde68a,#b45309);border-color:#fff7cc;color:#3b2510;font-size:24px;font-family:'Noto Serif TC',serif;animation:bfUlt 1.4s infinite}
+@keyframes bfUlt{0%,100%{box-shadow:0 0 6px #fbbf24,0 4px 10px rgba(0,0,0,.6)}50%{box-shadow:0 0 22px #fbbf24,0 4px 10px rgba(0,0,0,.6)}}
+#bf-acts .b.sm{width:46px;height:46px;font-size:18px}
+#bf-acts .b[disabled]{filter:grayscale(.9) brightness(.7);animation:none}
+#bf-acts .b .cd{position:absolute;inset:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;background:rgba(0,0,0,.45);text-shadow:0 1px 3px #000}
+#bf-acts .b:active:not([disabled]){transform:scale(.92)}
+#bf-acts .auto{position:absolute;left:4px;top:4px;padding:5px 12px;border-radius:12px;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);color:#f6efe0}
+#bf-acts .auto.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
 #bf-auto{margin-left:auto;padding:4px 10px;border-radius:9px;font-weight:800;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.35);color:#f6efe0}
 #bf-auto.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
 /* QTE */
@@ -16548,7 +16580,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
-<div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span><button id="bf-auto">自動:關</button></div>
+<div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div><div id="bf-acts"></div></div>
 <div id="bf-cut"><img alt=""><div class="cap"><div class="sub"></div><div class="big"></div><div class="say"></div><div class="tap">點擊繼續</div></div></div>
 <div id="bf-end"></div>`;
@@ -16566,16 +16598,20 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     $('bf-ph2').textContent = ['', '', '第二階段', '最終階段'][B.phase] || '';
     const s = []; if (B.e.charge) s.push('⚠ 蓄力中'); if (B.e.stun) s.push('💫 暈眩'); if (B.e.dot) s.push('🔥 灼燒'); if (B.p.buff) s.push('💢 戰意');
     $('bf-es').textContent = s.join(' '); $('bf-ei').classList.toggle('charge', !!B.e.charge);
-    $('bf-auto').textContent = '自動:' + (B.auto ? '開' : '關'); $('bf-auto').classList.toggle('on', B.auto);
     acts();
   }
   function acts() {
     const box = $('bf-acts'); if (!box || !B) return; const lock = B.busy || B.auto;
-    let h = `<button class="atk" data-bf="atk" ${lock ? 'disabled' : ''}>⚔ 普攻</button>`;
-    B.sk.forEach((k, i) => { const cd = B.cd[k.id] || 0; h += `<button data-bf="sk" data-i="${i}" ${lock || cd > 0 ? 'disabled' : ''}>${k.sk.name}${cd > 0 ? `<span class="cd">${cd}</span>` : ''}</button>`; });
+    const W = box.clientWidth || 390, H = 178, AX = W - 6 - 43, AY = H - 18 - 43;   /* 普攻鍵中心 */
+    const at = (dx, dy, sz) => `left:${AX + dx - sz / 2}px;top:${AY + dy - sz / 2}px`;
+    const SP = [[-104, 4], [-90, -62], [-34, -104], [-166, -34]];
+    let h = `<button id="bf-auto" class="auto ${B.auto ? 'on' : ''}">自動:${B.auto ? '開' : '關'}</button>`;
+    h += `<button class="b atk" data-bf="atk" ${lock ? 'disabled' : ''}>攻<small>普攻</small></button>`;
+    B.sk.slice(0, 4).forEach((k, i) => { const cd = B.cd[k.id] || 0, p = SP[i]; let ic = ''; try { ic = skArt(k.id, false); } catch (e) { }
+      h += `<button class="b sk" data-bf="sk" data-i="${i}" style="${at(p[0], p[1], 56)}" ${lock || cd > 0 ? 'disabled' : ''}><span class="ic">${ic}</span><span class="lb">${k.sk.name}</span>${cd > 0 ? `<span class="cd">${cd}</span>` : ''}</button>`; });
+    if (B.ult) { const cd = B.cd.ULT || 0; h += `<button class="b ult" data-bf="ult" style="${at(-236, 2, 72)}" ${lock || cd > 0 ? 'disabled' : ''}>絕<span class="lb">${B.ult.n}</span>${cd > 0 ? `<span class="cd">${cd}</span>` : ''}</button>`; }
     const pills = (state.inventory.pill_4 || 0);
-    h += `<button data-bf="pill" ${lock || !pills || B.pillUsed >= 2 ? 'disabled' : ''}>💊 回春丹 ${pills > 99 ? '99+' : pills}</button>`;
-    if (B.ult) { const cd = B.cd.ULT || 0; h += `<button class="ult" data-bf="ult" ${lock || cd > 0 ? 'disabled' : ''}>${B.ult.ic} 本命絕學・${B.ult.n}${cd > 0 ? `<span class="cd">${cd}</span>` : ''}</button>`; }
+    h += `<button class="b sm" data-bf="pill" style="left:8px;top:${H - 70}px" ${lock || !pills || B.pillUsed >= 2 ? 'disabled' : ''}>💊<span class="lb">回春丹 ${pills > 99 ? '99+' : pills}</span></button>`;
     if (box.dataset.h !== h) { box.dataset.h = h; box.innerHTML = h; }
   }
   const log = t => { const l = $('bf-log'); if (l) l.innerHTML = t; };
@@ -16626,6 +16662,20 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   }
   function speed(col) { const d = fxEl('fx-speed', 0, 0, { '--c': col || '#fff' }); setTimeout(() => d.remove(), 700); }
   function goBurst() { const s = $('bf-stg'); if (!s) return; const d = fxEl('fx-go', s.clientWidth / 2, s.clientHeight * .4); d.textContent = '戰'; const r = fxEl('fx-goring', s.clientWidth / 2, s.clientHeight * .4); sfx('sfx_boss', () => { try { audio.playThunder(); } catch (e) { } }); setTimeout(() => { d.remove(); r.remove(); }, 1300); }
+  function impactP(col) { const [x, y] = center('bf-pi'); const st = fxEl('fx-star', x + 30, y - 20, { '--c': col }); setTimeout(() => st.remove(), 380); }
+  /* v121 本命絕學過場:斜切光帶 + 主角特寫 + 招式大字(之後換成專屬特寫圖) */
+  const UCUT = window.UC121 || {};
+  function ultCut() {
+    return new Promise(res => {
+      const g = state.gender === 'f' ? 'F' : 'M', sch = (() => { try { return SCH19.SCH().main; } catch (e) { return ''; } })();
+      const src = UCUT[g + '_' + sch] || UCUT[g] || playerArt(), uc = ULTC[B.ult.n] || '#bfe3ff';
+      const d = document.createElement('div'); d.id = 'bf-ucut'; d.style.setProperty('--uc', uc);
+      d.innerHTML = `<div class="band"><div class="lines"></div></div><img src="${src}" alt=""><div class="tx"><div class="s">本命絕學</div><div class="n">${B.ult.n}</div></div><div class="fl"></div>`;
+      root.appendChild(d); sfx('sfx_skill');
+      let done = false; const end = () => { if (done) return; done = true; d.classList.add('out'); setTimeout(() => d.remove(), 260); res(); };
+      d.addEventListener('click', end); setTimeout(end, B.auto ? 1100 : 1500);
+    });
+  }
   function i114lunge() { const i = $('bf-pi'); if (!i) return; i.animate([{ translate: '0 0' }, { translate: '6% -3%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' }); }
   function hitFx(who) { const i = $(who === 'e' ? 'bf-ei' : 'bf-pi'); if (!i) return; i.classList.remove('hit'); void i.offsetWidth; i.classList.add('hit'); }
   function shake() { root.classList.remove('shake'); void root.offsetWidth; root.classList.add('shake'); }
@@ -16681,13 +16731,25 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     });
   }
   /* 3. 縮圈:敵方大招,圈縮到剛好重疊時點擊 */
+  /* 敵人撲來:在 ms 毫秒時剛好碰到主角(與縮圈重疊同一刻) */
+  function eApproach(ms) {
+    const e = $('bf-ei'); if (!e) return; const [px, py] = center('bf-pi'), [ex, ey] = center('bf-ei'), k = .62;
+    e.getAnimations().forEach(a => a.cancel());
+    e._ap = e.animate([{ translate: '0 0', scale: '1' }, { translate: `${(px - ex) * k * .15}px ${(py - ey) * k * .15}px`, scale: '1.05', offset: .35 }, { translate: `${(px - ex) * k}px ${(py - ey) * k}px`, scale: '1.45' }], { duration: ms, easing: 'ease-in', fill: 'forwards' });
+  }
+  function eReturn(bounce) {
+    const e = $('bf-ei'); if (!e || !e._ap) return; const kf = e._ap.effect.getKeyframes(), last = kf[kf.length - 1]; e._ap.cancel(); e._ap = null;
+    e.animate(bounce ? [{ translate: last.translate, scale: last.scale }, { translate: '0 -6%', scale: '1.1', offset: .4 }, { translate: '0 0', scale: '1' }] : [{ translate: last.translate, scale: last.scale }, { translate: '0 0', scale: '1' }], { duration: bounce ? 420 : 320, easing: 'ease-out' });
+  }
   function qRing(hint) {
-    if (B.auto) return Promise.resolve('gd');
+    const dur = (B.phase >= 3 ? 950 : 1150), contact = dur * (2 / 2.4);
+    if (B.auto) { eApproach(contact); return sleep(contact).then(() => 'gd'); }
+    eApproach(contact);
     return new Promise(res => {
       const q = qOpen(`<div class="bf-qhint" style="color:#fca5a5">${hint}<br><span style="font-size:11px;opacity:.85">紅圈與金圈重疊時點擊格擋</span></div><div class="bf-tg"></div><div class="bf-ring"></div>`);
-      const ring = q.querySelector('.bf-ring'), dur = (B.phase >= 3 ? 950 : 1150), t0 = performance.now(); let done = false, s = 3;
+      const ring = q.querySelector('.bf-ring'), t0 = performance.now(); let done = false, s = 3;
       const step = () => { if (done) return; const f = (performance.now() - t0) / dur; s = 3 - 2.4 * f; ring.style.transform = `scale(${Math.max(.2, s)})`; if (s < .45) fin('ms'); else requestAnimationFrame(step); };
-      const fin = r => { if (done) return; done = true; qClose(); result(r); res(r); };
+      const fin = r => { if (done) return; done = true; qClose(); result(r); const wait = Math.max(0, contact - (performance.now() - t0)); setTimeout(() => res(r), r === 'ms' ? wait : 0); };
       q.onpointerdown = () => fin(Math.abs(s - 1) <= .12 ? 'pf' : Math.abs(s - 1) <= .32 ? 'gd' : 'ms');
       requestAnimationFrame(step);
     });
@@ -16811,7 +16873,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   }
   async function doUlt() {
     if (!B.ult || (B.cd.ULT || 0) > 0) return; B.cd.ULT = B.ult.cd + 1;
-    await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
+    await ultCut();
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
     pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, tip(8)); fxBurst(uc); B.fxc = uc; speed(uc);
@@ -16838,8 +16900,8 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     let dmg, q = null;
     if (E.charge) {
       E.charge = 0; const nm = (B.d.charge && B.d.charge[1]) || '必殺一擊';
-      skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(400); eLunge(true);
-      q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') fxAura('sh');
+      skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(400);
+      q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') { fxAura('sh'); impactP('#bfe3ff'); } eReturn(q !== 'ms');
       dmg = B.dM() * 2.4 * atkM * (q === 'pf' ? 0 : q === 'gd' ? .45 : 1);
     } else {
       dmg = B.dM() * atkM * rnd(.9, 1.1); await eLunge(false);
