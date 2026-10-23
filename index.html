@@ -1445,8 +1445,8 @@ const ITEMS = {
   'ore_2': { id: 'ore_2', name: '赤陽銅', icon: '🔥', type: 'material', price: 40, desc: '蘊藏地火精華的赤金，可鍛造赤陽劍與寶戒' },
   'ore_3': { id: 'ore_3', name: '紫霄玄晶', icon: '⚡', type: 'material', price: 90, desc: '沐浴紫霄神雷淬煉之晶石，強化高階法寶' },
 
-  'pill_1': { id: 'pill_1', name: '聚氣丹', icon: '💊', type: 'consumable', price: 25, val: 500, desc: '服用直接增加 500 點氣海修為(只能服到圓滿;同層連服積丹毒,藥力遞減)' },
-  'pill_2': { id: 'pill_2', name: '洗髓丹', icon: '💊', type: 'consumable', price: 80, val: 5, desc: '服下體內濁氣盡褪，永久增加吐納速度+5/秒,並洗去當層丹毒' },
+  'pill_1': { id: 'pill_1', name: '聚氣丹', icon: '💊', type: 'consumable', price: 25, val: 500, desc: '服用增加修為(第 0 階;練氣期為上限 12%,境界越高藥效越弱;只能服到圓滿;同層連服積丹毒)' },
+  'pill_2': { id: 'pill_2', name: '洗髓丹', icon: '💊', type: 'consumable', price: 80, val: 5, desc: '服下體內濁氣盡褪，永久增加吐納速度+5/秒' },
   'pill_3': { id: 'pill_3', name: '渡劫丹', icon: '⚡', type: 'special', price: 200, val: 20, desc: '突破天劫成功率+20%，且天劫失敗時修為損失減半' }, // FIX-B2
   'pill_4': { id: 'pill_4', name: '回春丹', icon: '❤️', type: 'battle_heal', price: 35, val: 200, desc: '服用可恢復 200 點或 30% 氣血(取較高者),歷練戰鬥中與歷練途中皆可服用' },
   'pill_5': { id: 'pill_5', name: '九轉延壽丹', icon: '⏳', type: 'consumable', price: 300, val: 30, desc: '逆天奪壽，服用後增加壽元上限 +30 歲' }, // FIX-B8
@@ -1462,7 +1462,7 @@ const ITEMS = {
   // ===== 仙界道具 =====
   'herb_5': { id: 'herb_5', name: '蟠桃仙露', icon: '🍑', type: 'material', price: 400, desc: '仙界瑤池所產的仙露，可煉太清仙丹與鍛造仙器' },
   'ore_4': { id: 'ore_4', name: '九天玄晶', icon: '💠', type: 'material', price: 300, desc: '仙界天闕深處的玄奧晶石，鍛造仙器的核心材料' },
-  'pill_6': { id: 'pill_6', name: '太清仙丹', icon: '🌟', type: 'consumable', price: 1200, val: 1000000, desc: '仙家妙藥，服用直接增加 100 萬點修為(只能服到圓滿;同層連服積丹毒)' },
+  'pill_6': { id: 'pill_6', name: '太清仙丹', icon: '🌟', type: 'consumable', price: 1200, val: 1000000, desc: '仙家妙藥(第 5 階),真仙境服用增加修為上限 12%,高於或低於此境藥效隨之增減(只能服到圓滿;同層連服積丹毒)' },
   'equip_sword_4': { id: 'equip_sword_4', name: '誅仙劍', icon: '🗡️', type: 'equipment', slot: 'weapon', quality: 'immortal', atk: 520, def: 60, hp: 400, price: 2500, desc: '仙界殺伐至寶，劍出誅仙！攻擊+520，防禦+60，氣血+400' },
   'equip_armor_3': { id: 'equip_armor_3', name: '九天流雲仙衣', icon: '👘', type: 'equipment', slot: 'armor', quality: 'immortal', atk: 50, def: 260, hp: 1800, price: 2400, desc: '以九天流雲織就的仙衣，防禦+260，氣血+1800，攻擊+50' },
   'equip_art_3': { id: 'equip_art_3', name: '太虛混元珠', icon: '🔮', type: 'equipment', slot: 'artifact', quality: 'immortal', atk: 190, def: 170, hp: 1400, price: 3000, desc: '內藏一方太虛的混元寶珠，攻擊+190，防禦+170，氣血+1400' }
@@ -1574,12 +1574,12 @@ const AREAS_DATA = [
 
 // OPT-O2: 煉丹配方表
 const ALCHEMY_RECIPES = [
-  { id: 'pill_1', name: '聚氣丹', need: [{ item: 'herb_1', name: '凝露靈草', count: 2 }], giveId: 'pill_1', desc: '基礎修真靈丹，服用立增 500 點修為。' },
+  { id: 'pill_1', name: '聚氣丹', need: [{ item: 'herb_1', name: '凝露靈草', count: 2 }], giveId: 'pill_1', desc: '基礎修真靈丹,練氣期服用增加修為上限 12%。' },
   { id: 'pill_2', name: '洗髓丹', need: [{ item: 'herb_2', name: '洗髓花', count: 2 }], giveId: 'pill_2', desc: '洗滌奇經八脈，永久提升吐納速度 +5/秒。' },
   { id: 'pill_3', name: '渡劫丹', need: [{ item: 'herb_3', name: '天雷竹', count: 1 }, { item: 'herb_2', name: '洗髓花', count: 2 }], giveId: 'pill_3', desc: '天劫突破成功率+20%，且失敗時修為損失減半！' }, // FIX-B2
   { id: 'pill_4', name: '回春丹', need: [{ item: 'herb_1', name: '凝露靈草', count: 2 }], giveId: 'pill_4', desc: '外傷聖藥，服用可恢復 200 點或 30% 氣血(取較高者)。' },
   { id: 'pill_5', name: '九轉延壽丹', need: [{ item: 'herb_4', name: '龍血果', count: 1 }, { item: 'herb_2', name: '洗髓花', count: 2 }], giveId: 'pill_5', desc: '奪天地造化，服用後增延壽元上限 +30 歲。' }, // FIX-B8
-  { id: 'pill_6', name: '太清仙丹', need: [{ item: 'herb_5', name: '蟠桃仙露', count: 2 }, { item: 'herb_2', name: '洗髓花', count: 3 }], giveId: 'pill_6', desc: '仙界妙藥，服用立增 100 萬點修為。' }
+  { id: 'pill_6', name: '太清仙丹', need: [{ item: 'herb_5', name: '蟠桃仙露', count: 2 }, { item: 'herb_2', name: '洗髓花', count: 3 }], giveId: 'pill_6', desc: '仙界妙藥,真仙境服用增加修為上限 12%。' }
 ];
 
 // OPT-O2 & FIX-B4: 鍛造配方表 (鍛造出裝備進入背包)
@@ -1932,6 +1932,7 @@ function calculateTotalStats() {
   def = Math.floor(def * resMult);
   hp = Math.floor(hp * resMult);
   rawQiRate = Math.floor(rawQiRate * resMult);
+  rawQiRate = Math.floor(rawQiRate * (1 + 0.02 * Math.max(0, (state.arrayLevel || 1) - 1)));   // v109 聚靈陣每級吐納 +2%
 
   // 裝備加成 (FIX-B3, FIX-B4, OPT-O6: 品質與強化)
   EQUIP_SLOTS.forEach(slot => {
@@ -2102,7 +2103,7 @@ function updateTopBar() {
   const arrayQiBonus = document.getElementById('array-qi-bonus');
   const arrayCostText = document.getElementById('array-cost-text');
   if (arrayLvlBadge) arrayLvlBadge.innerText = `陣法 Lv.${state.arrayLevel}`;
-  if (arrayQiBonus) arrayQiBonus.innerText = `+${state.arrayLevel * 4}/秒`;
+  if (arrayQiBonus) arrayQiBonus.innerText = `+${state.arrayLevel * 4}/秒・吐納 +${2 * Math.max(0, state.arrayLevel - 1)}%`;
   if (arrayCostText) arrayCostText.innerText = `${formatNum(arrayCost)} 靈石`;
 
   // 悟性等級資訊
@@ -2111,7 +2112,7 @@ function updateTopBar() {
   const insightBonus = document.getElementById('insight-bonus-text');
   const insightCostText = document.getElementById('insight-cost-text');
   if (insightBadge) insightBadge.innerText = `悟性 Lv.${state.insightLevel}`;
-  if (insightBonus) insightBonus.innerText = `+${state.insightLevel * TAP_INSIGHT_PER_LV} 修為`;
+  if (insightBonus) insightBonus.innerText = `約 ${(TAP_QI_RATE_MULT + 0.1 * state.insightLevel).toFixed(1)} 秒吐納 +${state.insightLevel * TAP_INSIGHT_PER_LV}`;
   if (insightCostText) insightCostText.innerText = `${formatNum(insightCost)} 靈石`;
 
   // 新手引導步驟檢測 (OPT-O9)
@@ -2535,7 +2536,7 @@ function tapCultivate(e) {
 
   const stats = calculateTotalStats();
   const isCrit = Math.random() * 100 < stats.crit;
-  const baseGain = stats.qiRate * TAP_QI_RATE_MULT;
+  const baseGain = stats.qiRate * (TAP_QI_RATE_MULT + 0.1 * (state.insightLevel || 1));   // v109 悟性越高,一次點擊抵越多秒吐納
   const insightBonus = (state.insightLevel || 1) * TAP_INSIGHT_PER_LV;
   const gain = isCrit ? Math.floor((baseGain + insightBonus) * 2) : Math.floor(baseGain + insightBonus);
   
@@ -3079,6 +3080,13 @@ function upgradeTechnique(id) {
 // 5. 物品使用、穿戴與一鍵功能 (FIX-B3, FIX-B4, OPT-O6)
 // 服用丹藥:all=true 時整疊一次服完;quiet=true 供一鍵服用全部使用(不重繪、不提示,由呼叫端統一處理)
 /* ===== 修為丹:只能服到氣海圓滿;同層連服積丹毒,藥力遞減;突破或洗髓丹清除 ===== */
+/* v109 修為丹按境界上限百分比 */
+const QIP_TIER = t => t === 'pill_1' ? 0 : t === 'pill_6' ? 5 : /^yq_\d$/.test(t) ? +t.slice(3) : -1;
+function qiPillVal(key) {
+  const t = QIP_TIER(key); if (t < 0) return (ITEMS[key] && ITEMS[key].val) || 0;
+  const cur = Math.min(7, state.realmIdx || 0), d = t - cur, pct = d >= 0 ? Math.min(.2, .12 * Math.pow(1.5, d)) : .12 * Math.pow(.4, -d);
+  return Math.floor(getRealmInfo().maxQi * pct);
+}
 function pillEff() { const k = state.pillTox || 0; return k < TOX_FREE ? 1 : Math.pow(0.5, k - TOX_FREE + 1); }
 let _pillPend = null;
 function qiPillUse(key, all, quiet) {
@@ -3090,7 +3098,7 @@ function qiPillUse(key, all, quiet) {
     return 0;
   }
   if (!all && !quiet) {
-    const room = info.maxQi - state.qi, eff = pillEff(), raw = item.val * eff, add = Math.min(room, raw);
+    const room = info.maxQi - state.qi, eff = pillEff(), raw = qiPillVal(key) * eff, add = Math.min(room, raw);
     if (eff < 1 || raw - add > raw * 0.3) {
       const now = Date.now();
       if (!_pillPend || _pillPend.key !== key || now - _pillPend.t > 4500) {
@@ -3108,7 +3116,7 @@ function qiPillUse(key, all, quiet) {
     if (room <= 0.5) { stop = 'full'; break; }
     const eff = pillEff();
     if (all && eff < 0.25) { stop = 'tox'; break; }
-    const add = Math.min(room, item.val * eff);
+    const add = Math.min(room, qiPillVal(key) * eff);
     state.qi += add; state.totalCultivatedQi = (state.totalCultivatedQi || 0) + add;
     got += add; used++; state.pillTox = (state.pillTox || 0) + 1;
   }
@@ -3140,8 +3148,7 @@ function useItem(key, all = false, quiet = false) {
     const gain = (item.val || 5) * n;
     state.inventory[key] -= n;
     state.permQiRate += gain;
-    state.pillTox = 0;
-    msg = `服下洗髓丹 ×${n}，體內濁氣盡褪，丹毒盡消，吐納速度永久+${gain}/秒！`;
+    msg = `服下洗髓丹 ×${n}，體內濁氣盡褪，吐納速度永久+${gain}/秒！`;
   } else if (key === 'pill_5') {
     const gain = (item.val || 30) * n;
     state.inventory[key] -= n;
@@ -5804,7 +5811,8 @@ function scheduleAutoBattleTurn() {
 /* ===== v6-C:命格(戰力預覽/連續升級)、紅點、引導、九九登天塔、備份、明細 ===== */
 function cpNow() { return calculateTotalStats().combatPower; }
 function cpTxt(c0, c1) { return `戰力 ${formatNum(c0)} → ${formatNum(c1)} <span class="text-emerald-300">(${c1 >= c0 ? '+' : ''}${formatNum(c1 - c0)})</span>`; }
-function bodyCap() { return ((state.realmIdx || 0) + 1) * 5; }
+function bodyUnl() { return (state.realmIdx || 0) >= REALM_DATA.length - 1; }   /* v109 大羅金仙:煉體無上限 */
+function bodyCap() { return bodyUnl() ? 1e9 : ((state.realmIdx || 0) + 1) * 5; }
 function bodyPlan() { let b = state.body || 0, s = state.stones, n = 0, cost = 0; const cap = bodyCap(); while (b < cap) { const c = Math.floor(150 * Math.pow(1.3, b)); if (s < c) break; s -= c; cost += c; b++; n++; } return { n, cost }; }
 function petPlan(id) { const o = (state.pets || {})[id]; if (!o) return { n: 0, cost: 0 }; let lv = o.lv, s = state.stones, n = 0, cost = 0; while (lv < petCap()) { const c = petUpCost(lv); if (s < c) break; s -= c; cost += c; lv++; n++; } return { n, cost }; }
 function cpBody(n) { const b0 = state.body || 0, c0 = cpNow(); state.body = b0 + n; const c1 = cpNow(); state.body = b0; return [c0, c1]; }
@@ -5820,7 +5828,7 @@ function extParts() {
 }
 function renderMingBody() {
   const b = state.body || 0, cap = bodyCap(), s = stageIdx(b), I = STAGE_INFO[s], cost = bodyCost(), can = b < cap && state.stones >= cost, plan = bodyPlan();
-  const lo = s * 8, hi = s === 5 ? Math.max(cap, 48) : lo + 8, prog = Math.min(100, Math.max(0, ((b - lo) / (hi - lo)) * 100));
+  const lo = s < 5 ? s * 8 : 40 + Math.floor((b - 40) / 8) * 8, hi = lo + 8, prog = Math.min(100, Math.max(0, ((b - lo) / (hi - lo)) * 100));
   const [c0, c1] = cpBody(1), pv = b < cap ? `<div class="text-[11px] text-slate-300 mt-1">錘鍊一次:${cpTxt(c0, c1)}</div>` : '';
   let h = `<div class="rounded-xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 p-3 text-center">
     <div class="w-32 h-32 mx-auto glw" style="--c:${I.c1}">${bodyArt(s)}</div>
@@ -5830,7 +5838,7 @@ function renderMingBody() {
     <div class="grid grid-cols-3 gap-1 text-[11px] mt-2"><div class="bg-slate-900 rounded p-1 text-emerald-300">氣血<br>+${b * 3}%</div><div class="bg-slate-900 rounded p-1 text-sky-300">防禦<br>+${b * 2}%</div><div class="bg-slate-900 rounded p-1 text-rose-300">攻擊<br>+${(b * .5).toFixed(1)}%</div></div>
     ${pv}<div class="mt-2 space-x-2">${eBtn('body-up', '', b >= cap ? `需突破境界(上限 ${cap} 重)` : `🔨 錘鍊(${formatNum(cost)} 靈石)`, can)}${b < cap ? eBtn('body-max', '', plan.n > 1 ? `連續錘鍊 ×${plan.n}` : '連續錘鍊', plan.n > 1, 'bg-gradient-to-r from-orange-600 to-red-500 text-white') : ''}</div>
     ${plan.n > 1 ? `<div class="text-[10px] text-slate-500 mt-1">連續錘鍊 ×${plan.n}:共 ${formatNum(plan.cost)} 靈石</div>` : ''}
-    <div class="text-[10px] text-slate-500 mt-1">每個大境界可多煉 5 重,轉世後需重新錘鍊。</div></div><div class="grid grid-cols-3 gap-2 mt-2">`;
+    <div class="text-[10px] text-slate-500 mt-1">${bodyUnl() ? '已至大羅金仙,肉身錘鍊再無上限,唯每重所耗靈石倍增。轉世後需重新錘鍊。' : '每個大境界可多煉 5 重,轉世後需重新錘鍊。'}</div></div><div class="grid grid-cols-3 gap-2 mt-2">`;
   STAGE_INFO.forEach((st, i) => {
     const on = b >= i * 8;
     h += `<div class="rounded-lg border p-1.5 text-center ${on ? 'border-amber-500/50 bg-slate-900' : 'border-slate-800 bg-slate-950 opacity-60'}"><div class="w-12 h-12 mx-auto ${on ? '' : 'grayscale'}">${bodyArt(i)}</div><div class="text-[11px] font-bold ${on ? 'text-amber-200' : 'text-slate-500'}">${st.n}</div><div class="text-[10px] text-slate-500">${i * 8}${i === 5 ? '+' : '~' + (i * 8 + 7)} 重</div></div>`;
@@ -6231,7 +6239,7 @@ NEW_MATS.forEach((m, t) => {
 /* ---- 新丹藥 ---- */
 const YQ_VAL = [0, 6000, 40000, 200000, 1000000, 3600000, 7000000, 14000000];
 const YQ_NAME = ['', '培元丹', '凝神丹', '化嬰丹', '悟道丹', '仙元丹', '玄元丹', '金霞丹'];
-for (let t = 1; t < 8; t++) ITEMS[`yq_${t}`] = { id: `yq_${t}`, name: YQ_NAME[t], icon: '💊', type: 'consumable', price: Math.floor(YQ_VAL[t] / 40), val: YQ_VAL[t], desc: `服用直接增加 ${formatNum(YQ_VAL[t])} 點修為(只能服到圓滿;同層連服積丹毒)。` };
+for (let t = 1; t < 8; t++) ITEMS[`yq_${t}`] = { id: `yq_${t}`, name: YQ_NAME[t], icon: '💊', type: 'consumable', price: Math.floor(YQ_VAL[t] / 40), val: YQ_VAL[t], desc: `第 ${t} 階修為丹:${TIER_NAME[t]}服用增加修為上限 12%,境界越高藥效越弱(只能服到圓滿;同層連服積丹毒)。` };
 ITEMS.pp_hp = { id: 'pp_hp', name: '築骨丹', icon: '🟢', type: 'consumable', price: 900, desc: '服用後氣血永久 +1%(最多服用 20 枚)。' };
 ITEMS.pp_atk = { id: 'pp_atk', name: '煉罡丹', icon: '🔴', type: 'consumable', price: 1500, desc: '服用後攻擊永久 +1%(最多服用 20 枚)。' };
 ITEMS.pp_def = { id: 'pp_def', name: '玄甲丹', icon: '🔵', type: 'consumable', price: 2400, desc: '服用後防禦永久 +1%(最多服用 20 枚)。' };
@@ -6271,7 +6279,7 @@ const REC_TIER = { pill_1: 0, pill_4: 0, pill_2: 1, pill_3: 1, pill_5: 2, pill_6
 ALCHEMY_RECIPES.forEach(r => { r.tier = REC_TIER[r.id] || 0; r.kind = r.id === 'pill_2' || r.id === 'pill_5' ? 'perm' : r.id === 'pill_4' ? 'heal' : 'qi'; });
 FORGE_RECIPES.forEach(r => { r.tier = REC_TIER[r.id] || 0; });
 const nd = (id, c) => ({ item: id, name: ITEMS[id].name, count: c });
-for (let t = 1; t < 8; t++) ALCHEMY_RECIPES.push({ id: `yq_${t}`, name: YQ_NAME[t], tier: t, kind: 'qi', need: [nd(`hb_${t}`, 3), nd(`bp_${t}`, 1)], giveId: `yq_${t}`, desc: `${TIER_NAME[t]}靈材凝練的丹藥,服用增加 ${formatNum(YQ_VAL[t])} 點修為。` });
+for (let t = 1; t < 8; t++) ALCHEMY_RECIPES.push({ id: `yq_${t}`, name: YQ_NAME[t], tier: t, kind: 'qi', need: [nd(`hb_${t}`, 5), nd(`bp_${t}`, 2)], giveId: `yq_${t}`, desc: `${TIER_NAME[t]}靈材凝練的丹藥,同階服用增加當前境界修為上限的 12%。` });
 ALCHEMY_RECIPES.push(
   { id: 'pp_hp', name: '築骨丹', tier: 2, kind: 'perm', need: [nd('hb_2', 3), nd('bp_2', 2), nd('herb_4', 1)], giveId: 'pp_hp', desc: '氣血永久 +1%(最多 20 枚)。' },
   { id: 'pp_atk', name: '煉罡丹', tier: 3, kind: 'perm', need: [nd('hb_3', 3), nd('bp_3', 2), nd('ore_3', 1)], giveId: 'pp_atk', desc: '攻擊永久 +1%(最多 20 枚)。' },
@@ -6643,9 +6651,9 @@ function chestLoot(t) {
     else give('pp_hp', 2, '稀世丹藥');
   } else if (r < .80) {
     const ks = ['pp_hp', 'pp_atk', 'pp_def'].filter(k => ((state.pillUse || {})[PP_KEY[k]] || 0) + (state.inventory[k] || 0) < PP_MAX);
-    if (ks.length) give(pick(ks), 1 + Math.floor(Math.random() * 2), '稀世丹藥'); else give(t >= 1 ? `yq_${t}` : 'pill_1', 5, '丹藥');
+    if (ks.length) give(pick(ks), 1 + Math.floor(Math.random() * 2), '稀世丹藥'); else give(t >= 1 ? `yq_${t}` : 'pill_1', 3, '丹藥');
   } else if (r < .90 && petOK()) { state.eggs = (state.eggs || 0) + 2; out.push({ ic: '🥚', nm: '靈寵蛋 ×2', q: 'rare', tag: '靈寵' }); }
-  else give(t >= 1 ? `yq_${t}` : 'pill_1', 3 + t, '大批丹藥');
+  else give(t >= 1 ? `yq_${t}` : 'pill_1', 2 + Math.ceil(t / 2), '大批丹藥');
   const minors = 2 + Math.floor(wbState().lv / 8);
   for (let i = 0; i < minors; i++) {
     const k = Math.floor(Math.random() * 6);
@@ -10251,8 +10259,8 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     add(n) { NODES.push(n); BY[n.id] = n; },
     bg: n => ({ bg: n }), say: (w, f, t) => ({ say: w, face: f || '', t }), nar: t => ({ nar: t }), fx: n => ({ fx: n }), set: e => ({ set: e }),
     ch: (type, id, opts, head) => ({ ch: type, id, opts, head }), ifF: (c, a, b) => ({ if: c, a: a || [], b: b || [] }), clr: () => ({ clr: 1 }), fight: cfg => ({ fight: cfg }), ti: (big, sub) => ({ ti: [big, sub || ''] }), edg: id => ({ edg: id }),
-    R: (r, sub) => () => (state.realmIdx || 0) > r || ((state.realmIdx || 0) === r && (state.subRealm || 1) >= (sub || 1)),
-    E: r => () => { if ((state.realmIdx || 0) > r) return true; if ((state.realmIdx || 0) < r) return false; const i = getRealmInfo(); return (state.subRealm || 1) >= i.realm.subMax && state.qi >= i.maxQi * 0.999; }
+    R: (r, sub) => Object.assign(() => (state.realmIdx || 0) > r || ((state.realmIdx || 0) === r && (state.subRealm || 1) >= (sub || 1)), { _rq: [r, sub || 1, 0] }),
+    E: r => Object.assign(() => { if ((state.realmIdx || 0) > r) return true; if ((state.realmIdx || 0) < r) return false; const i = getRealmInfo(); return (state.subRealm || 1) >= i.realm.subMax && state.qi >= i.maxQi * 0.999; }, { _rq: [r, 99, 1] })
   };
   const CHN = ['', '凡心', '同門', '舊債', '抉擇', '師恩', '天門', '舊夢', '一念'];
   const CHR = [0, 0, 1, 2, 3, 4, 5, 6, 7];
@@ -10688,6 +10696,15 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   }; }
   /* 序章覆蓋原本的開場過場 */
   { const o = storyCheck; storyCheck = function () { if (run) return; if (NODES.length) { state.storySeen = state.storySeen || {}; state.storySeen.p0 = true; } return o.apply(this, arguments); }; }
+  /* v109 未開啟原因 */
+  function lockWhy(n) {
+    const q = n.at && n.at._rq, rn = r => (REALM_DATA[r] || {}).name || '';
+    const realmOk = !n.at || safe(n.at);
+    if (!realmOk && q) return q[2] ? `${rn(q[0])}圓滿後開啟` : `${rn(q[0])}${q[1] > 1 && (REALM_DATA[q[0]] || {}).subMax > 1 ? `第 ${q[1]} 層` : ''}後開啟`;
+    if (n.after && !seen(n.after)) return '看完前一段劇情後開啟';
+    if (!n.opt) { const m = nextMain(); if (m && m.id !== n.id) return '依序看完前面的主線後開啟'; }
+    return realmOk ? '條件達成後開啟' : '特定條件達成後開啟';
+  }
   /* ---------- 劇情總覽 ---------- */
   const hubTitle = () => '📖 一念飛仙・劇情';
   X.sheet('st28', hubTitle, b => {
@@ -10697,11 +10714,12 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     h += `<div class="x5-row" style="margin-bottom:8px;flex-wrap:wrap;gap:6px"><button class="x5-btn ${s.auto ? 'am' : 'gy'}" data-x5="st28.auto">自動播放:${s.auto ? '開' : '關'}</button><button class="x5-btn gy" data-x5="st28.spd">文字速度:${['慢', '正常', '快'][[0.7, 1, 1.6].indexOf(s.spd) < 0 ? 1 : [0.7, 1, 1.6].indexOf(s.spd)]}</button></div>`;
     const _top = h.length;
     chs.forEach(c => {
-      const list = NODES.filter(n => n.ch === c), done = list.filter(n => s.seen[n.id]).length;
+      const list0 = NODES.filter(n => n.ch === c); let lk = [-1, 0];   /* v109 依開啟境界排序;沒有境界資訊者沿用前一節的位置 */
+      const list = list0.map((n, i) => { const q = n.at && n.at._rq; if (q) lk = [q[0], q[1]]; return { n, k: lk, i }; }).sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1] || a.i - b.i).map(x => x.n), done = list.filter(n => s.seen[n.id]).length;
       h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d;font-size:14px">第${'零一二三四五六七八'[c]}章・${CHN[c]}</b> <span class="x5-sub">${done}/${list.length}</span>`;
       list.forEach(n => {
         const sn = !!s.seen[n.id], ok = ids.has(n.id);
-        h += `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0"><span style="color:${sn ? '#86efac' : ok ? '#fbbf24' : '#64748b'}">${sn ? '✔' : ok ? '▶' : '🔒'}</span> ${n.sys ? '<span class="x5-sub">[機緣]</span> ' : n.opt ? '<span class="x5-sub">[支線]</span> ' : ''}${sn || ok ? n.title : '？？？'}</div>${sn ? `<button class="x5-btn gy" data-x5="st28.play" data-id="${n.id}">重看</button>` : ok ? `<button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button>` : ''}</div>`;
+        h += `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0"><span style="color:${sn ? '#86efac' : ok ? '#fbbf24' : '#64748b'}">${sn ? '✔' : ok ? '▶' : '🔒'}</span> ${n.sys ? '<span class="x5-sub">[機緣]</span> ' : n.opt ? '<span class="x5-sub">[支線]</span> ' : ''}${sn || ok ? n.title : '？？？'}${!sn && !ok ? `<div class="x5-sub" style="margin-top:2px">🔒 ${lockWhy(n)}</div>` : ''}</div>${sn ? `<button class="x5-btn gy" data-x5="st28.play" data-id="${n.id}">重看</button>` : ok ? `<button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button>` : ''}</div>`;
       });
       h += '</div>';
     });
@@ -15194,7 +15212,9 @@ window.A45={"ef_atk": "assets/A45/ef_atk.webp?v=964164cd", "ef_cd": "assets/A45/
     h += '</div>';
     if (h !== sig || force) {
       const st = root.querySelector('.strip'), sl = st ? st.scrollLeft : 0;
+      const keep = [], cnt = {}; root.querySelectorAll('*').forEach(e => { const c = e.className; if (typeof c !== 'string') return; const k = cnt[c] = (cnt[c] || 0) + 1; if (e.scrollLeft > 0) keep.push([c, k, e.scrollLeft]); });   /* v109 記住每一排橫向捲動(以 class + 第幾個 對應) */
       sig = h; root.innerHTML = h;
+      if (keep.length) { const c2 = {}, want = {}; keep.forEach(([c, k, x]) => { want[c + '|' + k] = x; }); root.querySelectorAll('*').forEach(e => { const c = e.className; if (typeof c !== 'string') return; const k = c2[c] = (c2[c] || 0) + 1, x = want[c + '|' + k]; if (x) e.scrollLeft = x; }); }
       const s2 = root.querySelector('.strip'); if (s2) { s2.scrollLeft = sl; const on1 = s2.querySelector('.rc.on'); if (on1 && force === 'center') on1.scrollIntoView({ inline: 'center', block: 'nearest' }); }
     }
   }
