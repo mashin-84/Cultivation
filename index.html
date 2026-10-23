@@ -16585,8 +16585,15 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
   }
   /* v116 突進:主角衝到敵人面前出招,再退回原位(往場內走會變小,有遠近感) */
   function vec(k) { const [px, py] = center('bf-pi'), [ex, ey] = center('bf-ei'); return [(ex - px) * k, (ey - py) * k]; }
-  function go(k, sc, ms, lift) {
-    const i = $('bf-pi'); if (!i) return Promise.resolve(); const [dx, dy] = vec(k);
+  /* 突進目標:讓主角身上的出招點(fx,fy:圖框內比例)縮放後正好落在敵人身上;frac<1 只走一部分 */
+  function aim(fx, fy, sc, frac) {
+    const i = $('bf-pi'), s = $('bf-stg'); const r = i.getBoundingClientRect(), q = s.getBoundingClientRect();
+    const L = r.left - q.left, Tp = r.top - q.top, w = r.width, h = r.height, ox = L + w, oy = Tp + h / 2;   /* 縮放中心 = 版面框中心(圖片有 translateX(-50%)) */
+    const px = L + fx * w, py = Tp + fy * h, [ex, ey] = center('bf-ei');
+    return [(ex - ox - sc * (px - ox)) * frac, (ey - oy - sc * (py - oy)) * frac];
+  }
+  function go(k, sc, ms, lift, pt) {
+    const i = $('bf-pi'); if (!i) return Promise.resolve(); const [dx, dy] = pt ? aim(pt[0], pt[1], sc, k) : vec(k);
     i.style.transition = 'none';
     const a = i.animate([{ translate: '0 0', scale: '1' }, { translate: `${dx}px ${dy - (lift || 0)}px`, scale: String(sc) }], { duration: ms || 200, easing: 'cubic-bezier(.3,.0,.4,1)', fill: 'forwards' });
     i._mv = a; return a.finished.catch(() => { });
@@ -16767,7 +16774,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     log(q === 'pf' ? '劍光如虹,三連斬命中要害!' : q === 'gd' ? '道友連斬兩劍。' : '劍勢一偏,只削到衣角。');
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
     for (let k = 0; k < n && B.e.hp > 0; k++) {   /* 每一斬:衝上去 → 命中 → 退回(像 Pokémon GO 連打) */
-      await go(.72, .62, k ? 120 : 170); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
+      await go(1, .62, k ? 120 : 170, 0, [.6, .4]); setPose(2); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
       await dealE(tot / n, 1, cr && k === n - 1);
       setPose(1); await back(k === n - 1 ? 240 : 110);
     }
@@ -16800,7 +16807,7 @@ window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/
     await cut({ img: playerArt(), left: true, sub: '本命絕學', big: B.ult.n, say: '', ms: B.auto ? 900 : 1100 });
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
-    pi.classList.remove('chg'); setPose(8); await go(.8, .55, 230, 40); fxBurst(uc); B.fxc = uc; speed(uc);
+    pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, [.6, .32]); fxBurst(uc); B.fxc = uc; speed(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
     setPose(1); await back(320);
