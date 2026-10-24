@@ -120,7 +120,7 @@ body.lite15 *{animation:none!important;transition:none!important}
   let lastPlay = Date.now();
   function playTick() { const n = Date.now(), dt = (n - lastPlay) / 1000; lastPlay = n; if (!document.hidden && dt > 0 && dt < 5) ST().play += dt; }
   /* ---------- 洞府靈田 ---------- */
-  const CROPS = [];
+  const CROPS = X5.CROPS = [];
   [['herb_1', 3, [3, 5], 0], ['herb_2', 8, [2, 4], 0], ['herb_3', 15, [2, 3], 1], ['herb_4', 30, [1, 3], 2], ['herb_5', 60, [1, 2], 5]].forEach(x => CROPS.push({ id: x[0], mins: x[1], y: x[2], r: x[3] }));
   for (let t = 0; t < 8; t++) CROPS.push({ id: 'hb_' + t, mins: [10, 18, 25, 35, 50, 70, 100, 140][t], y: [2, 4], r: t });
   CROPS.forEach(c => { c.cost = Math.max(4, Math.ceil((ITEMS[c.id].price || 5) * 1.4)); });
