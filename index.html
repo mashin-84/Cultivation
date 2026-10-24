@@ -5883,7 +5883,7 @@ function renderMingPet() {
       <div class="text-[11px] text-emerald-300">${petDesc(apd, ap.lv)}</div>
       <div class="text-[11px] text-rose-300">協同出擊:每次出手後追加 ${Math.round((apd.s + .01 * ap.lv) * 100)}% 攻擊傷害</div>
       ${ap.lv < cap ? `<div class="text-[11px] text-slate-300 mt-1">升一級:${cpTxt(p0, p1)}</div>` : ''}
-      <div class="mt-2 space-x-2">${eBtn('pet-up', apd.id, ap.lv >= cap ? `已達上限 Lv.${cap}(境界提升可再升)` : `⬆ 餵養升級(${formatNum(cost)} 靈石)`, ap.lv < cap && state.stones >= cost)}${ap.lv < cap ? eBtn('pet-max', apd.id, plan.n > 1 ? `連續升級 ×${plan.n}` : '連續升級', plan.n > 1, 'bg-gradient-to-r from-orange-600 to-red-500 text-white') : ''}</div>`;
+      <div class="mt-2 space-x-2">${eBtn('pet-up', apd.id, ap.lv >= cap ? `已達上限 Lv.${cap}(境界提升可再升)` : `<i class="ii ui ii-c138_up"></i> 餵養升級(${formatNum(cost)} 靈石)`, ap.lv < cap && state.stones >= cost)}${ap.lv < cap ? eBtn('pet-max', apd.id, plan.n > 1 ? `連續升級 ×${plan.n}` : '連續升級', plan.n > 1, 'bg-gradient-to-r from-orange-600 to-red-500 text-white') : ''}</div>`;
   } else h += `<div class="text-slate-500 text-xs py-6">尚無出戰靈寵,孵化靈寵蛋獲得第一位夥伴。</div>`;
   h += `</div><div class="rounded-xl border border-slate-700 bg-slate-900 p-3 mt-2 flex items-center space-x-3"><div class="w-16 h-16 ${eggs > 0 ? 'wob' : 'grayscale opacity-60'}">${eggArt()}</div>
     <div class="flex-1"><div class="text-xs font-bold text-amber-200">靈寵蛋 × ${eggs}</div><div class="text-[10px] text-slate-500">來源:妖魔掉落(Boss 較高)、境界突破、離線歷練、九九登天塔。孵到重複靈寵則該寵 +1 級。</div></div>${eBtn('pet-hatch', '', '孵化', eggs > 0, 'bg-gradient-to-r from-pink-600 to-rose-500 text-white')}</div>
@@ -6096,8 +6096,29 @@ function renderMap() {
   const n = area.maxSteps, cur = Math.min(state.exploreStep || 1, n), pal = ELEM_PAL[area.element] || ELEM_PAL.metal, boss = area.monsters.find(m => m.isBoss) || {};
   let s = `<svg viewBox="0 0 360 176" class="w-full" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal[1]}"/><stop offset="1" stop-color="#020617"/></linearGradient></defs><rect width="360" height="176" rx="12" fill="url(#mapbg)"/>`;
   for (let k = 0; k < 9; k++) { const x = 18 + k * 40 + ((ai * 37 + k * 53) % 18), h = 16 + ((ai * 11 + k * 29) % 18), y = 88 + ((k * 17 + ai) % 6); s += `<path d="M${x - h * .8} ${y + h * .5} L${x} ${y - h * .5} L${x + h * .8} ${y + h * .5}z" fill="${pal[2]}" opacity=".13"/>`; }
-  s += `<path d="${stagePath(n, n)}" stroke="#0f172a" stroke-opacity=".75" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${stagePath(n, n)}" stroke="#64748b" stroke-width="3" stroke-dasharray="2 6" fill="none" stroke-linecap="round"/>`;
+  s += `<path d="${stagePath(n, n)}" stroke="#3b2f22" stroke-opacity=".42" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${stagePath(n, n)}" stroke="#f5ecd6" stroke-opacity=".85" stroke-width="2.5" stroke-dasharray="2 6" fill="none" stroke-linecap="round"/>`;
   if (cur > 1) s += `<path d="${stagePath(cur, n)}" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const IC = window.IC138, im = (k, x, y, w, ex) => `<image href="${IC[k]}" x="${x - w / 2}" y="${y - w / 2}" width="${w}" height="${w}" preserveAspectRatio="xMidYMid meet"${ex || ''}/>`;
+  if (IC) {
+    const bsrc = (window.MONART26 && MONART26(boss)) || '';
+    for (let i = 1; i <= n; i++) {
+      const p = stagePos(i, n), isB = i === n, done = i < cur, now = i === cur;
+      s += '<g>';
+      if (isB) {
+        if (now) s += im('n_cur', p.x, p.y, 46);
+        if (bsrc) s += `<clipPath id="bc19"><circle cx="${p.x}" cy="${p.y}" r="14.5"/></clipPath><circle cx="${p.x}" cy="${p.y}" r="15" fill="#f3ead6"/><image href="${bsrc}" x="${p.x - 17}" y="${p.y - 15}" width="34" height="34" clip-path="url(#bc19)" preserveAspectRatio="xMidYMin slice"/>`;
+        else s += im('n_boss', p.x, p.y, 30);
+        s += im('bossring', p.x, p.y, 40);
+      } else if (i === 1) { if (now) s += im('n_cur', p.x, p.y, 34); s += im('camp', p.x, p.y - 2, 34); }
+      else {
+        s += im(now ? 'n_cur' : done ? 'n_done' : 'n_idle', p.x, p.y, now ? 32 : 27);
+        if (i === 5) s += im('flag', p.x + 6, p.y - 12, 26);
+        else if (!done) s += `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="11" font-weight="800" fill="#3b2f22" stroke="#f5efe0" stroke-width="2.5" paint-order="stroke">${i}</text>`;
+      }
+      if (now) s += `<g>${im(state.gender === 'f' ? 'me_f' : 'me_m', p.x, p.y - 27, 32)}<animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.2s" repeatCount="indefinite"/></g>`;
+      s += '</g>';
+    }
+  } else
   for (let i = 1; i <= n; i++) {
     const p = stagePos(i, n), isB = i === n, special = i === 1 ? '⛺' : isB ? (boss.emoji || '👹') : (i === 5 ? '🚩' : ''), done = i < cur, now = i === cur, r = isB ? 17 : 13;
     const fill = now ? '#b45309' : done ? '#065f46' : isB ? '#4c0519' : '#1e293b', stroke = now ? '#fcd34d' : done ? '#34d399' : isB ? '#fb7185' : '#475569';
@@ -6987,6 +7008,7 @@ const GEN3={"A0": "assets/GEN3/A0.webp?v=5607b08f", "A1": "assets/GEN3/A1.webp?v
 #stage-map{border-radius:12px;overflow:hidden}
 .rs-th{background-size:cover!important;background-position:center!important}.rs-th .text-2xl{display:none}`;
   document.head.appendChild(st);
+  window.MONART26 = m => { try { const k = monKey(m); return k && G[k] ? G[k] : ''; } catch (e) { return ''; } };
   // 戰鬥場景
   XT.fxSetup76 = _s => function () {
     _s.apply(this, arguments);
@@ -8470,7 +8492,7 @@ body.lite15 *{animation:none!important;transition:none!important}
     host.innerHTML = `<div class="t" data-x5="gd.fold" style="cursor:pointer"><span style="color:#34d399">🌱 洞府靈田 <span class="x5-sub">${n} 塊・田力 Lv.${g.lv}</span></span><span class="x5-row" style="gap:6px">${rdy ? `<b style="color:#fbbf24;font-size:11px">${rdy} 塊可收</b>${fold ? '<button class="x5-btn am" data-x5="gd.all" style="padding:3px 8px">收成</button>' : ''}` : '<span class="x5-sub">生長中</span>'}${fold && emp ? `<button class="x5-btn" data-x5="gd.sow" style="padding:3px 8px">播種</button>` : ''}<b style="color:#64748b">${fold ? '▸' : '▾'}</b></span></div>
 <div class="gd-g">${tiles}</div>
 <button class="x5-btn" data-x5="gd.sow" style="width:100%;margin-top:8px;padding:8px">🌾 一鍵播種・依丹藥目標${g.goal && ALCHEMY_RECIPES.find(r => r.id === g.goal) ? '(目前:' + ALCHEMY_RECIPES.find(r => r.id === g.goal).name + (g.ac ? '・自動煉丹' : '') + ')' : ''}</button>
-<div class="gd-bt" style="margin-top:6px"><button class="x5-btn am" data-x5="gd.all" style="flex:1">🧺 全部收成${rdy ? `(${rdy})` : ''}</button><button class="x5-btn" data-x5="gd.re" style="flex:1">🌰 補種</button><button class="x5-btn gy" data-x5="gd.auto">${g.auto ? '✅' : '⬜'} 收成後自動補種</button><button class="x5-btn gy" data-x5="gd.up" ${g.lv >= 10 ? 'disabled' : ''}>⬆ 田力(${g.lv >= 10 ? '滿' : fmt(lvCost()) + '靈石'})</button></div>
+<div class="gd-bt" style="margin-top:6px"><button class="x5-btn am" data-x5="gd.all" style="flex:1">🧺 全部收成${rdy ? `(${rdy})` : ''}</button><button class="x5-btn" data-x5="gd.re" style="flex:1">🌰 補種</button><button class="x5-btn gy" data-x5="gd.auto">${g.auto ? '✅' : '⬜'} 收成後自動補種</button><button class="x5-btn gy" data-x5="gd.up" ${g.lv >= 10 ? 'disabled' : ''}><i class="ii ui ii-c138_up"></i> 田力(${g.lv >= 10 ? '滿' : fmt(lvCost()) + '靈石'})</button></div>
 <div class="x5-sub" style="margin-top:6px">後山那片荒廢的藥圃,被你重新翻土播種。點生長中的田可澆灌(縮時 25%);離線照常生長,回來再收。</div>`;
   }
   X5.act('gd.fold', () => { try { localStorage.setItem('gd19fold', gdFold() ? '0' : '1'); } catch (e) { } renderGarden(true); });
@@ -9653,7 +9675,7 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
 <div class="x5-card"><div class="x5-sub">煉化成</div><div class="fn-tabs">${['rn', 'st', 'qi'].map(m => `<button data-x5="fn.mode" data-m="${m}" class="${f.mode === m ? 'on' : ''}">${MODE[m][0]}</button>`).join('')}</div><div class="x5-sub">${MODE[f.mode][1]}</div>
 <div class="x5-sub" style="margin-top:8px">每種材料保留</div><div class="fn-tabs">${[10, 30, 60, 100].map(k => `<button data-x5="fn.keep" data-k="${k}" class="${f.keep === k ? 'on' : ''}">${k} 份</button>`).join('')}</div></div>
 <div class="x5-card" style="margin-top:8px"><div class="x5-row" style="justify-content:space-between"><span>目前可煉化</span><b style="color:#fde68a">${fmt(p.cnt)} 件(${p.kinds} 種)</b></div><div class="x5-sub" style="margin-top:2px">預計獲得:<b style="color:#4ade80">${p.cnt ? yld : '—'}</b></div>
-<div class="x5-row" style="margin-top:8px"><button class="x5-btn am" data-x5="fn.go" style="flex:1" ${p.cnt ? '' : 'disabled'}>🔥 立即煉化</button><button class="x5-btn ${f.on ? '' : 'gy'}" data-x5="fn.auto" style="flex:1">${f.on ? '✅ 自動煉化:開' : '⬜ 自動煉化:關'}</button></div>
+<div class="x5-row" style="margin-top:8px"><button class="x5-btn am" data-x5="fn.go" style="flex:1" ${p.cnt ? '' : 'disabled'}>🔥 立即煉化</button><button class="x5-btn ${f.on ? '' : 'gy'}" data-x5="fn.auto" style="flex:1">${f.on ? '<i class="ii ui ii-c138_chk1"></i> 自動煉化:開' : '<i class="ii ui ii-c138_chk0"></i> 自動煉化:關'}</button></div>
 <div class="x5-sub" style="margin-top:6px">自動煉化開啟後,熔爐每隔數秒會把超出保留量的材料自動煉掉,儲物袋不再被雜物塞滿。</div></div>
 <div class="x5-sub" style="margin-top:8px">累計煉化 ${fmt(f.tot)} 件:器紋石 ${fmt(f.rn)}・靈石 ${fmt(f.st)}・修為 ${fmt(f.qi)}${f.d === todayS() ? `・今日器紋石 ${f.n}/${RN_DAY}` : ''}</div>`;
     b.innerHTML = h;
@@ -10649,7 +10671,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   function abort() { clearTimeout(timer); clearInterval(typeT); const _t = run && run.n && run.n.post && run.then; if (run && run.n && !run.replay) declined[run.n.id] = 1; lastEndT = Date.now(); lastWasPost = !!(run && run.n && run.n.post); run = null; if (_t) setTimeout(_t, 200); { const t = $('st28ti'); if (t) t.classList.remove('on'); } $('st28').classList.remove('on'); $('st28cs').innerHTML = ''; badge(); }
   function showLog() {
     const s = SD(), lb = $('st28lb');
-    lb.innerHTML = s.log.slice(-120).map(l => l.w === '▶' ? `<p style="color:#fcd34d">▶ ${esc(l.t)}</p>` : `<p>${l.w ? `<b style="color:#a5b4fc">${esc(l.w)}</b>` : ''}${esc(l.t)}</p>`).join('') || '<p style="color:#94a3b8">尚無紀錄。</p>';
+    lb.innerHTML = s.log.slice(-120).map(l => l.w === '▶' ? `<p style="color:#fcd34d"><i class="ii ui ii-c138_play"></i> ${esc(l.t)}</p>` : `<p>${l.w ? `<b style="color:#a5b4fc">${esc(l.w)}</b>` : ''}${esc(l.t)}</p>`).join('') || '<p style="color:#94a3b8">尚無紀錄。</p>';
     $('st28lg').classList.add('on'); lb.scrollTop = lb.scrollHeight;
   }
   const esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -16676,7 +16698,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
-<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">🏃 逃離</button></div>
+<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">逃離</button></div>
 <button id="bf-auto2" class="auto on">自動:開</button>
 <div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div></div>
@@ -17105,7 +17127,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   }
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || !B) return;
-    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '🏃 逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '🏃 逃離'; B.over = true; B.ran = true; if (!B.cfg.engine) { try { showToast('暫且退避,改日再戰。'); } catch (e) { } } close(false); return; }
+    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '逃離'; B.over = true; B.ran = true; if (!B.cfg.engine) { try { showToast('暫且退避,改日再戰。'); } catch (e) { } } close(false); return; }
     if (b.id === 'bf-auto' || b.id === 'bf-auto2') { B.auto = !B.auto; ui(); if (B.auto && !B.busy && !B.over) act(autoPick()); return; }
     if (b.dataset.bfe === 'ok') { const w = B.e.hp <= 0; close(w); return; }
     if (b.dataset.bfe === 'retry') { const cfg = B.cfg; B = null; begin(cfg); return; }
@@ -17381,6 +17403,31 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     if (window.X5) X5.act('m37.inv', t => open(t.dataset.id, 0));
   }
   window.MAT37 = { open, rows };
+})();
+
+/* ===== v138 圖示補完:歷練地圖路線、兩個缺圖物品、重要戰鬥按鈕、零星 emoji、改名鉛筆 ===== */
+window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC138/flag.webp?v=cfc0f15d", "me_m": "assets/IC138/me_m.webp?v=c7e631fe", "me_f": "assets/IC138/me_f.webp?v=5003d75e", "bossring": "assets/IC138/bossring.webp?v=442d83b7", "n_idle": "assets/IC138/n_idle.webp?v=806f4aff", "n_cur": "assets/IC138/n_cur.webp?v=ea2613cb", "n_done": "assets/IC138/n_done.webp?v=b41ce7d8", "n_lock": "assets/IC138/n_lock.webp?v=16a1f3eb", "n_boss": "assets/IC138/n_boss.webp?v=40298f48", "tox_mat": "assets/IC138/tox_mat.webp?v=f7daa799", "pill_dt": "assets/IC138/pill_dt.webp?v=a9b13640", "flee": "assets/IC138/flee.webp?v=95167da6", "auto": "assets/IC138/auto.webp?v=d63ba13b", "up": "assets/IC138/up.webp?v=5f4d52fe", "chk0": "assets/IC138/chk0.webp?v=10fb22fe", "chk1": "assets/IC138/chk1.webp?v=bb2747e3", "chapter": "assets/IC138/chapter.webp?v=b58b8d33", "play": "assets/IC138/play.webp?v=2a124d1d", "brush": "assets/IC138/brush.webp?v=87673aa1"};
+(() => {
+  const I = window.IC138, $ = id => document.getElementById(id);
+  let css = Object.keys(I).map(k => `.ii-c138_${k}{background-image:url(${I[k]})}`).join('');
+  css += `
+#bf-run,#bf-auto{background:transparent!important;border-style:solid!important;border-color:transparent!important;border-width:0!important;border-radius:0!important;box-shadow:none!important;
+  border-image-source:var(--sk-btn-w)!important;border-image-slice:0 21% fill!important;border-image-width:0 1.6em!important;border-image-outset:0!important;border-image-repeat:stretch!important;color:#4b2f1d!important;text-shadow:0 1px 0 rgba(255,245,225,.6);padding:6px 1.15em!important;display:inline-flex;align-items:center;gap:3px}
+#bf-auto.on{border-image-source:var(--sk-btn-g)!important;border-image-slice:0 18% fill!important;color:#5a3a0c!important}
+#bf-run::before,#bf-auto::before{content:'';width:1.35em;height:1.35em;background:center/contain no-repeat;flex:none}
+#bf-run::before{background-image:url(${I.flee})}#bf-auto::before{background-image:url(${I.auto})}
+#btn-edit-name .ii{width:1.25em;height:1.25em;vertical-align:-.3em}`;
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  const ic = (k, cls) => `<i class="ii${cls ? ' ' + cls : ''} ii-c138_${k}"></i>`;
+  /* 缺圖物品 */
+  ['tox_mat', 'pill_dt'].forEach(k => { const it = ITEMS[k]; if (it) { if (!it._ico) it._ico = it.icon; it.icon = ic(k); } });
+  /* 道途錄章節圖示 */
+  const story = () => { try { (STORIES || []).forEach(s => { if (!/^<i /.test(s.icon || '')) s.icon = ic('chapter', 'ui'); }); } catch (e) { } };
+  /* 改名鉛筆 → 毛筆 */
+  const pen = () => { const b = $('btn-edit-name'); if (b && !b.querySelector('.ii-c138_brush')) b.innerHTML = ic('brush', 'ui'); };
+  const tick = () => { story(); pen(); };
+  tick(); setInterval(tick, 2000);
+  try { _mapSig = ''; renderMap(); } catch (e) { }
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
