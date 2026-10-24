@@ -135,8 +135,35 @@
 #title34 #t99-inst{position:relative;z-index:3;margin:-4% 0 calc(6% + env(safe-area-inset-bottom));padding:9px 20px;border-radius:999px;border:1px solid rgba(138,75,28,.45);background:rgba(255,250,238,.88);color:#7a3e12;font:700 14px 'Noto Serif TC',serif;letter-spacing:.12em;box-shadow:0 2px 10px rgba(90,60,20,.18);opacity:0;animation:t34fade 1s ease-out 3.6s forwards}
 #title34 #t99-inst[hidden],#title34 #t99-ios[hidden]{display:none}
 #title34 #t99-ios{position:relative;z-index:3;margin:-4% 16px calc(6% + env(safe-area-inset-bottom));padding:6px 12px;border-radius:10px;background:rgba(255,250,238,.85);color:#5a3a12;font-size:12px}
+
+/* v123 讀取條:讀完存檔前不可點 */
+#title34.ld .t34-go{display:none}
+.t34-ld{position:relative;z-index:2;margin-bottom:calc(9% + env(safe-area-inset-bottom));width:62%;max-width:300px;text-align:center;transition:opacity .5s}
+#title34:not(.ld) .t34-ld{display:none}
+.t34-ld .bar{position:relative;height:6px;border-radius:3px;background:rgba(138,75,28,.18);overflow:hidden;box-shadow:0 0 8px rgba(255,255,255,.8)}
+.t34-ld .bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:linear-gradient(90deg,rgba(60,32,12,.15),#5b3412 70%,#2a1608);transition:width .35s ease-out}
+.t34-ld .tx{margin-top:8px;font-size:12px;letter-spacing:.3em;padding-left:.3em;color:#8a4b1c;text-shadow:0 0 10px rgba(255,255,255,.95)}
 </style>
-<div id="title34" role="button" tabindex="0" aria-label="點擊進入遊戲"><div class="t34-bg"><div class="t34-fx"><i class="t34-sun"></i><i class="t34-moon"></i><div class="t34-cl a"></div><div class="t34-cl b"></div><canvas class="t34-ch"></canvas><i class="t34-cr"></i><i class="t34-cr"></i><i class="t34-cr"></i></div></div><canvas class="t34-pt"></canvas><div class="t34-hd"><h1><span>一</span><span>念</span><span>飛</span><span>仙</span></h1><div class="t34-sub">一念而已</div></div><div class="t34-go">點擊畫面,踏入仙途</div><button id="t99-inst" type="button" hidden>📲 安裝到主畫面</button><div id="t99-ios" hidden>iPhone:點 Safari 下方「分享」→「加入主畫面」</div></div><script>/* v99 安裝到主畫面 */
+<div id="title34" class="ld" role="button" tabindex="0" aria-label="點擊進入遊戲"><div class="t34-bg"><div class="t34-fx"><i class="t34-sun"></i><i class="t34-moon"></i><div class="t34-cl a"></div><div class="t34-cl b"></div><canvas class="t34-ch"></canvas><i class="t34-cr"></i><i class="t34-cr"></i><i class="t34-cr"></i></div></div><canvas class="t34-pt"></canvas><div class="t34-hd"><h1><span>一</span><span>念</span><span>飛</span><span>仙</span></h1><div class="t34-sub">一念而已</div></div><div class="t34-ld"><div class="bar"><i></i></div><div class="tx">凝神聚氣…</div></div><div class="t34-go">點擊畫面,踏入仙途</div><button id="t99-inst" type="button" hidden>📲 安裝到主畫面</button><div id="t99-ios" hidden>iPhone:點 Safari 下方「分享」→「加入主畫面」</div></div><script>/* v123 標題讀取條(緊接在標題畫面後執行,才能在大段程式載入時就開始跑) */
+(function () {
+  const t = document.getElementById('title34'); if (!t) return; window.T123 = { ready: false };
+  /* v123 讀取條:實際載入進度(圖片)+ 讀檔完成才可進入 */
+  const bar = t.querySelector('.t34-ld .bar i'), tx = t.querySelector('.t34-ld .tx'), t0 = Date.now(); let shown = 0;
+  const TX = ['凝神聚氣…', '感應天地靈氣…', '開啟洞府…'];
+  function prog() {
+    if (window.T123.ready) return;
+    const im = [...document.images], done = im.filter(i => i.complete).length, p = im.length ? done / im.length : 0;
+    const tp = Math.min(.92, Math.max(p * .9, Math.min(.6, (Date.now() - t0) / 4000)));   /* 圖片進度為主,時間緩慢補位,讀檔完成前最多 92% */
+    shown = Math.max(shown, tp); if (bar) bar.style.width = (shown * 100) + '%'; if (tx) tx.textContent = TX[Math.min(2, Math.floor(shown * 3))] + ' ' + Math.floor(shown * 100) + '%';
+    setTimeout(prog, 120);
+  }
+  prog();
+  window.addEventListener('load', () => setTimeout(() => {   /* 014 的 load 監聽(讀檔)在後面註冊;延後一拍確保已讀完存檔 */
+    if (!window.__LOADED112) return; window.T123.ready = true; if (bar) bar.style.width = '100%'; if (tx) tx.textContent = '靈台清明 100%';
+    setTimeout(() => t.classList.remove('ld'), 350);
+  }, 0));
+})();
+</script><script>/* v99 安裝到主畫面 */
 (function () {
   var b = document.getElementById('t99-inst'), ios = document.getElementById('t99-ios'), ev = null;
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
@@ -13983,7 +14010,7 @@ header .flex.justify-between.mb-0\\.5{margin-bottom:1px!important}
 (function () {
   const t = document.getElementById('title34'); if (!t) return;
   let gone = false;
-  function go() { if (gone) return; gone = true; try { audio.init(); } catch (e) { } t.classList.add('out'); setTimeout(() => { try { t.remove(); } catch (e) { } }, 1450); }
+  function go() { if (gone || (window.T123 && !T123.ready)) return; gone = true; try { audio.init(); } catch (e) { } t.classList.add('out'); setTimeout(() => { try { t.remove(); } catch (e) { } }, 1450); }
   t.addEventListener('click', go);
   t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') go(); });
 })();
