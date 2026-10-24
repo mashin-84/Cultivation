@@ -1,0 +1,2 @@
+/* v122 本命絕學過場特寫 */
+window.UC121 = {"F_sword": "data:image/webp;base64,@@IMG:UC/F_sword@@", "F_magic": "data:image/webp;base64,@@IMG:UC/F_magic@@", "F_body": "data:image/webp;base64,@@IMG:UC/F_body@@", "F_pill": "data:image/webp;base64,@@IMG:UC/F_pill@@", "M_sword": "data:image/webp;base64,@@IMG:UC/M_sword@@", "M_magic": "data:image/webp;base64,@@IMG:UC/M_magic@@", "M_body": "data:image/webp;base64,@@IMG:UC/M_body@@", "M_pill": "data:image/webp;base64,@@IMG:UC/M_pill@@"};
