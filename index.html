@@ -16429,8 +16429,8 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   const FL = ['gu', 'j1', 'j3', 'j4', 'jy_demon', 'jy_rogue', 'sr3', 'sr4', 'sr5', 'sr6', 'sr7', 'yx0', 'yx1', 'yx2', 'yx3', 'yx4', 'yx6', 'yx7'];
   const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 6 } };
   const ultOf = () => { try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : null; return m && ULT[m] ? ULT[m] : null; } catch (e) { return null; } };
-  function enemyArt(name, id) {
-    try { const k = window.art45 && art45({ monster: { name, id: id || '' } }); if (k && window.A45 && A45[k]) return { src: A45[k], flip: FL.includes(k) }; } catch (e) { }
+  function enemyArt(name, id, tier) {
+    try { let k = window.art45 && art45({ monster: { name, id: id || '' } }); if (!k && /守山長老$/.test(name || '') && tier != null) k = 'yx' + Math.min(7, Math.max(0, tier | 0)); if (k && window.A45 && A45[k]) return { src: A45[k], flip: FL.includes(k) }; } catch (e) { }
     return null;
   }
   /* v114 主角背面戰鬥動作:1 待機 2 普攻 3 攻擊神通 4 輔助神通 5 格擋 6 受擊 7 蓄力 8 爆發 9 勝利(其他外觀暫用新手服) */
@@ -16525,8 +16525,8 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 @keyframes fxBurst{from{transform:scale(.2);opacity:1}to{transform:scale(2.2);opacity:0}}
 .fx-flash{left:0!important;top:0!important;width:100%;height:100%;background:var(--c);mix-blend-mode:screen;animation:fxFlash .6s ease-out forwards}
 @keyframes fxFlash{from{opacity:.75}to{opacity:0}}
-#bf-ei.fl{transform:scaleX(-1)}
-#bf-ei.hit{animation:bfHit .35s}#bf-ei.fl.hit{animation:bfHitF .35s}
+#bf-ei.bffl{transform:scaleX(-1)}
+#bf-ei.hit{animation:bfHit .35s}#bf-ei.bffl.hit{animation:bfHitF .35s}
 #bf-pi.hit{animation:bfHit .35s}
 #bf-ei.charge{filter:drop-shadow(0 0 14px #f97316) drop-shadow(0 0 4px #fde68a)}
 @keyframes bfHit{0%,100%{translate:0}25%{translate:12px}50%{translate:-8px}75%{translate:5px}}
@@ -16570,6 +16570,8 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 #bf-acts .row:active:not([disabled]){transform:scale(.97)}
 #bf-cmd .auto,#bf-auto2{position:absolute;right:10px;top:2px;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.5);color:#f6efe0;z-index:2}
 #bf-auto2{top:auto;bottom:62px;z-index:42}
+#bf-cmd .auto.run{right:auto;left:auto;right:86px}
+#bf-cmd .auto.run.ask{background:#b91c1c;border-color:#fca5a5;color:#fff}
 #bf-cmd .auto.on,#bf-auto2.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
 #bf-acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}
 #bf-acts button{position:relative;min-width:0;padding:9px 4px;border-radius:12px;font-weight:900;font-size:13px;color:#3b2510;background:linear-gradient(180deg,#fbf1d8,#e8d1a0);border:1px solid #b07d1a;box-shadow:0 3px 0 #8a5a12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -16655,7 +16657,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
-<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button></div>
+<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">🏃 逃離</button></div>
 <button id="bf-auto2" class="auto on">自動:開</button>
 <div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div></div>
@@ -16867,7 +16869,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   function build(cfg) {
     const s = calculateTotalStats(), d = BFD[cfg.name] || {};
     const S = skState(), slots = skSlots(), sk = S.equipped.slice(0, slots).filter(id => id && S.learned[id] && SK_BY_ID[id]).map(id => ({ id, sk: SK_BY_ID[id], c: skCalc(SK_BY_ID[id], S.learned[id].lv) }));
-    const art = enemyArt(cfg.name, cfg.id) || {};
+    const art = enemyArt(cfg.name, cfg.id, cfg.tier != null ? cfg.tier : state.realmIdx) || {};
     const X0 = { cfg, d, s, e: { name: cfg.name, hp: 1, max: 1, atk: 1, def: Math.floor(s.atk * .5), el: cfg.element || null, charge: 0, stun: 0, dot: null, cnt: 0, art }, p: { hp: s.hp, max: s.hp, sh: 0, buff: null },
       sk, cd: {}, ult: ultOf(), pillUsed: 0, phase: 1, turn: 0, busy: false, auto: false, ease: 0 };
     calibrate(X0, cfg.turns || d.T || 10, cfg.margin != null ? cfg.margin : (d.margin != null ? d.margin : .55));
@@ -17064,13 +17066,13 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     if (r) r(win);
   }
   async function begin(cfg) {
-    B = build(cfg); window.BF113.on = true; B.pt = (window.ART28 && ART28.ch[(B.d.pt || PT[cfg.name])]) || null;
+    B = build(cfg); window.BF113.on = true; B.pt = (window.ART28 && ART28.ch[(B.d.pt || PT[cfg.name])]) || null; if (B.pt) B.e.art = { src: B.pt, flip: false, hi: 1 };
     B.dM = () => { const a = B.e.atk; return Math.max(1, a * a / (a + B.s.def)); };
     const bgk = B.d.bg || cfg.bg;
     root.style.backgroundImage = `url("${(bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
     $('bf-en').textContent = cfg.name; $('bf-el').textContent = cfg.label || B.d.title || '';
     $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
-    if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('fl', !!B.e.art.flip); } else ei.style.display = 'none';
+    if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     ui(); log('');
     await cut({ img: B.pt || B.e.art.src, flip: !B.pt && B.e.art.flip, sub: cfg.label || B.d.title || '', big: cfg.name, say: B.d.intro || cfg.intro || '來吧!' });
@@ -17078,6 +17080,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   }
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || !B) return;
+    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '🏃 逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '🏃 逃離'; B.over = true; try { showToast('暫且退避,改日再戰。'); } catch (e) { } close(false); return; }
     if (b.id === 'bf-auto' || b.id === 'bf-auto2') { B.auto = !B.auto; ui(); if (B.auto && !B.busy && !B.over) act(autoPick()); return; }
     if (b.dataset.bfe === 'ok') { const w = B.e.hp <= 0; close(w); return; }
     if (b.dataset.bfe === 'retry') { const cfg = B.cfg; B = null; begin(cfg); return; }
