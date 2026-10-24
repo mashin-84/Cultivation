@@ -28,16 +28,22 @@ def key(path):
     return np.dstack([np.clip(a, 0, 255), al * 255]).astype(np.uint8)
 
 
-def pieces(path):
-    r = key(path)
+def pieces(path, n=9):
+    """依格線分配:每個區塊依中心點歸到 3x3(n=9)或 1xN 的格子,同一格的區塊合併(脫手的道具也算進去)"""
+    r = key(path); H, W = r.shape[:2]
     lab, _ = ndimage.label(ndimage.binary_dilation(r[..., 3] > 60, iterations=4))
     sl = ndimage.find_objects(lab)
-    ids = [i + 1 for i, s in enumerate(sl) if s and (lab[s] == i + 1).sum() > 3000]
-    rowh = r.shape[0] / 3.2
-    ids.sort(key=lambda i: (round(((sl[i - 1][0].start + sl[i - 1][0].stop) / 2) / rowh), sl[i - 1][1].start))
+    cells = {}
+    for i, s in enumerate(sl, 1):
+        if not s or (lab[s] == i).sum() < 1500: continue
+        cy, cx = (s[0].start + s[0].stop) / 2, (s[1].start + s[1].stop) / 2
+        c = (min(2, int(cy / (H / 3))), min(2, int(cx / (W / 3)))) if n == 9 else (0, min(n - 1, int(cx / (W / n))))
+        cells.setdefault(c, []).append(i)
     out = []
-    for i in ids:
-        s = sl[i - 1]; p = r[s].copy(); p[..., 3] = (p[..., 3] * (lab[s] == i)).astype(np.uint8); out.append(p)
+    for c in sorted(cells):
+        ids = cells[c]; m = np.isin(lab, ids); ys, xs = np.nonzero(m)
+        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+        p = r[y0:y1, x0:x1].copy(); p[..., 3] = (p[..., 3] * m[y0:y1, x0:x1]).astype(np.uint8); out.append(p)
     return out
 
 
@@ -51,16 +57,18 @@ def main():
         return np.median(np.nonzero(al[int(h * .45):int(h * .6)])[1])
     refw = [waist(r[..., 3] > 40) for r in ref]
     refh = foot - np.nonzero(ref[0][..., 3] > 40)[0].min()      # o1 待機身高
-    mp = pieces(sheet); assert len(mp) == 9, f'主表找到 {len(mp)} 格,應為 9'
-    s_main = refh / mp[0].shape[0]
+    mp = pieces(sheet, 9); assert len(mp) == 9, f'主表找到 {len(mp)} 格,應為 9'
+    rh = np.median([foot - np.nonzero(r[..., 3] > 40)[0].min() for r in ref])
+    s_main = rh / np.median([x.shape[0] for x in mp])   # 整組中位身高對齊新手服劍修
     use = {n: (mp[n - 1], s_main) for n in range(1, 10)}
     if len(sys.argv) > 4:
-        sp = pieces(sys.argv[4]); nums = [int(x) for x in sys.argv[5].split(',')]
+        nums = [int(x) for x in sys.argv[5].split(',')]; sp = pieces(sys.argv[4], len(nums))
         assert len(sp) == len(nums), f'補圖找到 {len(sp)} 格,應為 {len(nums)}'
         s_sup = s_main * mp[8].shape[0] / sp[0].shape[0]
         for n, p in zip(nums, sp): use[n] = (p, s_sup)
     tips = {}
     for n, (p, s) in use.items():
+        s = min(s, (foot - 4) / p.shape[0])                     # 單格放不下(舉手、騰空)才單獨縮
         im = Image.fromarray(p); im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
         al = np.array(im)[..., 3] > 40; ys, xs = np.nonzero(al)
         x0, x1 = xs.min(), xs.max()
@@ -73,6 +81,7 @@ def main():
         cy, cx = np.nonzero(np.array(can)[..., 3] > 40)
         if n in (2, 3, 8):
             if n == 2: k = np.argmax(cx - cy * .6)
+            elif n == 3 and '_' in look: k = np.argmax(cx - cy * .6)      # 流派:手掌/拳頭/丹爐在右上
             elif n == 3:
                 top = cy < cy.min() + 120; lft, rgt = cx[top].min(), cx[top].max()
                 al2 = np.array(can)[..., 3] > 40                       # 劍尖那端較細:比較兩端 40px 內的像素量

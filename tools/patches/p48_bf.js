@@ -29,10 +29,15 @@
   }
   /* v114 主角背面戰鬥動作:1 待機 2 普攻 3 攻擊神通 4 輔助神通 5 格擋 6 受擊 7 蓄力 8 爆發 9 勝利(其他外觀暫用新手服) */
   const BPX = window.BP114 || {};
-  const pose = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1'; return BPX[g + lk + '_' + n] || BPX[g + 'o1_' + n] || ''; };
+  /* v142 主流派(練氣期尚未分流派 → 劍修)。流派圖只在「該外觀有該流派圖」時使用,否則沿用該外觀的劍修圖 */
+  const SCM = () => { try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : ''; return m && m !== 'sword' ? m : ''; } catch (e) { return ''; } };
+  const pkey = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1', sc = SCM(); if (sc && BPX[g + lk + '_' + sc + '_' + n]) return g + lk + '_' + sc + '_' + n; return BPX[g + lk + '_' + n] ? g + lk + '_' + n : g + 'o1_' + n; };
+  const STY = () => { const k = pkey(2); return /_magic_/.test(k) ? 'magic' : /_body_/.test(k) ? 'body' : /_pill_/.test(k) ? 'pill' : 'sword'; };
+  const pose = n => BPX[pkey(n)] || '';
+  const ATKN = () => ({ sword: ['仙劍普攻', '看準時機・最多三連斬'], magic: ['飛符術', '看準時機・最多三張連發'], body: ['崩山拳', '看準時機・最多三連擊'], pill: ['丹爐撞擊', '看準時機・最多三連擊'] })[STY()];
   /* 各出招動作的「劍尖附近」在圖框內的位置(由圖自動量出;其他外觀暫用新手服的值) */
-  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.942, .207], M_o2_3: [.584, .263], M_o2_8: [.998, .107], M_o3_2: [.949, .198], M_o3_3: [.618, .257], M_o3_8: [.998, .098], M_o4_2: [.949, .199], M_o4_3: [.588, .257], M_o4_8: [.998, .095], M_o5_2: [.948, .199], M_o5_3: [.619, .26], M_o5_8: [.998, .097], F_o2_2: [.969, .167], F_o2_3: [.546, .39], F_o2_8: [.421, .208], F_o3_2: [.968, .167], F_o3_3: [.548, .39], F_o3_8: [.421, .208], F_o4_2: [.967, .168], F_o4_3: [.546, .39], F_o4_8: [.421, .208], F_o5_2: [.981, .168], F_o5_3: [.548, .39], F_o5_8: [.421, .208] };
-  const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
+  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.942, .207], M_o2_3: [.584, .263], M_o2_8: [.998, .107], M_o3_2: [.949, .198], M_o3_3: [.618, .257], M_o3_8: [.998, .098], M_o4_2: [.949, .199], M_o4_3: [.588, .257], M_o4_8: [.998, .095], M_o5_2: [.948, .199], M_o5_3: [.619, .26], M_o5_8: [.998, .097], M_o1_magic_2: [.798, .232], M_o1_magic_3: [.763, .143], M_o1_magic_8: [.825, .051], M_o1_body_2: [.77, .235], M_o1_body_3: [.727, .199], M_o1_body_8: [.716, .386], M_o1_pill_2: [.795, .322], M_o1_pill_3: [.729, .202], M_o1_pill_8: [.835, .245], F_o2_2: [.969, .167], F_o2_3: [.546, .39], F_o2_8: [.421, .208], F_o3_2: [.968, .167], F_o3_3: [.548, .39], F_o3_8: [.421, .208], F_o4_2: [.967, .168], F_o4_3: [.546, .39], F_o4_8: [.421, .208], F_o5_2: [.981, .168], F_o5_3: [.548, .39], F_o5_8: [.421, .208] };
+  const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[pkey(n)] || TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
   const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
   let poseT = 0;
   function setPose(n, back, lift) {
@@ -43,6 +48,21 @@
   const center = id => { const e = $(id), s = $('bf-stg'); if (!e || !s) return [0, 0]; const r = e.getBoundingClientRect(), q = s.getBoundingClientRect(); return [r.left - q.left + r.width / 2, r.top - q.top + r.height * .45]; };
   function fxEl(cls, x, y, css) { const d = document.createElement('div'); d.className = 'bfx ' + cls; d.style.left = x + 'px'; d.style.top = y + 'px'; if (css) Object.assign(d.style, css); $('bf-stg').appendChild(d); return d; }
   function fxArc(col) { const [x, y] = center('bf-ei'); const d = fxEl('fx-arc', x, y, { '--c': col || '#dff1ff' }); setTimeout(() => d.remove(), 450); }
+  /* v142 流派特效 */
+  function handAt(n) { const p = $('bf-pi'), s = $('bf-stg'); const r = p.getBoundingClientRect(), q = s.getBoundingClientRect(), t = tip(n); return [r.left - q.left + r.width * t[0], r.top - q.top + r.height * t[1]]; }
+  function fxTal(col, from, to, ms, delay) {
+    return new Promise(res => setTimeout(() => {
+      const [sx, sy] = from, [ex, ey] = to, d = fxEl('fx-tal', sx, sy, { '--c': col || '#fde68a', backgroundImage: `url(${BPX.talisman || ''})` });
+      const a = d.animate([{ transform: 'translate(0,0) rotate(-20deg) scale(.7)', opacity: 1 }, { transform: `translate(${ex - sx}px,${ey - sy}px) rotate(${340 + Math.random() * 60}deg) scale(1.05)`, opacity: 1 }], { duration: ms || 300, easing: 'cubic-bezier(.4,0,.8,.6)' });
+      a.onfinish = () => { d.remove(); res(); };
+    }, delay || 0));
+  }
+  function fxSky(col, big) {
+    const [x, y] = center('bf-ei'), d = fxEl('fx-sky' + (big ? ' big' : ''), x, 0, { '--c': col || '#c4b5fd', height: y + 'px' });
+    setTimeout(() => { d.remove(); fxArc(col); }, big ? 520 : 380);
+  }
+  function fxPill() { const [x, y] = center('bf-pi'); const d = fxEl('fx-aura bf', x, y - 40); setTimeout(() => d.remove(), 800); num('p', '服丹', 'tx'); }
+  async function swallow() { setPose(4); fxPill(); sfx('sfx_skill'); await sleep(520); }
   function fxBolt(col, n) {
     const p = $('bf-pi'), s = $('bf-stg'); if (!p || !s) return; const r = p.getBoundingClientRect(), q = s.getBoundingClientRect();
     const tp = tip(3), sx = r.left - q.left + r.width * tp[0], sy = r.top - q.top + r.height * tp[1], [ex, ey] = center('bf-ei'), a = Math.atan2(ey - sy, ex - sx) * 180 / Math.PI;
@@ -109,6 +129,10 @@
 @keyframes fxGoR{from{transform:scale(.5);opacity:1}to{transform:scale(5);opacity:0}}
 .fx-arc{width:190px;height:190px;margin:-95px 0 0 -95px;border-radius:50%;border-top:9px solid var(--c);filter:drop-shadow(0 0 10px var(--c));animation:fxArc .4s ease-out forwards}
 @keyframes fxArc{from{transform:rotate(-70deg) scale(.6);opacity:1}to{transform:rotate(50deg) scale(1.15);opacity:0}}
+.fx-tal{width:30px;height:52px;margin:-26px 0 0 -15px;background:center/contain no-repeat;filter:drop-shadow(0 0 6px var(--c)) drop-shadow(0 0 2px #fff)}
+.fx-sky{top:0!important;width:64px;margin-left:-32px;transform-origin:50% 0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c) 55%,transparent) 30%,#fff 47%,#fff 53%,color-mix(in srgb,var(--c) 55%,transparent) 70%,transparent);-webkit-mask-image:linear-gradient(180deg,transparent,#000 35%,#000 92%,transparent);mask-image:linear-gradient(180deg,transparent,#000 35%,#000 92%,transparent);filter:blur(1.5px) drop-shadow(0 0 12px var(--c));mix-blend-mode:screen;animation:fxSky .38s ease-in forwards}
+.fx-sky.big{width:150px;margin-left:-75px;animation-duration:.52s}
+@keyframes fxSky{0%{transform:scaleY(0);opacity:1}55%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
 .fx-bolt{width:110px;height:7px;margin:-3px 0 0 0;transform-origin:left center;border-radius:4px;background:linear-gradient(90deg,transparent,var(--c) 45%,#fff);box-shadow:0 0 12px var(--c)}
 .fx-aura{width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;animation:fxAura .9s ease-out forwards}
 .fx-aura.sh{border:4px solid rgba(147,197,253,.9);background:radial-gradient(circle,rgba(147,197,253,.05) 55%,rgba(147,197,253,.35))}
@@ -287,7 +311,7 @@
     const row = (cls, attr, ic, n, d, cd, dis) => `<button class="row ${cls}" ${attr} ${dis ? 'disabled' : ''}><span class="ic">${ic}</span><span class="t"><span class="n">${n}${cd > 0 ? `<em>(${cd})</em>` : ''}</span><span class="d">${d}</span></span></button>`;
     let rs = '';
     if (B.ult) { const cd = B.cd.ULT || 0; rs += row('ult', 'data-bf="ult"', `<b>${B.ult.ic}</b>`, `本命絕學・${B.ult.n}`, cd > 0 ? `尚需 ${cd} 回合` : '按住蓄力,全力一擊', cd, lock || cd > 0); }
-    rs += row('atk', 'data-bf="atk"', '<b>⚔</b>', '仙劍普攻', '看準時機・最多三連斬', 0, lock);
+    rs += row('atk', 'data-bf="atk"', '<b>⚔</b>', ATKN()[0], ATKN()[1], 0, lock);
     B.sk.forEach((k, i) => { const cd = B.cd[k.id] || 0; let ic = ''; try { ic = skArt(k.id, false); } catch (e) { } rs += row('sk', `data-bf="sk" data-i="${i}"`, ic, k.sk.name, DS(k), cd, lock || cd > 0); });
     const pl = (state.inventory.pill_4 || 0); rs += row('pill', 'data-bf="pill"', '<b>💊</b>', `回春丹 ×${pl > 99 ? '99+' : pl}`, `回復 35% 氣血・本場還能服 ${2 - B.pillUsed} 顆`, 0, lock || !pl || B.pillUsed >= 2);
     if (box.dataset.h !== rs) { box.dataset.h = rs; box.innerHTML = rs; }
@@ -559,10 +583,17 @@
   const critM = () => window.sectCritMult ? sectCritMult() : 1.5;
   /* ---------- 玩家行動 ---------- */
   async function doAtk() {
-    setPose(1); const q = await qTiming('⚔ 仙劍普攻');
+    setPose(1); const q = await qTiming('⚔ ' + ATKN()[0]);
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q), n = q === 'pf' ? 3 : q === 'gd' ? 2 : 1;
-    log(q === 'pf' ? '劍光如虹,三連斬命中要害!' : q === 'gd' ? '道友連斬兩劍。' : '劍勢一偏,只削到衣角。');
+    { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; log(q === 'pf' ? L[0] : q === 'gd' ? L[1] : L[2]); }
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
+    if (STY() === 'magic') {   /* 法修:原地連甩符咒 */
+      for (let k = 0; k < n && B.e.hp > 0; k++) {
+        setPose(2); await fxTal(q === 'pf' ? '#fff3b0' : '#fde68a', handAt(2), center('bf-ei'), k ? 230 : 300); fxArc('#fde68a');
+        await dealE(tot / n, 1, cr && k === n - 1); setPose(1); await sleep(k === n - 1 ? 160 : 60);
+      }
+      return;
+    }
     for (let k = 0; k < n && B.e.hp > 0; k++) {   /* 每一斬:衝上去 → 命中 → 退回(像 Pokémon GO 連打) */
       setPose(2); await go(1, .62, k ? 120 : 170, 0, tip(2)); fxArc(q === 'pf' ? '#fff7cc' : '#dff1ff');
       await dealE(tot / n, 1, cr && k === n - 1);
@@ -575,14 +606,17 @@
     const dm = window.sectDmgMult ? sectDmgMult(sk) : 1;
     if (sk.type === 'shield' || sk.type === 'heal' || sk.type === 'buff') {
       const q = await qTiming(`✨ ${sk.name}`, .85), f = q === 'pf' ? 1.35 : q === 'gd' ? 1 : .65;
-      setPose(4, 900); fxAura(sk.type === 'shield' ? 'sh' : sk.type === 'heal' ? 'hl' : 'bf');
+      setPose(4, 900); fxAura(sk.type === 'shield' ? 'sh' : sk.type === 'heal' ? 'hl' : 'bf'); if (STY() === 'pill') num('p', '服丹', 'tx');
       if (sk.type === 'shield') { B.p.sh = Math.max(B.p.sh, Math.floor(B.p.max * c.pct * f)); num('p', '🛡' + fm(B.p.sh), 'hl'); log(`護體靈光籠罩全身,護盾 ${fm(B.p.sh)}。`); }
       else if (sk.type === 'heal') { const h = Math.floor(B.p.max * c.pct * f); B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); log(`生機湧現,恢復 ${fm(h)} 氣血。`); }
       else { B.p.buff = { pct: c.pct * f, turns: c.turns + 1 }; num('p', '攻↑', 'tx'); log(`戰意沸騰!攻擊提升 ${Math.round(c.pct * f * 100)}%。`); }
       ui(); await sleep(400); return;
     }
     const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
-    B.fxc = sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff'; go(.22, .9, 160); setPose(3); setTimeout(() => { if (B && !B.over) { setPose(1); back(240); } }, 900); fxBolt(sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff', Math.min(3, sk.type === 'atk' ? c.hits : 1)); await sleep(280);
+    B.fxc = sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff'; const sty = STY(), nb = Math.min(3, sk.type === 'atk' ? c.hits : 1);
+    if (sty === 'pill') await swallow();
+    if (sty === 'magic') { setPose(3); setTimeout(() => { if (B && !B.over) setPose(1); }, 1000); for (let j = 0; j < nb; j++) setTimeout(() => fxSky(B.fxc), 140 + j * 150); await sleep(420); }
+    else { go(.22, .9, 160); setPose(3); setTimeout(() => { if (B && !B.over) { setPose(1); back(240); } }, 900); fxBolt(B.fxc, nb); await sleep(280); }
     const hits = sk.type === 'atk' ? c.hits : 1, cr = r >= 1 || Math.random() * 100 < B.s.crit;
     const total = base(c.mult * (sk.type === 'atk' ? c.hits : 1) * f) * (cr ? critM() : 1) * dm;
     log(`施展【${sk.name}】${r >= 1 ? ',法訣圓滿!' : ''}`);
@@ -595,9 +629,16 @@
   async function doUlt() {
     if (!B.ult || (B.cd.ULT || 0) > 0) return; B.cd.ULT = B.ult.cd + 1;
     await ultCut();
+    const sty = STY(); if (sty === 'pill') await swallow();
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
     pi.classList.remove('chg'); B.fxc = uc;
+    if (sty === 'magic') {   /* 法修:原地舉符,群符飛起 → 天降轟擊 */
+      setPose(8); { const fl = fxEl('fx-flash', 0, 0, { '--c': uc }); setTimeout(() => fl.remove(), 900); } speed(uc); sfx('sfx_ult'); skName(B.ult.n);
+      const [hx, hy] = handAt(8), [ex, ey] = center('bf-ei');
+      await Promise.all([0, 1, 2, 3, 4].map(j => fxTal(uc, [hx + (j - 2) * 22, hy], [ex + (j - 2) * 34, Math.max(20, ey - 150 - (j % 2) * 30)], 380, j * 60)));
+      fxSky(uc, true); await sleep(200); fxBurst(uc); shake();
+    } else {
     const T = thrustT(tip(2));
     /* 爆發:躍出約一半距離並騰空 */
     setPose(8); if (T) await mvTo({ dx: T.dx * .45, dy: T.dy * .45 - T.H * .07, sc: 1 + (T.sc - 1) * .5 }, 200, 'cubic-bezier(.2,.8,.3,1)');
@@ -606,6 +647,7 @@
     /* 突刺:劍尖命中 */
     setPose(2); if (T) await mvTo(T, 150, 'cubic-bezier(.5,0,.9,.6)');
     fxBurst(uc); shake();
+    }
     const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
     await dealE(base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
     setPose(1); await back(320);
