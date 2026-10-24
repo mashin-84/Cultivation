@@ -44,7 +44,7 @@ function renderMingPet() {
       <div class="text-[11px] text-emerald-300">${petDesc(apd, ap.lv)}</div>
       <div class="text-[11px] text-rose-300">協同出擊:每次出手後追加 ${Math.round((apd.s + .01 * ap.lv) * 100)}% 攻擊傷害</div>
       ${ap.lv < cap ? `<div class="text-[11px] text-slate-300 mt-1">升一級:${cpTxt(p0, p1)}</div>` : ''}
-      <div class="mt-2 space-x-2">${eBtn('pet-up', apd.id, ap.lv >= cap ? `已達上限 Lv.${cap}(境界提升可再升)` : `⬆ 餵養升級(${formatNum(cost)} 靈石)`, ap.lv < cap && state.stones >= cost)}${ap.lv < cap ? eBtn('pet-max', apd.id, plan.n > 1 ? `連續升級 ×${plan.n}` : '連續升級', plan.n > 1, 'bg-gradient-to-r from-orange-600 to-red-500 text-white') : ''}</div>`;
+      <div class="mt-2 space-x-2">${eBtn('pet-up', apd.id, ap.lv >= cap ? `已達上限 Lv.${cap}(境界提升可再升)` : `<i class="ii ui ii-c138_up"></i> 餵養升級(${formatNum(cost)} 靈石)`, ap.lv < cap && state.stones >= cost)}${ap.lv < cap ? eBtn('pet-max', apd.id, plan.n > 1 ? `連續升級 ×${plan.n}` : '連續升級', plan.n > 1, 'bg-gradient-to-r from-orange-600 to-red-500 text-white') : ''}</div>`;
   } else h += `<div class="text-slate-500 text-xs py-6">尚無出戰靈寵,孵化靈寵蛋獲得第一位夥伴。</div>`;
   h += `</div><div class="rounded-xl border border-slate-700 bg-slate-900 p-3 mt-2 flex items-center space-x-3"><div class="w-16 h-16 ${eggs > 0 ? 'wob' : 'grayscale opacity-60'}">${eggArt()}</div>
     <div class="flex-1"><div class="text-xs font-bold text-amber-200">靈寵蛋 × ${eggs}</div><div class="text-[10px] text-slate-500">來源:妖魔掉落(Boss 較高)、境界突破、離線歷練、九九登天塔。孵到重複靈寵則該寵 +1 級。</div></div>${eBtn('pet-hatch', '', '孵化', eggs > 0, 'bg-gradient-to-r from-pink-600 to-rose-500 text-white')}</div>
@@ -257,8 +257,29 @@ function renderMap() {
   const n = area.maxSteps, cur = Math.min(state.exploreStep || 1, n), pal = ELEM_PAL[area.element] || ELEM_PAL.metal, boss = area.monsters.find(m => m.isBoss) || {};
   let s = `<svg viewBox="0 0 360 176" class="w-full" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal[1]}"/><stop offset="1" stop-color="#020617"/></linearGradient></defs><rect width="360" height="176" rx="12" fill="url(#mapbg)"/>`;
   for (let k = 0; k < 9; k++) { const x = 18 + k * 40 + ((ai * 37 + k * 53) % 18), h = 16 + ((ai * 11 + k * 29) % 18), y = 88 + ((k * 17 + ai) % 6); s += `<path d="M${x - h * .8} ${y + h * .5} L${x} ${y - h * .5} L${x + h * .8} ${y + h * .5}z" fill="${pal[2]}" opacity=".13"/>`; }
-  s += `<path d="${stagePath(n, n)}" stroke="#0f172a" stroke-opacity=".75" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${stagePath(n, n)}" stroke="#64748b" stroke-width="3" stroke-dasharray="2 6" fill="none" stroke-linecap="round"/>`;
+  s += `<path d="${stagePath(n, n)}" stroke="#3b2f22" stroke-opacity=".42" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${stagePath(n, n)}" stroke="#f5ecd6" stroke-opacity=".85" stroke-width="2.5" stroke-dasharray="2 6" fill="none" stroke-linecap="round"/>`;
   if (cur > 1) s += `<path d="${stagePath(cur, n)}" stroke="#fbbf24" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const IC = window.IC138, im = (k, x, y, w, ex) => `<image href="${IC[k]}" x="${x - w / 2}" y="${y - w / 2}" width="${w}" height="${w}" preserveAspectRatio="xMidYMid meet"${ex || ''}/>`;
+  if (IC) {
+    const bsrc = (window.MONART26 && MONART26(boss)) || '';
+    for (let i = 1; i <= n; i++) {
+      const p = stagePos(i, n), isB = i === n, done = i < cur, now = i === cur;
+      s += '<g>';
+      if (isB) {
+        if (now) s += im('n_cur', p.x, p.y, 46);
+        if (bsrc) s += `<clipPath id="bc19"><circle cx="${p.x}" cy="${p.y}" r="14.5"/></clipPath><circle cx="${p.x}" cy="${p.y}" r="15" fill="#f3ead6"/><image href="${bsrc}" x="${p.x - 17}" y="${p.y - 15}" width="34" height="34" clip-path="url(#bc19)" preserveAspectRatio="xMidYMin slice"/>`;
+        else s += im('n_boss', p.x, p.y, 30);
+        s += im('bossring', p.x, p.y, 40);
+      } else if (i === 1) { if (now) s += im('n_cur', p.x, p.y, 34); s += im('camp', p.x, p.y - 2, 34); }
+      else {
+        s += im(now ? 'n_cur' : done ? 'n_done' : 'n_idle', p.x, p.y, now ? 32 : 27);
+        if (i === 5) s += im('flag', p.x + 6, p.y - 12, 26);
+        else if (!done) s += `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="11" font-weight="800" fill="#3b2f22" stroke="#f5efe0" stroke-width="2.5" paint-order="stroke">${i}</text>`;
+      }
+      if (now) s += `<g>${im(state.gender === 'f' ? 'me_f' : 'me_m', p.x, p.y - 27, 32)}<animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.2s" repeatCount="indefinite"/></g>`;
+      s += '</g>';
+    }
+  } else
   for (let i = 1; i <= n; i++) {
     const p = stagePos(i, n), isB = i === n, special = i === 1 ? '⛺' : isB ? (boss.emoji || '👹') : (i === 5 ? '🚩' : ''), done = i < cur, now = i === cur, r = isB ? 17 : 13;
     const fill = now ? '#b45309' : done ? '#065f46' : isB ? '#4c0519' : '#1e293b', stroke = now ? '#fcd34d' : done ? '#34d399' : isB ? '#fb7185' : '#475569';

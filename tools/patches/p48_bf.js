@@ -258,7 +258,7 @@
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
-<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">🏃 逃離</button></div>
+<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">逃離</button></div>
 <button id="bf-auto2" class="auto on">自動:開</button>
 <div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div></div>
@@ -687,7 +687,7 @@
   }
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || !B) return;
-    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '🏃 逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '🏃 逃離'; B.over = true; B.ran = true; if (!B.cfg.engine) { try { showToast('暫且退避,改日再戰。'); } catch (e) { } } close(false); return; }
+    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '逃離'; B.over = true; B.ran = true; if (!B.cfg.engine) { try { showToast('暫且退避,改日再戰。'); } catch (e) { } } close(false); return; }
     if (b.id === 'bf-auto' || b.id === 'bf-auto2') { B.auto = !B.auto; ui(); if (B.auto && !B.busy && !B.over) act(autoPick()); return; }
     if (b.dataset.bfe === 'ok') { const w = B.e.hp <= 0; close(w); return; }
     if (b.dataset.bfe === 'retry') { const cfg = B.cfg; B = null; begin(cfg); return; }

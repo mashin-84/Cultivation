@@ -35,7 +35,7 @@
 <div class="x5-card"><div class="x5-sub">煉化成</div><div class="fn-tabs">${['rn', 'st', 'qi'].map(m => `<button data-x5="fn.mode" data-m="${m}" class="${f.mode === m ? 'on' : ''}">${MODE[m][0]}</button>`).join('')}</div><div class="x5-sub">${MODE[f.mode][1]}</div>
 <div class="x5-sub" style="margin-top:8px">每種材料保留</div><div class="fn-tabs">${[10, 30, 60, 100].map(k => `<button data-x5="fn.keep" data-k="${k}" class="${f.keep === k ? 'on' : ''}">${k} 份</button>`).join('')}</div></div>
 <div class="x5-card" style="margin-top:8px"><div class="x5-row" style="justify-content:space-between"><span>目前可煉化</span><b style="color:#fde68a">${fmt(p.cnt)} 件(${p.kinds} 種)</b></div><div class="x5-sub" style="margin-top:2px">預計獲得:<b style="color:#4ade80">${p.cnt ? yld : '—'}</b></div>
-<div class="x5-row" style="margin-top:8px"><button class="x5-btn am" data-x5="fn.go" style="flex:1" ${p.cnt ? '' : 'disabled'}>🔥 立即煉化</button><button class="x5-btn ${f.on ? '' : 'gy'}" data-x5="fn.auto" style="flex:1">${f.on ? '✅ 自動煉化:開' : '⬜ 自動煉化:關'}</button></div>
+<div class="x5-row" style="margin-top:8px"><button class="x5-btn am" data-x5="fn.go" style="flex:1" ${p.cnt ? '' : 'disabled'}>🔥 立即煉化</button><button class="x5-btn ${f.on ? '' : 'gy'}" data-x5="fn.auto" style="flex:1">${f.on ? '<i class="ii ui ii-c138_chk1"></i> 自動煉化:開' : '<i class="ii ui ii-c138_chk0"></i> 自動煉化:關'}</button></div>
 <div class="x5-sub" style="margin-top:6px">自動煉化開啟後,熔爐每隔數秒會把超出保留量的材料自動煉掉,儲物袋不再被雜物塞滿。</div></div>
 <div class="x5-sub" style="margin-top:8px">累計煉化 ${fmt(f.tot)} 件:器紋石 ${fmt(f.rn)}・靈石 ${fmt(f.st)}・修為 ${fmt(f.qi)}${f.d === todayS() ? `・今日器紋石 ${f.n}/${RN_DAY}` : ''}</div>`;
     b.innerHTML = h;

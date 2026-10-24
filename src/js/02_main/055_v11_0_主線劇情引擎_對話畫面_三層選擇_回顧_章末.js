@@ -400,7 +400,7 @@
   function abort() { clearTimeout(timer); clearInterval(typeT); const _t = run && run.n && run.n.post && run.then; if (run && run.n && !run.replay) declined[run.n.id] = 1; lastEndT = Date.now(); lastWasPost = !!(run && run.n && run.n.post); run = null; if (_t) setTimeout(_t, 200); { const t = $('st28ti'); if (t) t.classList.remove('on'); } $('st28').classList.remove('on'); $('st28cs').innerHTML = ''; badge(); }
   function showLog() {
     const s = SD(), lb = $('st28lb');
-    lb.innerHTML = s.log.slice(-120).map(l => l.w === '▶' ? `<p style="color:#fcd34d">▶ ${esc(l.t)}</p>` : `<p>${l.w ? `<b style="color:#a5b4fc">${esc(l.w)}</b>` : ''}${esc(l.t)}</p>`).join('') || '<p style="color:#94a3b8">尚無紀錄。</p>';
+    lb.innerHTML = s.log.slice(-120).map(l => l.w === '▶' ? `<p style="color:#fcd34d"><i class="ii ui ii-c138_play"></i> ${esc(l.t)}</p>` : `<p>${l.w ? `<b style="color:#a5b4fc">${esc(l.w)}</b>` : ''}${esc(l.t)}</p>`).join('') || '<p style="color:#94a3b8">尚無紀錄。</p>';
     $('st28lg').classList.add('on'); lb.scrollTop = lb.scrollHeight;
   }
   const esc = t => String(t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));

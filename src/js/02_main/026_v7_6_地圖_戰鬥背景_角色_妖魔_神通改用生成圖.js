@@ -23,6 +23,7 @@
 #stage-map{border-radius:12px;overflow:hidden}
 .rs-th{background-size:cover!important;background-position:center!important}.rs-th .text-2xl{display:none}`;
   document.head.appendChild(st);
+  window.MONART26 = m => { try { const k = monKey(m); return k && G[k] ? G[k] : ''; } catch (e) { return ''; } };
   // 戰鬥場景
   XT.fxSetup76 = _s => function () {
     _s.apply(this, arguments);
