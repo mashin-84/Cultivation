@@ -13041,6 +13041,10 @@ bg('sky'),
     beats: [
       bg('void'),
       N('戰局膠著。天門的光,與你身上的光,互相撕扯,誰也無法佔上風。'),
+      S('tian', '', '言語,已經夠了。那便,以天規論高下。'),
+      fx('flash'),
+      A.fight({ name: '天道', emoji: '☯️', label: '天道之戰・終局', tier: 7, target: 1.4, skill: '無情天規' }),
+      N('你的一念,與天規正面相撞。那團無邊的「靜」,第一次,往後退了一步。'),
       N('就在這時,你胸口殘存的最後一枚珠屑——那枚從一開始就藏在你心口深處的碎片——忽然炸裂開來。'),
       fx('flash'),
       N('所有的記憶,一瞬間,回到了你身上。'),
@@ -16423,7 +16427,11 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     '顧青衍': { pt: 'gu_a', bg: 'hall', T: 9, title: '外門大比・決賽', charge: ['劍意凝聚', '青雲劍訣・極'],
       intro: '聽說你是長老親自帶回來的?讓我看看,「親自」二字值多少。',
       p2: '……有點意思。那這一劍,你接得住嗎?', p3: '我走劍修,一條路走到黑。今天,我不會輸!',
-      win: '……我輸了。下次,我一定贏回來。', lose: '這就是長老看中的人?太讓人失望了。' }
+      win: '……我輸了。下次,我一定贏回來。', lose: '這就是長老看中的人?太讓人失望了。' },
+    '天道': { bg: 'void', T: 11, margin: .5, title: '天道之戰・終局', art: () => (window.A45 && A45.j8) ? { src: A45.j8, flip: false } : null, charge: ['天規降臨', '無情天罰', '萬法歸寂'],
+      intro: '凡心不足以擋天。你,也是我的一部分。',
+      p2: '……你竟能傷我。那便,讓你看看三千年的孤寂。', p3: '取代我,斬斷我,或者——再試一次吧,一念。',
+      win: '……原來,被人打醒,是這種感覺。', lose: '回去吧。等你想清楚了,再來。' }
   };
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
@@ -16869,10 +16877,13 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   function build(cfg) {
     const s = calculateTotalStats(), d = BFD[cfg.name] || {};
     const S = skState(), slots = skSlots(), sk = S.equipped.slice(0, slots).filter(id => id && S.learned[id] && SK_BY_ID[id]).map(id => ({ id, sk: SK_BY_ID[id], c: skCalc(SK_BY_ID[id], S.learned[id].lv) }));
-    const art = enemyArt(cfg.name, cfg.id, cfg.tier != null ? cfg.tier : state.realmIdx) || {};
+    const art = cfg.art || (d.art && d.art()) || enemyArt(cfg.name, cfg.id, cfg.tier != null ? cfg.tier : state.realmIdx) || {};
     const X0 = { cfg, d, s, e: { name: cfg.name, hp: 1, max: 1, atk: 1, def: Math.floor(s.atk * .5), el: cfg.element || null, charge: 0, stun: 0, dot: null, cnt: 0, art }, p: { hp: s.hp, max: s.hp, sh: 0, buff: null },
       sk, cd: {}, ult: ultOf(), pillUsed: 0, phase: 1, turn: 0, busy: false, auto: false, ease: 0 };
-    calibrate(X0, cfg.turns || d.T || 10, cfg.margin != null ? cfg.margin : (d.margin != null ? d.margin : .55));
+    calibrate(X0, cfg.turns || d.T || 10, cfg.winRate != null ? cfg.winRate : (cfg.margin != null ? cfg.margin : (d.margin != null ? d.margin : .55)));
+    if (cfg.efrac != null && cfg.efrac > 0 && cfg.efrac < 1) X0.e.max = Math.max(X0.e.hp, Math.floor(X0.e.hp / cfg.efrac));
+    if (cfg.pfrac != null) X0.p.hp = Math.max(1, Math.floor(X0.p.max * Math.min(1, Math.max(.01, cfg.pfrac))));
+    if (cfg.auto) X0.auto = true;
     return X0;
   }
   /* ---------- 難度校準:用「自動」打法模擬整場,調到自動約五五波;手動 QTE 打得好會輕鬆得多 ---------- */
@@ -17056,11 +17067,12 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     else sfx('sfx_lose');
     const box = $('bf-end');
     box.innerHTML = `<div class="stamp ${win ? 'w' : 'l'}">${win ? '勝' : '敗'}</div><div class="say">${B.pt || E.art.src ? `【${E.name}】` : ''}${win ? (d.win || '敗了……') : (d.lose || '不過如此。')}</div>
-      <div class="say" style="font-size:11px;opacity:.75">${B.cfg.rematch ? '(重戰:不影響劇情與獎勵)' : ''}</div><div class="bts">${win ? '<button data-bfe="ok">繼續</button>' : '<button data-bfe="retry">⚔ 再戰一次</button><button data-bfe="ok">離開</button>'}</div>`;
+      <div class="say" style="font-size:11px;opacity:.75">${B.cfg.rematch ? '(重戰:不影響劇情與獎勵)' : ''}</div><div class="bts">${win ? '<button data-bfe="ok">繼續</button>' : (B.cfg.engine ? '<button data-bfe="ok">離開</button>' : '<button data-bfe="retry">⚔ 再戰一次</button><button data-bfe="ok">離開</button>')}</div>`;
     box.classList.add('on');
   }
   let resolver = null;
   function close(win) {
+    try { window.BF113.last = B ? { win: !!win, run: !!B.ran, efrac: Math.max(0, B.e.hp) / B.e.max, pfrac: Math.max(0, B.p.hp) / B.p.max } : { win: !!win }; } catch (e) { }
     const r = resolver; resolver = null; root.classList.remove('on'); $('bf-end').classList.remove('on'); qClose(); B = null; window.BF113.on = false;
     try { BGM96 && BGM96.sync(true); } catch (e) { }
     if (r) r(win);
@@ -17069,7 +17081,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     B = build(cfg); window.BF113.on = true; B.pt = (window.ART28 && ART28.ch[(B.d.pt || PT[cfg.name])]) || null; if (B.pt) B.e.art = { src: B.pt, flip: false, hi: 1 };
     B.dM = () => { const a = B.e.atk; return Math.max(1, a * a / (a + B.s.def)); };
     const bgk = B.d.bg || cfg.bg;
-    root.style.backgroundImage = `url("${(bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
+    root.style.backgroundImage = `url("${cfg.bgSrc || (bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
     $('bf-en').textContent = cfg.name; $('bf-el').textContent = cfg.label || B.d.title || '';
     $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
@@ -17077,10 +17089,11 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     ui(); log('');
     await cut({ img: B.pt || B.e.art.src, flip: !B.pt && B.e.art.flip, sub: cfg.label || B.d.title || '', big: cfg.name, say: B.d.intro || cfg.intro || '來吧!' });
     goBurst(); log('輪到道友出手。'); ui();
+    if (B && B.auto && !B.busy && !B.over) setTimeout(() => { if (B && B.auto && !B.busy && !B.over) act(autoPick()); }, 600);
   }
   root.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || !B) return;
-    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '🏃 逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '🏃 逃離'; B.over = true; try { showToast('暫且退避,改日再戰。'); } catch (e) { } close(false); return; }
+    if (b.id === 'bf-run') { if (!B || B.busy || B.over) return; if (!b.classList.contains('ask')) { b.classList.add('ask'); b.textContent = '再按一次確定逃離'; clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('ask'); b.textContent = '🏃 逃離'; }, 2500); return; } b.classList.remove('ask'); b.textContent = '🏃 逃離'; B.over = true; B.ran = true; if (!B.cfg.engine) { try { showToast('暫且退避,改日再戰。'); } catch (e) { } } close(false); return; }
     if (b.id === 'bf-auto' || b.id === 'bf-auto2') { B.auto = !B.auto; ui(); if (B.auto && !B.busy && !B.over) act(autoPick()); return; }
     if (b.dataset.bfe === 'ok') { const w = B.e.hp <= 0; close(w); return; }
     if (b.dataset.bfe === 'retry') { const cfg = B.cfg; B = null; begin(cfg); return; }
@@ -17093,6 +17106,59 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     bgm: () => 'tianjie',
     dbg: { build: c => build(c), sim: (X, h, a, t, q) => sim(X, h, a, t, q) }
   };
+  /* ---------- v125 接上其他重要戰(塔主・九重劫・心魔・天地異種・秘境/輔修守關者) ---------- */
+  {
+    const winRateOf = r => { if (!(r > 0)) return .5; const p = 1 / (1 + Math.pow(1 / r, 4)); return Math.min(.97, Math.max(.02, p)); };
+    const G3 = () => (typeof GEN3 !== 'undefined' && GEN3) || window.GEN3 || {};
+    const towerArt = m => { const nm = String(m.name || '').replace(/^守塔·/, ''); const ti = (typeof TOWER_MON !== 'undefined' ? TOWER_MON : []).findIndex(t => t[0] === nm); const s = ti >= 0 && G3()['K' + (ti + 1)]; return s ? { src: s, flip: false } : null; };
+    const wbArt = m => { const nm = String(m.name || '').replace(/^Lv\.\d+\s*/, ''); const wi = (typeof WB_POOL !== 'undefined' ? WB_POOL : []).findIndex(p => p[0] === nm); const s = wi >= 0 && G3()['W' + (wi + 1)]; return s ? { src: s, flip: wi === 4 } : null; };
+    const mindArt = () => (window.A45 && A45.mind) ? { src: A45.mind, flip: false } : null;
+    function kindOf(Bt) {
+      if (!Bt || Bt.bf113 || !Bt.monster) return null; const m = Bt.monster, id = String(m.id || '');
+      if (Bt.tb26) return Bt.tb26.kind === 'story' ? null : 'tb26';
+      if (Bt.isDemonTrib) return 'demon';
+      if (Bt.isJie) return 'jie';
+      if (Bt.isWB) return 'wb';
+      if (Bt.isTower && (m.isBoss || id === 'tw_100')) return 'tower';
+      return null;
+    }
+    function cfgOf(k, Bt) {
+      const m = Bt.monster, s = calculateTotalStats();
+      let r = 1; try { r = TB26.margin(Object.assign({}, m, { hp: Math.max(1, m.curHp != null ? m.curHp : m.hp) }), s.hp); } catch (e) { }
+      const c = { name: m.name, label: '', engine: k, winRate: winRateOf(r), pfrac: Bt.playerMaxHp ? Bt.playerHp / Bt.playerMaxHp : 1, element: m.element || null, turns: 9 };
+      if (k === 'tower') { const f = Bt.floor || 0; c.label = `九九登天塔・第 ${f} 層`; c.bgSrc = G3().T || ''; c.art = id100(m) ? mindArt() : towerArt(m); c.intro = id100(m) ? '你登得越高,我便越強……我,就是你。' : '登塔者,先過我這一關!'; c.auto = !!state.autoExplore; c.id = id100(m) ? 'mind_demon' : ''; }
+      else if (k === 'jie') { c.id = m.id; c.label = '九重劫'; c.intro = '天威浩蕩,劫雷將至——受死!'; c.turns = 10; }
+      else if (k === 'demon') { c.id = 'mind_demon'; c.label = '渡劫・心魔'; c.intro = '我即是你,你的貪嗔痴,都在這裡。'; c.art = mindArt(); c.pfrac = 1; }
+      else if (k === 'wb') { const w = window.wbState ? wbState().cur : null; c.label = `天地異種${w ? `・第 ${w.tries}/${typeof WB_TRIES !== 'undefined' ? WB_TRIES : 3} 次挑戰` : ''}`; c.art = wbArt(m); c.intro = '(震耳欲聾的咆哮)'; c.efrac = w && w.maxHp ? Math.max(.02, Math.min(1, (m.curHp || w.hp) / w.maxHp)) : 1; c.turns = 10; }
+      else if (k === 'tb26') { const t = Bt.tb26; c.label = t.label || ''; c.tier = t.tier; c.intro = t.kind === 'trial' ? '想兼修此道?先接我三招!' : '擅闖秘境者,死!'; }
+      return c;
+    }
+    const id100 = m => String(m.id || '') === 'tw_100';
+    function engage(k) {
+      const Bt = currentBattle; if (!Bt || Bt.bf113) return; Bt.bf113 = k; battleLock = true;
+      try { clearTimeout(battleAutoTimer); } catch (e) { }
+      const cfg = cfgOf(k, Bt);
+      window.BF113.start(cfg).then(win => {
+        const L = window.BF113.last || {}; if (currentBattle !== Bt) return;
+        battleLock = false;
+        if (L.run) {
+          if (k === 'demon') { try { finishDemonBattle('flee'); } catch (e) { endBattle(); } }
+          else if (k === 'wb') { Bt.monster.curHp = Math.max(1, Math.floor((L.efrac != null ? L.efrac : 1) * ((wbState().cur || {}).maxHp || Bt.monster.hp))); wbLose(true); }
+          else { endBattle(); if (k === 'tower' && state.autoExplore) { try { stopAutoExplore('已撤出守塔之戰。'); } catch (e) { } } showToast('撤出戰鬥,無任何損失。'); }
+          return;
+        }
+        if (win) { Bt.playerHp = Math.max(1, Math.floor((L.pfrac || .01) * Bt.playerMaxHp)); Bt.monster.curHp = 0; winBattle(); }
+        else {
+          if (k === 'wb') { const c = wbState().cur; Bt.monster.curHp = Math.max(1, Math.floor((L.efrac != null ? L.efrac : 1) * ((c && c.maxHp) || Bt.monster.hp))); }
+          Bt.playerHp = 0; loseBattle();
+        }
+      });
+    }
+    const check = () => { try { const k = kindOf(currentBattle); if (k) engage(k); } catch (e) { console.error(e); } };
+    { const o = startMonsterBattle; startMonsterBattle = function () { const r = o.apply(this, arguments); setTimeout(check, 0); return r; }; }
+    if (typeof triggerDemonTribulation === 'function') { const o = triggerDemonTribulation; triggerDemonTribulation = function () { const r = o.apply(this, arguments); setTimeout(check, 0); return r; }; }
+    { const o = scheduleAutoBattleTurn; scheduleAutoBattleTurn = function () { if (currentBattle && currentBattle.bf113) return; return o.apply(this, arguments); }; }
+  }
   /* ---------- 接上劇情戰 ---------- */
   if (window.TB26 && TB26.story) {
     const o = TB26.story;
