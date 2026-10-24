@@ -16436,6 +16436,10 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
   const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 6 } };
+  /* v126 本命絕學倍率:最強攻擊神通總倍率 ×1.6(保底 5) */
+  const ultM = X => { let m = 0; (X.sk || []).forEach(k => { if (k.c && k.c.mult) m = Math.max(m, k.c.mult * (k.sk.type === 'atk' ? (k.c.hits || 1) : 1)); }); return Math.max(5, m * 1.6); };
+  /* 增傷:比照最強攻擊神通吃到的流派/宗門/神通加成 */
+  const ultDm = X => { let m = 0; if (window.sectDmgMult) (X.sk || []).forEach(k => { if (k.c && k.c.mult) m = Math.max(m, sectDmgMult(k.sk)); }); return m || ((window.sectDmgMult ? sectDmgMult(null) : 1) * 1.12); };
   const ultOf = () => { try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : null; return m && ULT[m] ? ULT[m] : null; } catch (e) { return null; } };
   function enemyArt(name, id, tier) {
     try { let k = window.art45 && art45({ monster: { name, id: id || '' } }); if (!k && /守山長老$/.test(name || '') && tier != null) k = 'yx' + Math.min(7, Math.max(0, tier | 0)); if (k && window.A45 && A45[k]) return { src: A45[k], flip: FL.includes(k) }; } catch (e) { }
@@ -16903,7 +16907,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
       if (!a) { let best = -1, bv = 0; X.sk.forEach((k, i) => { if (S.cd[k.id] > 0) return; const v = k.sk.type === 'buff' ? (S.buff ? 0 : 2) : (k.c.mult || 0) * (k.c.hits || 1); if (v > bv) { bv = v; best = i; } }); a = best >= 0 ? ['sk', best] : ['atk']; }
       let dmg = 0;
       if (a[0] === 'atk') dmg = baseOf(X, Q.a, S.buff) * cr * (window.sectDmgMult ? sectDmgMult(null) : 1);
-      else if (a[0] === 'ult') { S.cd.ULT = X.ult.cd + 1; dmg = baseOf(X, 5 * Q.u, S.buff) * (window.sectDmgMult ? sectDmgMult(null) : 1); }
+      else if (a[0] === 'ult') { S.cd.ULT = X.ult.cd + 1; dmg = baseOf(X, ultM(X) * Q.u, S.buff) * cr * ultDm(X); }
       else { const k = X.sk[a[1]], c = k.c, ty = k.sk.type; S.cd[k.id] = c.cd + 1;
         if (ty === 'shield') S.sh = Math.max(S.sh, X.p.max * c.pct); else if (ty === 'heal') S.php = Math.min(X.p.max, S.php + X.p.max * c.pct); else if (ty === 'buff') S.buff = { pct: c.pct, turns: c.turns + 1 };
         else { const f = .45 + .85 * Q.r; dmg = baseOf(X, c.mult * (ty === 'atk' ? c.hits : 1) * f, S.buff) * cr * (window.sectDmgMult ? sectDmgMult(k.sk) : 1);
@@ -16987,7 +16991,8 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
     pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, tip(8)); fxBurst(uc); B.fxc = uc; speed(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
-    await dealE(base(5 * f) * (q === 'pf' ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1), 5, q === 'pf');
+    const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
+    await dealE(base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
     setPose(1); await back(320);
     log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!`);
   }
