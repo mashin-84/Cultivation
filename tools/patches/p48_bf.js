@@ -31,7 +31,7 @@
   const BPX = window.BP114 || {};
   const pose = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1'; return BPX[g + lk + '_' + n] || BPX[g + 'o1_' + n] || ''; };
   /* 各出招動作的「劍尖附近」在圖框內的位置(由圖自動量出;其他外觀暫用新手服的值) */
-  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.998, .159], M_o2_3: [.379, .263], M_o2_8: [.908, .25] };
+  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.998, .159], M_o2_3: [.379, .263], M_o2_8: [.908, .25], F_o2_2: [.969, .167], F_o2_3: [.445, .39], F_o2_8: [.421, .208], F_o3_2: [.968, .167], F_o3_3: [.445, .39], F_o3_8: [.421, .208], F_o4_2: [.967, .168], F_o4_3: [.445, .39], F_o4_8: [.421, .208], F_o5_2: [.981, .168], F_o5_3: [.445, .39], F_o5_8: [.421, .208] };
   const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
   const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
   let poseT = 0;
@@ -311,7 +311,7 @@
     const a1 = $('bf-auto'); if (a1) { a1.textContent = '自動:' + (B && B.auto ? '開' : '關'); a1.classList.toggle('on', !!(B && B.auto)); }
     const bt = root.querySelector('.bt'), cm = $('bf-cmd'); if (bt && cm) cm.style.bottom = bt.offsetHeight + 'px';
     const cp = $('bf-cp'); if (cp && B) { const g = state.gender === 'f' ? 'F' : 'M', h = B.p.hp / B.p.max < .3 ? 'h' : 'n', CP = window.CP124 || {}, U = window.UC121 || {};
-      const src = CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && !CP[g + '_h']); }
+      const lk = state.look || 'o1', src = CP[g + '_' + lk + '_' + h] || CP[g + '_' + lk + '_n'] || CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && !CP[g + '_h']); }
   }
   const log = t => { const l = $('bf-log'); if (l) l.innerHTML = t; };
   function num(who, txt, cls) {
@@ -367,7 +367,7 @@
   function ultCut() {
     return new Promise(res => {
       const g = state.gender === 'f' ? 'F' : 'M', sch = (() => { try { return SCH19.SCH().main; } catch (e) { return ''; } })();
-      const src = UCUT[g + '_' + sch] || UCUT[g] || playerArt(), uc = ULTC[B.ult.n] || '#bfe3ff';
+      const src = UCUT[g + '_' + (state.look || 'o1') + '_' + sch] || UCUT[g + '_' + sch] || UCUT[g] || playerArt(), uc = ULTC[B.ult.n] || '#bfe3ff';
       const d = document.createElement('div'); d.id = 'bf-ucut'; d.style.setProperty('--uc', uc);
       d.innerHTML = `<div class="band"><div class="lines"></div></div><img src="${src}" alt=""><div class="tx"><div class="s">本命絕學</div><div class="n">${B.ult.n}</div></div><div class="fl"></div>`;
       root.appendChild(d); sfx('sfx_skill');
