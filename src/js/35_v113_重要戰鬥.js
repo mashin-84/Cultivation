@@ -340,6 +340,17 @@
     const a = i.animate([{ translate: '0 0', scale: '1' }, { translate: `${dx}px ${dy - (lift || 0)}px`, scale: String(sc) }], { duration: ms || 200, easing: 'cubic-bezier(.3,.0,.4,1)', fill: 'forwards' });
     i._mv = a; return a.finished.catch(() => { });
   }
+  /* v139 絕學突刺:劍尖落在敵人身上(腳站在敵人左下約 1/3 畫面寬) */
+  function thrust(t, ms) {
+    const i = $('bf-pi'), s = $('bf-stg'); if (!i || !s) return Promise.resolve();
+    const r = i.getBoundingClientRect(), q = s.getBoundingClientRect(), L = r.left - q.left, Tp = r.top - q.top, w = r.width, h = r.height, ox = L + w / 2, oy = Tp + h;
+    const px = L + t[0] * w, py = Tp + t[1] * h, [ex, ey] = center('bf-ei');
+    let sc = px - ox > 1 ? (q.width * .34) / (px - ox) : .62; sc = Math.max(.3, Math.min(.85, sc));
+    const dx = ex - ox - sc * (px - ox), dy = ey - oy - sc * (py - oy);
+    i.style.transition = 'none';
+    const a = i.animate([{ translate: '0 0', scale: '1' }, { translate: `${dx}px ${dy}px`, scale: String(sc) }], { duration: ms || 220, easing: 'cubic-bezier(.3,.0,.4,1)', fill: 'forwards' });
+    i._mv = a; return a.finished.catch(() => { });
+  }
   function back(ms) {
     const i = $('bf-pi'); if (!i || !i._mv) return Promise.resolve(); const kf = i._mv.effect.getKeyframes(), last = kf[kf.length - 1]; i._mv.cancel();
     const a = i.animate([{ translate: last.translate, scale: last.scale }, { translate: '0 0', scale: '1' }], { duration: ms || 260, easing: 'ease-out' }); i._mv = null;
@@ -578,7 +589,7 @@
     await ultCut();
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
     const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
-    pi.classList.remove('chg'); setPose(8); await go(1, .58, 230, 0, tip(8)); fxBurst(uc); B.fxc = uc; speed(uc);
+    pi.classList.remove('chg'); setPose(2); await thrust(tip(2), 240); fxBurst(uc); B.fxc = uc; speed(uc);
     sfx('sfx_ult'); shake(); skName(B.ult.n);
     const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
     await dealE(base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
