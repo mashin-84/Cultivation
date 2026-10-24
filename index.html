@@ -16409,6 +16409,9 @@ window.UC121 = {"F_sword": "assets/UC/F_sword.webp?v=d6b677e1", "F_magic": "asse
 /* v124 選招面板主角半身(n=戰意 h=負傷) */
 window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.webp?v=7e210eae", "M_n": "assets/CP/M_n.webp?v=ed336fd6", "M_h": "assets/CP/M_h.webp?v=dda6f675"};
 
+/* v124 QTE 按鈕美術 */
+window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp?v=89ea0a29", "ring": "assets/QT/ring.webp?v=6545ff9d", "hold": "assets/QT/hold.webp?v=80bfbbe7", "holdring": "assets/QT/holdring.webp?v=6274733f", "burst": "assets/QT/burst.webp?v=fffaf725", "zone": "assets/QT/zone.webp?v=5a34e686", "needle": "assets/QT/needle.webp?v=d9baf715", "track": "assets/QT/track.webp?v=8f008610"};
+
 /* ===== v113 重要戰鬥:獨立戰鬥介面 + 回合制 QTE + Boss 階段演出 ===== */
 (() => {
   const $ = id => document.getElementById(id);
@@ -16458,7 +16461,7 @@ window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.we
   /* ---------- 樣式 ---------- */
   const st = document.createElement('style');
   st.textContent = `
-#bf113{position:fixed;inset:0;z-index:99970;display:none;flex-direction:column;color:#f6efe0;font-family:inherit;background:#0f0b08 center/cover no-repeat;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+#bf113{position:fixed;inset:0;z-index:99970;display:none;flex-direction:column;color:#f6efe0;font-family:inherit;background:#0f0b08 center/cover no-repeat;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden;overflow:clip}
 #bf113.on{display:flex}
 #bf113::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,5,3,.55),rgba(8,5,3,.15) 35%,rgba(8,5,3,.35) 62%,rgba(8,5,3,.92));pointer-events:none}
 #bf113>*{position:relative}
@@ -16474,7 +16477,7 @@ window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.we
 #bf-ph i.v{background:linear-gradient(90deg,#065f46,#10b981,#6ee7b7)}
 #bf-ph i.sh{background:rgba(147,197,253,.65)}
 .bf-hpt{display:flex;justify-content:space-between;font-size:11px;margin-top:2px;opacity:.9}
-#bf113 .stg{flex:1;min-height:0;position:relative;overflow:hidden}
+#bf113 .stg{flex:1;min-height:0;position:relative;overflow:hidden;overflow:clip}
 #bf113,#bf113 *{-webkit-touch-callout:none}
 #bf113 .stg img{position:absolute;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .18s;pointer-events:none;-webkit-user-drag:none}
 /* 站位(參考 Pokémon GO 對戰):主角在前景左下、背對鏡頭;敵人在場地中後方 */
@@ -16599,22 +16602,27 @@ window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.we
 #bf-q{position:absolute;inset:0;z-index:30;display:none;touch-action:none}
 #bf-q.on{display:block}
 .bf-qhint{position:absolute;left:0;right:0;top:8%;text-align:center;font-weight:900;font-size:16px;text-shadow:0 2px 6px #000;letter-spacing:2px}
-.bf-track{position:absolute;left:6%;right:6%;top:46%;height:40px;border-radius:20px;background:rgba(0,0,0,.6);border:2px solid #f6efe0;overflow:hidden}
-.bf-track .g{position:absolute;top:0;bottom:0;background:rgba(16,185,129,.55)}
-.bf-track .p{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a)}
-.bf-track .n{position:absolute;top:-4px;bottom:-4px;width:5px;margin-left:-2px;background:#fff;box-shadow:0 0 8px #fff}
-.bf-dot{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;color:#3b2510;background:radial-gradient(circle,#fff7d6,#fbbf24 70%,#b45309);box-shadow:0 0 18px #fbbf24;animation:bfPop .25s}
+.bf-track{position:absolute;left:12%;right:12%;top:46%;height:48px;z-index:0}
+.bf-track::before{content:'';position:absolute;left:-10.3%;width:120.6%;top:-58.3%;height:196.9%;background:var(--qt-track) center/100% 100% no-repeat;z-index:-1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
+.bf-track .g{position:absolute;top:4%;bottom:4%;background:var(--qt-zone) center/100% 100% no-repeat}
+.bf-track .p{position:absolute;top:22%;bottom:22%;border-radius:12px;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a);box-shadow:0 0 8px #fde68a}
+.bf-track .n{position:absolute;top:-62%;height:170%;width:26px;margin-left:-13px;background:var(--qt-needle) center/contain no-repeat;filter:drop-shadow(0 0 4px #fff)}
+.bf-dot{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;color:#1f4d3a;text-shadow:0 1px 0 #fff,0 0 6px #fff;background:var(--qt-dot) center/contain no-repeat;filter:drop-shadow(0 3px 8px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(253,230,138,.7));animation:bfPop .25s}
 .bf-dot.done{animation:bfGone .3s forwards}
 @keyframes bfPop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
 @keyframes bfGone{to{transform:scale(1.8);opacity:0}}
 .bf-time{position:absolute;left:10%;right:10%;bottom:6%;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}.bf-time i{position:absolute;inset:0;background:#fbbf24;transform-origin:left}
-.bf-tg{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:4px solid #fde68a;box-shadow:0 0 14px #fde68a inset,0 0 14px #fde68a}
-.bf-ring{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:5px solid #f87171;box-shadow:0 0 16px #ef4444}
-.bf-hold{position:absolute;left:50%;top:56%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;background:conic-gradient(#f59e0b var(--v,0%),rgba(0,0,0,.55) 0);display:flex;align-items:center;justify-content:center;border:3px solid #fde68a}
-.bf-hold span{width:160px;height:160px;font-size:18px!important;border-radius:50%;background:#2a1a0c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;text-align:center;line-height:1.3}
-.bf-hold .z{position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(transparent 0 306deg,rgba(253,224,71,.85) 306deg 352deg,transparent 352deg);pointer-events:none;-webkit-mask:radial-gradient(circle,transparent 82px,#000 83px);mask:radial-gradient(circle,transparent 82px,#000 83px)}
+.bf-tg{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--qt-tg) center/contain no-repeat;filter:drop-shadow(0 0 10px rgba(253,230,138,.8))}
+.bf-ring{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--qt-ring) center/contain no-repeat;filter:drop-shadow(0 0 8px #ef4444)}
+.bf-hold{position:absolute;left:50%;top:56%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.bf-hold::before{content:'';position:absolute;inset:4px;border-radius:50%;background:conic-gradient(#fbbf24 var(--v,0%),rgba(0,0,0,.55) 0);-webkit-mask:radial-gradient(circle,transparent 78px,#000 79px);mask:radial-gradient(circle,transparent 78px,#000 79px)}
+.bf-hold::after{content:'';position:absolute;inset:0;background:var(--qt-holdring) center/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 8px rgba(0,0,0,.6))}
+.bf-hold span{position:relative;z-index:3;width:160px;height:160px;font-size:18px!important;border-radius:50%;background:var(--qt-hold) center/contain no-repeat;color:#3b2510;text-shadow:0 0 6px #fff,0 0 3px #fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;text-align:center;line-height:1.3}
+.bf-hold .z{position:absolute;z-index:2;inset:-3px;border-radius:50%;background:conic-gradient(transparent 0 306deg,rgba(253,224,71,.85) 306deg 352deg,transparent 352deg);pointer-events:none;-webkit-mask:radial-gradient(circle,transparent 82px,#000 83px);mask:radial-gradient(circle,transparent 82px,#000 83px)}
 .bf-res{position:absolute;left:50%;top:40%;transform:translateX(-50%);font-weight:900;font-size:34px;letter-spacing:4px;text-shadow:0 0 12px #000,0 2px 0 #000;animation:bfNum 1.1s forwards;pointer-events:none;z-index:40}
-.bf-res.pf{color:#fde047}.bf-res.gd{color:#6ee7b7}.bf-res.ms{color:#fca5a5}
+.bf-res.pf{color:#fde047}
+.bf-res .bu{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;background:var(--qt-burst) center/contain no-repeat;z-index:-1;animation:bfBurst .7s ease-out forwards}
+@keyframes bfBurst{from{transform:scale(.3) rotate(0);opacity:1}to{transform:scale(1.3) rotate(25deg);opacity:0}}.bf-res.gd{color:#6ee7b7}.bf-res.ms{color:#fca5a5}
 /* 過場 */
 #bf-cut{position:absolute;inset:0;z-index:50;display:none;align-items:flex-end;background:rgba(0,0,0,.55)}
 #bf-cut.on{display:flex}
@@ -16642,6 +16650,7 @@ window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.we
   document.head.appendChild(st);
   /* ---------- 介面骨架 ---------- */
   const root = document.createElement('div'); root.id = 'bf113';
+  try { const Q = window.QT124 || {}; Object.keys(Q).forEach(k => root.style.setProperty('--qt-' + k, `url(${Q[k]})`)); } catch (e) { }
   root.innerHTML = `<div class="tp"><div class="nm"><span id="bf-en"></span><small id="bf-el"></small><span class="st" id="bf-es"></span></div>
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
@@ -16766,7 +16775,7 @@ window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.we
   function i114lunge() { const i = $('bf-pi'); if (!i) return; i.animate([{ translate: '0 0' }, { translate: '6% -3%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' }); }
   function hitFx(who) { const i = $(who === 'e' ? 'bf-ei' : 'bf-pi'); if (!i) return; i.classList.remove('hit'); void i.offsetWidth; i.classList.add('hit'); }
   function shake() { root.classList.remove('shake'); void root.offsetWidth; root.classList.add('shake'); }
-  function result(q) { const t = { pf: '完美!', gd: '不錯', ms: '失誤' }[q]; const d = document.createElement('div'); d.className = 'bf-res ' + q; d.textContent = t; $('bf-stg').appendChild(d); setTimeout(() => d.remove(), 1100); }
+  function result(q) { const t = { pf: '完美!', gd: '不錯', ms: '失誤' }[q]; const d = document.createElement('div'); d.className = 'bf-res ' + q; d.textContent = t; if (q === 'pf') { const u = document.createElement('i'); u.className = 'bu'; d.appendChild(u); } $('bf-stg').appendChild(d); setTimeout(() => d.remove(), 1100); }
   function skName(t) { const e = $('bf-sk'); e.textContent = t; e.classList.remove('go'); void e.offsetWidth; e.classList.add('go'); }
   /* 過場(立繪+台詞),點擊或時間到結束 */
   function cut(o) {
