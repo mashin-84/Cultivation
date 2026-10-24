@@ -32,7 +32,7 @@
     const p = stageEl('bs-p'), svg = p && p.querySelector('svg');
     if (svg) svg.outerHTML = `<img id="bs-ps" class="bs-ps" src="${G.S0}" alt="" draggable="false">`;
     const mk = monKey(B.monster), me = s.querySelector('.bs-memo');
-    if (me && mk) me.innerHTML = `<img class="bs-mi ${mk[0].toLowerCase()}${['K1', 'K7', 'M06', 'M07', 'M08', 'M10', 'W5', 'W8'].includes(mk) ? ' fl87' : ''}" src="${G[mk]}" alt="" draggable="false">`;
+    if (me && mk) me.innerHTML = `<img class="bs-mi ${mk[0].toLowerCase()}${['M06', 'M07', 'M10'].includes(mk) ? ' fl87' : ''}" src="${G[mk]}" alt="" draggable="false">`;
   };
   const pose = (n, ms) => { const im = stageEl('bs-ps'); if (!im) return; im.src = G[n]; clearTimeout(pose.t); pose.t = setTimeout(() => { const i2 = stageEl('bs-ps'); if (i2) i2.src = G.S0; }, ms / (state.battleSpeed || 1) + 60); };
   XT.fxAct76 = _pa => function (sk) { _pa.apply(this, arguments); if (!stageOn()) return; if (!sk || ['atk', 'burn', 'stun', 'drain'].includes(sk.type)) pose('S1', 560); };
