@@ -76,8 +76,8 @@
 #bf113 .stg img{position:absolute;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .18s;pointer-events:none;-webkit-user-drag:none}
 /* 站位(參考 Pokémon GO 對戰):主角在前景左下、背對鏡頭;敵人在場地中後方 */
 #bf-gd{position:absolute;left:41%;width:50%;height:8%;bottom:39%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.5),rgba(0,0,0,.15) 60%,transparent 72%);box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
-#bf-ei{left:38%;width:56%;height:44%;bottom:42%;z-index:1}
-#bf-pi{left:27%;width:auto!important;max-width:none!important;height:92%;bottom:-20%;z-index:2;transform:translateX(-50%);transform-origin:0% 100%;transition:translate .18s ease-out}
+#bf-ei{left:47%;width:53%;height:44%;bottom:42%;z-index:1}
+#bf-pi{left:19%;width:auto!important;max-width:none!important;height:92%;bottom:-20%;z-index:2;transform:translateX(-50%);transform-origin:0% 100%;transition:translate .18s ease-out}
 #bf-pi.chg{filter:drop-shadow(0 0 10px var(--uc,#bfe3ff)) drop-shadow(0 0 22px var(--uc,#bfe3ff));animation:bfChg .5s infinite alternate}
 @keyframes bfChg{from{filter:drop-shadow(0 0 6px var(--uc,#bfe3ff))}to{filter:drop-shadow(0 0 18px var(--uc,#bfe3ff)) drop-shadow(0 0 30px var(--uc,#bfe3ff))}}
 .bfx{position:absolute;pointer-events:none;z-index:20}
