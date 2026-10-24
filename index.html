@@ -16414,7 +16414,7 @@ window.UC121 = {"F_sword": "assets/UC/F_sword.webp?v=d6b677e1", "F_magic": "asse
 window.CP124 = {"F_n": "assets/CP/F_n.webp?v=fdc6f39c", "F_h": "assets/CP/F_h.webp?v=7e210eae", "M_n": "assets/CP/M_n.webp?v=ed336fd6", "M_h": "assets/CP/M_h.webp?v=dda6f675"};
 
 /* v124 QTE 按鈕美術 */
-window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp?v=89ea0a29", "ring": "assets/QT/ring.webp?v=6545ff9d", "hold": "assets/QT/hold.webp?v=80bfbbe7", "holdring": "assets/QT/holdring.webp?v=6274733f", "burst": "assets/QT/burst.webp?v=fffaf725", "zone": "assets/QT/zone.webp?v=5a34e686", "needle": "assets/QT/needle.webp?v=d9baf715", "track": "assets/QT/track.webp?v=8f008610"};
+window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp?v=89ea0a29", "ring": "assets/QT/ring.webp?v=6545ff9d", "hold": "assets/QT/hold.webp?v=80bfbbe7", "holdring": "assets/QT/holdring.webp?v=6274733f", "burst": "assets/QT/burst.webp?v=fffaf725", "zone": "assets/QT/zone.webp?v=5a34e686", "needle": "assets/QT/needle.webp?v=d9baf715", "track": "assets/QT/track.webp?v=8f008610", "sh": "assets/QT/sh.webp?v=1b17af1c", "sh2": "assets/QT/sh2.webp?v=c0fac47b"};
 
 /* ===== v113 重要戰鬥:獨立戰鬥介面 + 回合制 QTE + Boss 階段演出 ===== */
 (() => {
@@ -16626,8 +16626,15 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 @keyframes bfPop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
 @keyframes bfGone{to{transform:scale(1.8);opacity:0}}
 .bf-time{position:absolute;left:10%;right:10%;bottom:6%;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}.bf-time i{position:absolute;inset:0;background:#fbbf24;transform-origin:left}
-.bf-tg{position:absolute;left:26%;top:66%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:var(--qt-tg) center/contain no-repeat;--gl:0;filter:drop-shadow(0 0 calc(4px + var(--gl) * 18px) rgba(255,236,150,calc(.4 + var(--gl) * .6))) brightness(calc(1 + var(--gl) * .45))}
-.bf-ring{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--qt-ring) center/contain no-repeat;filter:drop-shadow(0 0 8px #ef4444)}
+.bf-tg{position:absolute;left:26%;top:66%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:var(--qt-sh) center/100% 100% no-repeat;filter:drop-shadow(0 3px 8px rgba(0,0,0,.6))}
+.bf-tg.pf{background:none;filter:drop-shadow(0 0 12px #fff6c8) brightness(1.08);animation:bfTgPf .16s ease-out}
+.bf-tg.pf::before{content:'';position:absolute;inset:-26.3px;background:var(--qt-sh2) center/contain no-repeat}
+@keyframes bfTgPf{from{transform:scale(1.18)}to{transform:scale(1)}}
+.bf-tg.brk{animation:bfTgBrk .3s ease-out forwards}
+@keyframes bfTgBrk{0%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}100%{transform:none;filter:grayscale(1) brightness(.6)}}
+.bf-ring{position:absolute;left:26%;top:66%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;box-sizing:border-box;border:3px solid #ff4d4d;box-shadow:0 0 10px #ef4444,inset 0 0 6px rgba(239,68,68,.6);pointer-events:none}
+.bf-ring.brk{animation:bfRingBrk .3s ease-out forwards}
+@keyframes bfRingBrk{to{opacity:0;border-style:dashed;filter:blur(1px)}}
 .bf-hold{position:absolute;left:50%;top:56%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .bf-hold::before{content:'';position:absolute;inset:4px;border-radius:50%;background:conic-gradient(#fbbf24 var(--v,0%),rgba(0,0,0,.55) 0);-webkit-mask:radial-gradient(circle,transparent 78px,#000 79px);mask:radial-gradient(circle,transparent 78px,#000 79px)}
 .bf-hold::after{content:'';position:absolute;inset:0;background:var(--qt-holdring) center/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 8px rgba(0,0,0,.6))}
@@ -16856,10 +16863,10 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     if (B.auto) { eApproach(contact); return sleep(contact).then(() => 'gd'); }
     eApproach(contact);
     return new Promise(res => {
-      const q = qOpen(`<div class="bf-qhint" style="color:#fca5a5">${hint}<br><span style="font-size:11px;opacity:.85">紅圈縮到剛好貼住金圈外緣(金圈最亮)時點擊</span></div><div class="bf-tg"></div><div class="bf-ring"></div>`);
+      const q = qOpen(`<div class="bf-qhint" style="color:#fca5a5">${hint}<br><span style="font-size:11px;opacity:.85">紅線貼住護盾邊緣、護盾發光的瞬間點擊</span></div><div class="bf-tg"></div><div class="bf-ring"></div>`);
       const ring = q.querySelector('.bf-ring'), tg = q.querySelector('.bf-tg'), t0 = performance.now(); let done = false, s = 3;
-      const step = () => { if (done) return; const f = (performance.now() - t0) / dur; s = 3 - 2.4 * f; ring.style.transform = `scale(${Math.max(.2, s)})`; tg.style.setProperty('--gl', Math.max(0, 1 - Math.abs(s - 1) / .45).toFixed(3)); if (s < .45) fin('ms'); else requestAnimationFrame(step); };
-      const fin = r => { if (done) return; done = true; qClose(); result(r); const wait = Math.max(0, contact - (performance.now() - t0)); setTimeout(() => res(r), r === 'ms' ? wait : 0); };
+      const step = () => { if (done) return; const f = (performance.now() - t0) / dur; s = 3 - 2.4 * f; ring.style.transform = `scale(${Math.max(.2, s)})`; tg.classList.toggle('pf', Math.abs(s - 1) <= .12); if (s < .68) fin('ms', 1); else requestAnimationFrame(step); };
+      const fin = (r, late) => { if (done) return; done = true; if (late) { ring.style.transform = 'scale(.68)'; ring.classList.add('brk'); tg.classList.remove('pf'); tg.classList.add('brk'); setTimeout(qClose, 300); } else qClose(); result(r); const wait = Math.max(0, contact - (performance.now() - t0)); setTimeout(() => res(r), r === 'ms' ? wait : 0); };
       q.onpointerdown = () => fin(Math.abs(s - 1) <= .12 ? 'pf' : Math.abs(s - 1) <= .32 ? 'gd' : 'ms');
       requestAnimationFrame(step);
     });
