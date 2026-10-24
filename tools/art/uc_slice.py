@@ -18,13 +18,11 @@ NAMES = [('UC', 'sword', 760), ('UC', 'magic', 760), ('UC', 'body', 760), ('UC',
 def main():
     g, look, sheet = sys.argv[1:4]
     r = key(sheet); H, W = r.shape[:2]
-    lab, n = ndimage.label(ndimage.binary_dilation(r[..., 3] > 30, iterations=2))
-    cells = [np.zeros((H, W), bool) for _ in range(6)]
-    for i, sl in enumerate(ndimage.find_objects(lab), 1):     # 每塊依重心歸到 3x2 格
-        m = lab == i
-        if m.sum() < 40: continue
-        cy, cx = ndimage.center_of_mass(m)
-        cells[min(int(cy / (H / 2)), 1) * 3 + min(int(cx / (W / 3)), 2)] |= m
+    # 依 3x2 格線切(相鄰格的人物常互相碰到,不能靠連通區塊分)
+    cells = []
+    for i in range(6):
+        y0, x0 = (i // 3) * H // 2, (i % 3) * W // 3
+        c = np.zeros((H, W), bool); c[y0:y0 + H // 2, x0:x0 + W // 3] = True; cells.append(c)
     for c, (d, nm, th) in zip(cells, NAMES):
         ys, xs = np.nonzero(c & (r[..., 3] > 20)); assert len(ys) > 5000, nm
         p = r[ys.min():ys.max() + 1, xs.min():xs.max() + 1].copy()
