@@ -16405,7 +16405,7 @@ window.SFX = (() => {
 })();
 
 /* v115 主角背面戰鬥動作圖(重要戰鬥用) */
-window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/BP/F_o1_2.webp?v=63e0ea8a", "F_o1_3": "assets/BP/F_o1_3.webp?v=4c8fedf0", "F_o1_4": "assets/BP/F_o1_4.webp?v=2d3a9938", "F_o1_5": "assets/BP/F_o1_5.webp?v=39089390", "F_o1_6": "assets/BP/F_o1_6.webp?v=665fdf49", "F_o1_7": "assets/BP/F_o1_7.webp?v=a421ed48", "F_o1_8": "assets/BP/F_o1_8.webp?v=46d02e9f", "F_o1_9": "assets/BP/F_o1_9.webp?v=71e7e51b", "M_o1_1": "assets/BP/M_o1_1.webp?v=2560faa7", "M_o1_2": "assets/BP/M_o1_2.webp?v=7ad66686", "M_o1_3": "assets/BP/M_o1_3.webp?v=49844ea7", "M_o1_4": "assets/BP/M_o1_4.webp?v=e28f9fdc", "M_o1_5": "assets/BP/M_o1_5.webp?v=b9ccd80b", "M_o1_6": "assets/BP/M_o1_6.webp?v=e9083ee8", "M_o1_7": "assets/BP/M_o1_7.webp?v=58ceecdd", "M_o1_8": "assets/BP/M_o1_8.webp?v=cfe7d049", "M_o1_9": "assets/BP/M_o1_9.webp?v=c5d17e5e"};
+window.BP114 = {"F_o1_1": "assets/BP/F_o1_1.webp?v=845711f1", "F_o1_2": "assets/BP/F_o1_2.webp?v=63e0ea8a", "F_o1_3": "assets/BP/F_o1_3.webp?v=4c8fedf0", "F_o1_4": "assets/BP/F_o1_4.webp?v=2d3a9938", "F_o1_5": "assets/BP/F_o1_5.webp?v=39089390", "F_o1_6": "assets/BP/F_o1_6.webp?v=665fdf49", "F_o1_7": "assets/BP/F_o1_7.webp?v=a421ed48", "F_o1_8": "assets/BP/F_o1_8.webp?v=46d02e9f", "F_o1_9": "assets/BP/F_o1_9.webp?v=71e7e51b", "M_o1_1": "assets/BP/M_o1_1.webp?v=2560faa7", "M_o1_2": "assets/BP/M_o1_2.webp?v=7ad66686", "M_o1_3": "assets/BP/M_o1_3.webp?v=49844ea7", "M_o1_4": "assets/BP/M_o1_4.webp?v=e28f9fdc", "M_o1_5": "assets/BP/M_o1_5.webp?v=b9ccd80b", "M_o1_6": "assets/BP/M_o1_6.webp?v=e9083ee8", "M_o1_7": "assets/BP/M_o1_7.webp?v=58ceecdd", "M_o1_8": "assets/BP/M_o1_8.webp?v=cfe7d049", "M_o1_9": "assets/BP/M_o1_9.webp?v=c5d17e5e", "M_o2_1": "assets/BP/M_o2_1.webp?v=24d5051a", "M_o2_2": "assets/BP/M_o2_2.webp?v=11bec308", "M_o2_3": "assets/BP/M_o2_3.webp?v=3aa37fa9", "M_o2_4": "assets/BP/M_o2_4.webp?v=ae6f6207", "M_o2_5": "assets/BP/M_o2_5.webp?v=3c5e7fa2", "M_o2_6": "assets/BP/M_o2_6.webp?v=9e14adff", "M_o2_7": "assets/BP/M_o2_7.webp?v=84b7e440", "M_o2_8": "assets/BP/M_o2_8.webp?v=5128e793", "M_o2_9": "assets/BP/M_o2_9.webp?v=2efc8862"};
 
 /* v122 本命絕學過場特寫 */
 window.UC121 = {"F_sword": "assets/UC/F_sword.webp?v=d6b677e1", "F_magic": "assets/UC/F_magic.webp?v=c86b9151", "F_body": "assets/UC/F_body.webp?v=ed430cdf", "F_pill": "assets/UC/F_pill.webp?v=a4586067", "M_sword": "assets/UC/M_sword.webp?v=e231c3ac", "M_magic": "assets/UC/M_magic.webp?v=1e32114b", "M_body": "assets/UC/M_body.webp?v=5d231bd2", "M_pill": "assets/UC/M_pill.webp?v=a7f87dd1"};
@@ -16449,7 +16449,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   const BPX = window.BP114 || {};
   const pose = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1'; return BPX[g + lk + '_' + n] || BPX[g + 'o1_' + n] || ''; };
   /* 各出招動作的「劍尖附近」在圖框內的位置(由圖自動量出;其他外觀暫用新手服的值) */
-  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053] };
+  const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.998, .159], M_o2_3: [.379, .263], M_o2_8: [.908, .25] };
   const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
   const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
   let poseT = 0;
