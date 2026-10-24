@@ -16602,8 +16602,8 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 #bf-q{position:absolute;inset:0;z-index:30;display:none;touch-action:none}
 #bf-q.on{display:block}
 .bf-qhint{position:absolute;left:0;right:0;top:8%;text-align:center;font-weight:900;font-size:16px;text-shadow:0 2px 6px #000;letter-spacing:2px}
-.bf-track{position:absolute;left:12%;right:12%;top:46%;height:48px;z-index:0}
-.bf-track::before{content:'';position:absolute;left:-10.3%;width:120.6%;top:-58.3%;height:196.9%;background:var(--qt-track) center/100% 100% no-repeat;z-index:-1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
+.bf-track{position:absolute;left:12%;right:12%;top:46%;height:40px;z-index:0}
+.bf-track::before{content:'';position:absolute;left:-10.3%;width:120.6%;top:-73.6%;height:242%;background:var(--qt-track) center/100% 100% no-repeat;z-index:-1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
 .bf-track .g{position:absolute;top:4%;bottom:4%;background:var(--qt-zone) center/100% 100% no-repeat}
 .bf-track .p{position:absolute;top:22%;bottom:22%;border-radius:12px;background:linear-gradient(90deg,#fde68a,#f59e0b,#fde68a);box-shadow:0 0 8px #fde68a}
 .bf-track .n{position:absolute;top:-62%;height:170%;width:26px;margin-left:-13px;background:var(--qt-needle) center/contain no-repeat;filter:drop-shadow(0 0 4px #fff)}
@@ -16612,7 +16612,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
 @keyframes bfPop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
 @keyframes bfGone{to{transform:scale(1.8);opacity:0}}
 .bf-time{position:absolute;left:10%;right:10%;bottom:6%;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}.bf-time i{position:absolute;inset:0;background:#fbbf24;transform-origin:left}
-.bf-tg{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--qt-tg) center/contain no-repeat;filter:drop-shadow(0 0 10px rgba(253,230,138,.8))}
+.bf-tg{position:absolute;left:26%;top:66%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;background:var(--qt-tg) center/contain no-repeat;--gl:0;filter:drop-shadow(0 0 calc(4px + var(--gl) * 18px) rgba(255,236,150,calc(.4 + var(--gl) * .6))) brightness(calc(1 + var(--gl) * .45))}
 .bf-ring{position:absolute;left:26%;top:66%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--qt-ring) center/contain no-repeat;filter:drop-shadow(0 0 8px #ef4444)}
 .bf-hold{position:absolute;left:50%;top:56%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .bf-hold::before{content:'';position:absolute;inset:4px;border-radius:50%;background:conic-gradient(#fbbf24 var(--v,0%),rgba(0,0,0,.55) 0);-webkit-mask:radial-gradient(circle,transparent 78px,#000 79px);mask:radial-gradient(circle,transparent 78px,#000 79px)}
@@ -16842,9 +16842,9 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     if (B.auto) { eApproach(contact); return sleep(contact).then(() => 'gd'); }
     eApproach(contact);
     return new Promise(res => {
-      const q = qOpen(`<div class="bf-qhint" style="color:#fca5a5">${hint}<br><span style="font-size:11px;opacity:.85">紅圈與金圈重疊時點擊格擋</span></div><div class="bf-tg"></div><div class="bf-ring"></div>`);
-      const ring = q.querySelector('.bf-ring'), t0 = performance.now(); let done = false, s = 3;
-      const step = () => { if (done) return; const f = (performance.now() - t0) / dur; s = 3 - 2.4 * f; ring.style.transform = `scale(${Math.max(.2, s)})`; if (s < .45) fin('ms'); else requestAnimationFrame(step); };
+      const q = qOpen(`<div class="bf-qhint" style="color:#fca5a5">${hint}<br><span style="font-size:11px;opacity:.85">紅圈縮到剛好貼住金圈外緣(金圈最亮)時點擊</span></div><div class="bf-tg"></div><div class="bf-ring"></div>`);
+      const ring = q.querySelector('.bf-ring'), tg = q.querySelector('.bf-tg'), t0 = performance.now(); let done = false, s = 3;
+      const step = () => { if (done) return; const f = (performance.now() - t0) / dur; s = 3 - 2.4 * f; ring.style.transform = `scale(${Math.max(.2, s)})`; tg.style.setProperty('--gl', Math.max(0, 1 - Math.abs(s - 1) / .45).toFixed(3)); if (s < .45) fin('ms'); else requestAnimationFrame(step); };
       const fin = r => { if (done) return; done = true; qClose(); result(r); const wait = Math.max(0, contact - (performance.now() - t0)); setTimeout(() => res(r), r === 'ms' ? wait : 0); };
       q.onpointerdown = () => fin(Math.abs(s - 1) <= .12 ? 'pf' : Math.abs(s - 1) <= .32 ? 'gd' : 'ms');
       requestAnimationFrame(step);
