@@ -10,3 +10,4 @@ for p in ['src/js/35_v113_重要戰鬥.js', 'tools/patches/p48_bf.js']:
     if NEW in t: print(p, '已套用'); continue
     assert t.count(OLD) == 1, p; open(f, 'w', encoding='utf-8').write(t.replace(OLD, NEW)); print(p, 'OK')
 # v160 一般戰鬥的本命絕學也同步:劍 max(4,m×2.0)、法 max(2.5,m×1.6)、體 max(2.5,m×1.4)、丹 max(2,m×1.2) 冷卻 5(已直接改 051)
+# v161 一般戰鬥:劍修絕學退回 max(3,m×1.6)(一擊秒殺太強);自動戰鬥四派都在開場(或首領)放絕學,丹/體另在受傷時補放
