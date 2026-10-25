@@ -260,7 +260,7 @@
     $('st28').classList.remove('on');
     const done = win => {
       if (!run) return; run.fighting = false; $('st28').classList.add('on');
-      if (win) { flash('⚔ 戰鬥勝利'); next(); } else showFightLose(cfg);
+      if (win) { if (!cfg.script) flash('⚔ 戰鬥勝利'); next(); } else showFightLose(cfg);
     };
     let ok = false; try { ok = TB26.story(Object.assign({}, cfg, { onEnd: done })); } catch (e) { ok = false; }
     if (!ok) done(true);
@@ -390,7 +390,7 @@
       return;
     }
     if (run && run.titling) { hideTitle(); return; }
-    if (!run || run.choosing || $('st28lg').classList.contains('on') || $('st28cf').classList.contains('on')) return;
+    if (!run || run.choosing || run.fighting || $('st28lg').classList.contains('on') || $('st28cf').classList.contains('on')) return;
     if (run.typing) { clearInterval(typeT); typeDone(); } else { clearTimeout(timer); next(); }
   }
   function confirmK(c, i) {

@@ -32,13 +32,13 @@
   /* v142 主流派(練氣期尚未分流派 → 劍修)。流派圖只在「該外觀有該流派圖」時使用,否則沿用該外觀的劍修圖 */
   const SCM = () => { try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : ''; return m && m !== 'sword' ? m : ''; } catch (e) { return ''; } };
   const pkey = n => { const g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1', sc = SCM(); if (sc && BPX[g + lk + '_' + sc + '_' + n]) return g + lk + '_' + sc + '_' + n; return BPX[g + lk + '_' + n] ? g + lk + '_' + n : g + 'o1_' + n; };
-  const STY = () => { const k = pkey(2); return /_magic_/.test(k) ? 'magic' : /_body_/.test(k) ? 'body' : /_pill_/.test(k) ? 'pill' : 'sword'; };
-  const pose = n => BPX[pkey(n)] || '';
-  const ATKN = () => ({ sword: ['仙劍普攻', '看準時機・最多三連斬'], magic: ['飛符術', '看準時機・最多三張連發'], body: ['崩山拳', '看準時機・最多三連擊'], pill: ['丹爐撞擊', '看準時機・最多三連擊'] })[STY()];
+  const STY = () => { if (B && B.A) return 'sword'; const k = pkey(2); return /_magic_/.test(k) ? 'magic' : /_body_/.test(k) ? 'body' : /_pill_/.test(k) ? 'pill' : 'sword'; };
+  const pose = n => (B && B.A && B.A.pose && B.A.pose(n)) || BPX[pkey(n)] || '';
+  const ATKN = () => (B && B.A && B.A.atk) || ({ sword: ['仙劍普攻', '看準時機・最多三連斬'], magic: ['飛符術', '看準時機・最多三張連發'], body: ['崩山拳', '看準時機・最多三連擊'], pill: ['丹爐撞擊', '看準時機・最多三連擊'] })[STY()];
   /* 各出招動作的「劍尖附近」在圖框內的位置(由圖自動量出;其他外觀暫用新手服的值) */
   const TIPS = { F_o1_2: [.906, .191], F_o1_3: [.776, .413], F_o1_8: [.965, .038], M_o1_2: [.82, .533], M_o1_3: [.702, .144], M_o1_8: [.966, .053], M_o2_2: [.942, .207], M_o2_3: [.584, .263], M_o2_8: [.998, .107], M_o3_2: [.949, .198], M_o3_3: [.618, .257], M_o3_8: [.998, .098], M_o4_2: [.949, .199], M_o4_3: [.588, .257], M_o4_8: [.998, .095], M_o5_2: [.948, .199], M_o5_3: [.619, .26], M_o5_8: [.998, .097], M_o1_magic_2: [.798, .232], M_o1_magic_3: [.763, .143], M_o1_magic_8: [.825, .051], M_o1_body_2: [.77, .235], M_o1_body_3: [.727, .199], M_o1_body_8: [.716, .386], M_o1_pill_2: [.795, .322], M_o1_pill_3: [.729, .202], M_o1_pill_8: [.835, .245], F_o2_2: [.969, .167], F_o2_3: [.546, .39], F_o2_8: [.421, .208], F_o3_2: [.968, .167], F_o3_3: [.548, .39], F_o3_8: [.421, .208], F_o4_2: [.967, .168], F_o4_3: [.546, .39], F_o4_8: [.421, .208], F_o5_2: [.981, .168], F_o5_3: [.548, .39], F_o5_8: [.421, .208] };
-  const tip = n => { const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[pkey(n)] || TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
-  const ULTC = { '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
+  const tip = n => { if (B && B.A && B.A.tip) return B.A.tip(n); const g = state.gender === 'f' ? 'F_' : 'M_'; return TIPS[pkey(n)] || TIPS[g + (state.look || 'o1') + '_' + n] || TIPS[g + 'o1_' + n] || [.6, .35]; };
+  const ULTC = { '一劍青雲': '#d9f3ff', '劍氣縱橫': '#bfe3ff', '五行法陣': '#c4b5fd', '金身怒目': '#fcd34d', '丹爐煉化': '#fb923c' };
   let poseT = 0;
   function setPose(n, back, lift) {
     const i = $('bf-pi'); if (!i) return; const s = pose(n); if (!s) return;
@@ -216,6 +216,17 @@
 #bf-acts .b:active:not([disabled]){transform:scale(.92)}
 #bf-acts .auto{position:absolute;left:4px;top:4px;padding:5px 12px;border-radius:12px;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);color:#f6efe0}
 #bf-acts .auto.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
+#bf113.scr #bf-auto,#bf113.scr #bf-run,#bf113.scr #bf-auto2{display:none!important}
+#bf-acts .row.lk{opacity:.32;filter:grayscale(.8)}
+#bf-acts .row.gd{box-shadow:0 0 0 2px #fde68a,0 0 14px rgba(253,230,138,.85);animation:bfGd 1s ease-in-out infinite alternate}
+@keyframes bfGd{from{box-shadow:0 0 0 2px #fde68a,0 0 6px rgba(253,230,138,.5)}to{box-shadow:0 0 0 3px #fff3c4,0 0 18px rgba(253,230,138,1)}}
+#bf-gtip{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 8px);width:min(92%,380px);padding:8px 12px;border-radius:12px;background:rgba(255,250,235,.96);color:#3b2a14;font-size:13px;font-weight:700;line-height:1.5;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.4);display:none;pointer-events:none;z-index:5}
+#bf-gtip.on{display:block}
+#bf-tap{position:absolute;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+#bf-tap.on{display:flex}
+#bf-tap .bx{width:min(86%,360px);padding:16px 18px 12px;border-radius:14px;background:radial-gradient(ellipse at 50% 0,#fbf8ef,#efe6d2 70%,#e5d9bd);color:#2a241c;box-shadow:0 8px 30px rgba(0,0,0,.5);font-size:14.5px;line-height:1.7}
+#bf-tap .bx b{color:#9e2b25}
+#bf-tap .bx .nx{margin-top:8px;text-align:right;font-size:12px;color:#8a7a62}
 #bf-auto{margin-left:auto;padding:4px 10px;border-radius:9px;font-weight:800;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.35);color:#f6efe0}
 #bf-auto.on{background:#f59e0b;color:#3b2510;border-color:#fde68a}
 /* QTE */
@@ -282,7 +293,7 @@
 <div class="bf-bar" id="bf-eh"><i class="lag"></i><i class="v"></i></div><div class="bf-hpt"><span id="bf-ph2"></span><span id="bf-et"></span></div></div>
 <div class="stg" id="bf-stg"><div id="bf-gd"></div><img id="bf-ei" alt="" draggable="false"><img id="bf-pi" alt="" draggable="false"><div id="bf-sk"></div><div id="bf-q"></div></div>
 <div id="bf-log"></div>
-<div id="bf-cmd"><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">逃離</button></div>
+<div id="bf-tap"><div class="bx"><div class="tx"></div><div class="nx">點一下繼續 ▸</div></div></div><div id="bf-cmd"><div id="bf-gtip"></div><div class="pt"><img id="bf-cp" alt="" draggable="false"></div><div class="ls"><div id="bf-acts"></div></div><button id="bf-auto" class="auto">自動:關</button><button id="bf-run" class="auto run">逃離</button></div>
 <button id="bf-auto2" class="auto on">自動:開</button>
 <div class="bt"><div class="bf-row"><b>道友</b><span id="bf-pt"></span></div>
 <div class="bf-bar" id="bf-ph"><i class="lag"></i><i class="v"></i><i class="sh"></i></div></div>
@@ -313,8 +324,12 @@
     if (B.ult) { const cd = B.cd.ULT || 0; rs += row('ult', 'data-bf="ult"', `<b>${B.ult.ic}</b>`, `本命絕學・${B.ult.n}`, cd > 0 ? `尚需 ${cd} 回合` : '按住蓄力,全力一擊', cd, lock || cd > 0); }
     rs += row('atk', 'data-bf="atk"', '<b>⚔</b>', ATKN()[0], ATKN()[1], 0, lock);
     B.sk.forEach((k, i) => { const cd = B.cd[k.id] || 0; let ic = ''; try { ic = skArt(k.id, false); } catch (e) { } rs += row('sk', `data-bf="sk" data-i="${i}"`, ic, k.sk.name, DS(k), cd, lock || cd > 0); });
-    const pl = (state.inventory.pill_4 || 0); rs += row('pill', 'data-bf="pill"', '<b>💊</b>', `回春丹 ×${pl > 99 ? '99+' : pl}`, `回復 35% 氣血・本場還能服 ${2 - B.pillUsed} 顆`, 0, lock || !pl || B.pillUsed >= 2);
+    if (B.A && B.A.wine) rs += row('pill', 'data-bf="wine"', (ITEMS.pill_4 && ITEMS.pill_4.icon) || '<b>🍶</b>', '酒葫蘆', '仰頭灌一口・回復 50% 氣血', 0, lock || B.A.wineUsed);
+    if (!B.A) { const pl = (state.inventory.pill_4 || 0); rs += row('pill', 'data-bf="pill"', '<b>💊</b>', `回春丹 ×${pl > 99 ? '99+' : pl}`, `回復 35% 氣血・本場還能服 ${2 - B.pillUsed} 顆`, 0, lock || !pl || B.pillUsed >= 2);
+    }
+    if (B.G) { const al = B.G.allow || []; rs = rs.replace(/<button class="row ([a-z]+)" data-bf="([a-z]+)"([^>]*)>/g, (m, c, k, rest) => al.includes(k) ? `<button class="row ${c} gd" data-bf="${k}"${rest}>` : `<button class="row ${c} lk" data-bf="${k}"${rest.replace(/ disabled/, '')} disabled>`); }
     if (box.dataset.h !== rs) { box.dataset.h = rs; box.innerHTML = rs; }
+    const tp = $('bf-gtip'); if (tp) { const t = B.G && !B.busy && !B.over ? B.G.tip || '' : ''; tp.textContent = t; tp.classList.toggle('on', !!t); }
     return;
     const W = box.clientWidth || 390, H = 178, AX = W - 6 - 43, AY = H - 18 - 43;   /* 普攻鍵中心 */
     const at = (dx, dy, sz) => `left:${AX + dx - sz / 2}px;top:${AY + dy - sz / 2}px`;
@@ -335,7 +350,7 @@
     const a1 = $('bf-auto'); if (a1) { a1.textContent = '自動:' + (B && B.auto ? '開' : '關'); a1.classList.toggle('on', !!(B && B.auto)); }
     const bt = root.querySelector('.bt'), cm = $('bf-cmd'); if (bt && cm) cm.style.bottom = bt.offsetHeight + 'px';
     const cp = $('bf-cp'); if (cp && B) { const g = state.gender === 'f' ? 'F' : 'M', h = B.p.hp / B.p.max < .3 ? 'h' : 'n', CP = window.CP124 || {}, U = window.UC121 || {};
-      const lk = state.look || 'o1', src = CP[g + '_' + lk + '_' + h] || CP[g + '_' + lk + '_n'] || CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && !CP[g + '_h']); }
+      const lk = state.look || 'o1', src = (B.A && B.A.cp && B.A.cp(h)) || CP[g + '_' + lk + '_' + h] || CP[g + '_' + lk + '_n'] || CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && !CP[g + '_h']); }
   }
   const log = t => { const l = $('bf-log'); if (l) l.innerHTML = t; };
   function num(who, txt, cls) {
@@ -410,7 +425,7 @@
   function ultCut() {
     return new Promise(res => {
       const g = state.gender === 'f' ? 'F' : 'M', sch = (() => { try { return SCH19.SCH().main; } catch (e) { return ''; } })();
-      const src = UCUT[g + '_' + (state.look || 'o1') + '_' + sch] || UCUT[g + '_' + sch] || UCUT[g] || playerArt(), uc = ULTC[B.ult.n] || '#bfe3ff';
+      const src = (B.A && B.A.uc) || UCUT[g + '_' + (state.look || 'o1') + '_' + sch] || UCUT[g + '_' + sch] || UCUT[g] || playerArt(), uc = ULTC[B.ult.n] || '#bfe3ff';
       const d = document.createElement('div'); d.id = 'bf-ucut'; d.style.setProperty('--uc', uc);
       d.innerHTML = `<div class="band"><div class="lines"></div></div><img src="${src}" alt=""><div class="tx"><div class="s">本命絕學</div><div class="n">${B.ult.n}</div></div><div class="fl"></div>`;
       root.appendChild(d); sfx('sfx_skill');
@@ -574,7 +589,7 @@
   async function dealE(total, hits, crit, key) {
     hits = Math.max(1, hits); const per = total / hits;
     for (let i = 0; i < hits; i++) {
-      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(0, B.e.hp - v); impact(B.fxc || '#ffffff', crit); num('e', fm(v), crit ? 'cr' : '');
+      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(B.A && B.A.efloor ? B.A.efloor() : 0, B.e.hp - v); impact(B.fxc || '#ffffff', crit); num('e', fm(v), crit ? 'cr' : '');
       sfx(crit ? 'sfx_crit' : 'sfx_hit', () => audio.playSlash()); ui(); await sleep(70); await sleep(hits > 1 ? 120 : 200);
       if (B.e.hp <= 0) break;
     }
@@ -583,7 +598,7 @@
   const critM = () => window.sectCritMult ? sectCritMult() : 1.5;
   /* ---------- 玩家行動 ---------- */
   async function doAtk() {
-    setPose(1); const q = await qTiming('⚔ ' + ATKN()[0]);
+    setPose(1); if (B.A && B.A.once) await B.A.once('atk'); const q = await qTiming('⚔ ' + ATKN()[0]);
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q), n = q === 'pf' ? 3 : q === 'gd' ? 2 : 1;
     { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; log(q === 'pf' ? L[0] : q === 'gd' ? L[1] : L[2]); }
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
@@ -612,7 +627,7 @@
       else { B.p.buff = { pct: c.pct * f, turns: c.turns + 1 }; num('p', '攻↑', 'tx'); log(`戰意沸騰!攻擊提升 ${Math.round(c.pct * f * 100)}%。`); }
       ui(); await sleep(400); return;
     }
-    const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
+    if (B.A && B.A.once) await B.A.once('skill'); const n = Math.max(3, Math.min(5, (c.hits || 1) + 2)), r = await qPoints(`✨ ${sk.name}`, n), f = .45 + .85 * r;
     B.fxc = sk.el && window.SK_EL_COLOR ? SK_EL_COLOR[sk.el] : '#bfe3ff'; const sty = STY(), nb = Math.min(3, sk.type === 'atk' ? c.hits : 1);
     if (sty === 'pill') await swallow();
     if (sty === 'magic') { setPose(3); setTimeout(() => { if (B && !B.over) setPose(1); }, 1000); for (let j = 0; j < nb; j++) setTimeout(() => fxSky(B.fxc), 140 + j * 150); await sleep(420); }
@@ -631,7 +646,7 @@
     await ultCut();
     const sty = STY(); if (sty === 'pill') await swallow();
     const uc = ULTC[B.ult.n] || '#bfe3ff', pi = $('bf-pi'); pi.style.setProperty('--uc', uc); setPose(7); pi.classList.add('chg');
-    const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
+    if (B.A && B.A.once) await B.A.once('hold'); const q = await qHold(`${B.ult.ic} ${B.ult.n}`), f = q === 'pf' ? 1.6 : q === 'gd' ? 1 : .55;
     pi.classList.remove('chg'); B.fxc = uc;
     if (sty === 'magic') {   /* 法修:原地舉符,群符飛起 → 天降轟擊 */
       setPose(8); { const fl = fxEl('fx-flash', 0, 0, { '--c': uc }); setTimeout(() => fl.remove(), 900); } speed(uc); sfx('sfx_ult'); skName(B.ult.n);
@@ -649,9 +664,13 @@
     fxBurst(uc); shake();
     }
     const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
-    await dealE(base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
+    await dealE(B.A && B.A.ultKill ? B.e.hp * 1.5 + 10 : base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
     setPose(1); await back(320);
     log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!`);
+  }
+  async function doWine() {
+    B.A.wineUsed = 1; setPose(4, 1000); sfx('sfx_skill'); await sleep(450); fxAura('hl');
+    const h = Math.floor(B.p.max * .5); B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); log(`墨塵仰頭灌了一口酒,恢復 ${fm(h)} 氣血。`); ui(); await sleep(500);
   }
   async function doPill() {
     if (!(state.inventory.pill_4 > 0) || B.pillUsed >= 2) return; B.pillUsed++;
@@ -669,10 +688,11 @@
     if (E.stun) { E.stun = 0; log(`【${E.name}】動彈不得!`); ui(); await sleep(500); return; }
     const atkM = 1 + .12 * (B.phase - 1);
     let dmg, q = null;
+    if (B.A && B.A.enemy) { const r = await B.A.enemy(); if (r) return; }
     if (E.charge) {
       E.charge = 0; const nm = (B.d.charge && B.d.charge[1]) || '必殺一擊';
       skName(nm); log(`【${E.name}】施展【${nm}】!`); await sleep(400);
-      q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') { fxAura('sh'); impactP('#bfe3ff'); } eReturn(q !== 'ms');
+      if (B.A && B.A.once) await B.A.once('block'); q = await qRing(`⚠ ${nm}`); setPose(q === 'ms' ? 6 : 5, 800); if (q !== 'ms') { fxAura('sh'); impactP('#bfe3ff'); } eReturn(q !== 'ms');
       dmg = B.dM() * 2.4 * atkM * (q === 'pf' ? 0 : q === 'gd' ? .45 : 1);
     } else {
       dmg = B.dM() * atkM * rnd(.9, 1.1); await eLunge(false);
@@ -680,11 +700,11 @@
     }
     E.cnt++;
     const every = B.phase >= 3 ? 2 : 3;
-    if (!E.charge && E.cnt % every === every - 1) { E.charge = 1; }
+    if (B.A && B.A.charge) E.charge = B.A.charge(E.cnt) ? 1 : 0; else if (!E.charge && E.cnt % every === every - 1) { E.charge = 1; }
     if (q === 'pf') { num('p', '完美格擋', 'hl'); log('看準時機,完全化解!'); sfx('sfx_click'); }
     if (dmg > 0) {
       dmg = Math.floor(dmg); let ab = 0; if (B.p.sh > 0) { ab = Math.min(B.p.sh, dmg); B.p.sh -= ab; dmg -= ab; }
-      B.p.hp = Math.max(0, B.p.hp - dmg); hitFx('p'); if (!q) setPose(6, 600); num('p', '-' + fm(dmg) + (ab ? `(🛡${fm(ab)})` : ''), 'pd'); sfx('sfx_hurt');
+      B.p.hp = Math.max(B.A && B.A.pfloor ? B.A.pfloor() : 0, B.p.hp - dmg); hitFx('p'); if (!q) setPose(6, 600); num('p', '-' + fm(dmg) + (ab ? `(🛡${fm(ab)})` : ''), 'pd'); sfx('sfx_hurt');
       if (q) shake(); if (!q) log(`【${E.name}】出手,造成 ${fm(dmg)} 傷害。`);
     }
     if (E.charge) { log(`⚠【${E.name}】正在蓄力(${(B.d.charge && B.d.charge[0]) || '凝聚殺機'})……下回合小心!`); }
@@ -692,6 +712,7 @@
   }
   /* ---------- 階段 ---------- */
   async function phaseCheck() {
+    if (B.A) return;   /* 劇情戰腳本不走階段過場 */
     const r = B.e.hp / B.e.max, np = r <= .33 ? 3 : r <= .66 ? 2 : 1;
     if (np > B.phase && B.e.hp > 0) {
       B.phase = np; const say = np === 3 ? (B.d.p3 || '……還沒完!') : (B.d.p2 || '有點本事,那就來真的吧。');
@@ -710,10 +731,12 @@
   async function act(a) {
     if (!B || B.busy) return; B.busy = true; ui();
     try {
-      if (a[0] === 'atk') await doAtk(); else if (a[0] === 'sk') await doSkill(a[1]); else if (a[0] === 'ult') await doUlt(); else if (a[0] === 'pill') { await doPill(); }
-      if (a[0] !== 'pill') await petHit();
+      if (a[0] === 'atk') await doAtk(); else if (a[0] === 'sk') await doSkill(a[1]); else if (a[0] === 'ult') await doUlt(); else if (a[0] === 'pill') { await doPill(); } else if (a[0] === 'wine') await doWine();
+      if (a[0] !== 'pill' && !B.A) await petHit();
+      if (B.A && B.A.after) B.A.after(a);
       if (B.e.hp <= 0) return end(true);
       await phaseCheck();
+      if (B.A && B.A.final && await B.A.final()) return;
       await sleep(300); await enemyTurn();
       if (B.e.hp <= 0) return end(true);
       if (B.p.hp <= 0) return end(false);
@@ -732,6 +755,84 @@
       <div class="say" style="font-size:11px;opacity:.75">${B.cfg.rematch ? '(重戰:不影響劇情與獎勵)' : ''}</div><div class="bts">${win ? '<button data-bfe="ok">繼續</button>' : (B.cfg.engine ? '<button data-bfe="ok">離開</button>' : '<button data-bfe="retry">⚔ 再戰一次</button><button data-bfe="ok">離開</button>')}</div>`;
     box.classList.add('on');
   }
+  /* ---------- v145 劇情戰腳本 ---------- */
+  function tapTip(html) {
+    return new Promise(res => { const t = $('bf-tap'); if (!t) { res(); return; } t.querySelector('.tx').innerHTML = html; t.classList.add('on');
+      const go = () => { t.classList.remove('on'); t.removeEventListener('pointerup', go); res(); }; setTimeout(() => t.addEventListener('pointerup', go), 350); });
+  }
+  const wolfArt = () => { try { const m = AREAS_DATA[0].monsters.find(x => x.id === 'm_0_3'); const s = window.MONART26 && MONART26(m); return s ? { src: s, flip: false } : null; } catch (e) { return null; } };
+  const SCR = {
+    c1kid(cfg) {
+      const C = window.C1IMG || {}, g = state.gender === 'f' ? 'F' : 'M', K = n => C[`kid_${g}_${n}`];
+      const MAP = { 1: 1, 2: 2, 3: 2, 4: 1, 5: 3, 6: 4, 7: 1, 8: 2, 9: 1, down: 5 };
+      const seen = {};
+      B.s = { atk: 30, def: 10, crit: 0, hp: 60 }; B.p = { hp: 60, max: 60, sh: 0, buff: null }; B.sk = []; B.ult = null; B.cd = {};
+      Object.assign(B.e, { name: '妖狼', hp: 420, max: 420, atk: 14, def: 10, el: null, charge: 0, stun: 0, dot: null, cnt: 0 });
+      const wa = wolfArt(); if (wa) { B.e.art = wa; const ei = $('bf-ei'); ei.src = wa.src; ei.style.display = ''; ei.classList.remove('bffl'); }
+      B.d = { intro: '(低吼著逼近,口涎滴在焦土上)' }; B.dM = () => 9; B.pt = null;
+      B.G = { allow: ['atk'], tip: '點【揮鋤】還手!' };
+      B.A = {
+        who: '你', atk: ['揮鋤', '看準時機・用盡全力砸下去'],
+        pose: n => K(n === 1 && B.p.hp / B.p.max < .4 ? 6 : MAP[n] || 1),
+        tip: n => [.64, .23],
+        cp: h => C[`kidcp_${g}_${h}`],
+        pfloor: () => (B.turn >= 3 ? 4 : 12),
+        charge: cnt => cnt === 1 || cnt === 3,
+        async start() { await tapTip('妖狼盯上了你。<br>握緊鋤頭——點下方的<b>【揮鋤】</b>還手!'); },
+        async once(k) {
+          if (seen[k]) return; seen[k] = 1;
+          if (k === 'atk') await tapTip('指針會來回擺動,<b>擺到金色區時點一下</b>。<br>點得越準,打得越多下。');
+          if (k === 'block') await tapTip('妖狼撲過來了!<br>紅線縮到<b>護盾邊緣、護盾發光</b>的瞬間點擊,就能格擋,少受傷害。');
+        },
+        after() { B.G.tip = B.e.charge ? '妖狼正在蓄力,下一擊很重!先出手,牠撲來時記得<b>格擋</b>。'.replace(/<\/?b>/g, '') : '點【揮鋤】繼續還手!'; },
+        async final() {
+          if (B.turn < 4) return false;
+          B.G = null; ui(); await sleep(350); log('妖狼猛地人立而起——'); skName('撲殺'); await sleep(500);
+          await eLunge(true); setPose('down'); hitFx('p'); shake(); sfx('sfx_hurt'); B.p.hp = 1; num('p', '被撲倒', 'pd'); ui();
+          await sleep(1500); B.over = true; close(true); return true;
+        }
+      };
+    },
+    c1mo(cfg) {
+      const C = window.C1IMG || {}, MP = n => BPX['M_mc_' + n];
+      const mk = (id, name, type, el, c) => ({ id, sk: { id, name, type, el }, c: Object.assign({ cd: 2, hits: 1, mult: 1 }, c) });
+      B.s = { atk: 200, def: 120, crit: 15, hp: 1000 }; B.p = { hp: 1000, max: 1000, sh: 0, buff: null }; B.cd = { ULT: 0 };
+      B.sk = [mk('sk_sword', '青雲劍氣', 'atk', 'metal', { mult: 2.4 }), mk('sc_sw1', '醉劍・連環', 'atk', 'metal', { mult: .9, hits: 3 }), mk('sk_void', '拂袖', 'stun', null, { mult: 1.2 }), mk('sk_guard', '醉仙步', 'shield', null, { pct: .35 })];
+      B.ult = { n: '一劍青雲', ic: '🌬️', cd: 99 };
+      Object.assign(B.e, { name: '妖狼', hp: 2000, max: 2000, atk: 60, def: 100, el: null, charge: 0, stun: 0, dot: null, cnt: 0 });
+      const wa = wolfArt(); if (wa) { B.e.art = wa; const ei = $('bf-ei'); ei.src = wa.src; ei.style.display = ''; ei.classList.remove('bffl'); }
+      B.d = { intro: '(青狼弓起背脊,喉中滾出低沉的咆哮)', win: '(哀嚎一聲,轟然倒地)' }; B.dM = () => 45; B.pt = null;
+      const T = { 2: [.971, .117], 3: [.356, .105], 8: [.717, .042] };
+      let step = 0; const seen = {};
+      const TIP = ['墨塵擋在你身前。先用【普攻】。', '神通威力更大,各有效果:連擊、暈眩、護盾。挑一個用用看。', '墨塵被咬了一口——點【酒葫蘆】喝一口緩緩。', '妖狼也撐不住了。最後,【本命絕學】!'];
+      const AL = [['atk'], ['sk'], ['wine'], ['ult']];
+      const setStep = s => { step = s; B.G = { allow: AL[s], tip: TIP[s] }; };
+      setStep(0);
+      B.A = {
+        who: '墨塵', atk: ['青雲劍・普攻', '看準時機・最多三連斬'], wine: 1, wineUsed: 0, ultKill: 1,
+        pose: n => MP(n === 'down' ? 6 : n) || MP(1),
+        tip: n => T[n] || [.6, .35],
+        cp: () => C.mocp_n, uc: C.mouc,
+        efloor: () => step < 3 ? Math.floor(B.e.max * .2) : 0,
+        charge: () => false,
+        async start() { await tapTip('<b>墨塵</b>擋在你身前,輪到他出手了。<br>跟著提示,看看真正的修士怎麼戰鬥。'); },
+        async once(k) {
+          if (seen[k]) return; seen[k] = 1;
+          if (k === 'skill') await tapTip('神通會出現幾個光點,<b>依序點掉</b>。<br>點得越完整,威力越大。');
+          if (k === 'hold') await tapTip('本命絕學:<b>按住</b>蓄力,圈子轉到<b>金色區時放開</b>。<br>全力一擊!');
+        },
+        after(a) { if (step === 0 && a[0] === 'atk') setStep(1); else if (step === 1 && a[0] === 'sk') setStep(2); else if (step === 2 && a[0] === 'wine') { B.cd.ULT = 0; setStep(3); } },
+        async enemy() {
+          if (step === 2 && !B.A.bit) {   /* 用完神通後:妖狼拚死一咬,逼出喝酒 */
+            B.A.bit = 1; skName('拚死一咬'); log('妖狼拚死撲上來,狠狠咬中墨塵!'); await sleep(350); await eLunge(true);
+            const dmg = Math.floor(B.p.max * .55); B.p.sh = 0; B.p.hp = Math.max(1, B.p.hp - dmg); hitFx('p'); setPose(6, 700); shake(); num('p', '-' + fm(dmg), 'pd'); sfx('sfx_hurt'); ui(); await sleep(500); return true;
+          }
+          if (step === 3) { log('妖狼伏低身子,喘著粗氣。'); ui(); await sleep(400); return true; }
+          return false;
+        }
+      };
+    }
+  };
   let resolver = null;
   function close(win) {
     try { window.BF113.last = B ? { win: !!win, run: !!B.ran, efrac: Math.max(0, B.e.hp) / B.e.max, pfrac: Math.max(0, B.p.hp) / B.p.max } : { win: !!win }; } catch (e) { }
@@ -748,9 +849,10 @@
     $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
+    if (cfg.script && SCR[cfg.script]) SCR[cfg.script](cfg); root.classList.toggle('scr', !!B.A); $('bf-pi').src = pose(1) || playerArt();
     ui(); log('');
     await cut({ img: B.pt || B.e.art.src, flip: !B.pt && B.e.art.flip, sub: cfg.label || B.d.title || '', big: cfg.name, say: B.d.intro || cfg.intro || '來吧!' });
-    goBurst(); log('輪到道友出手。'); ui();
+    goBurst(); log(B.A && B.A.who ? `輪到${B.A.who}出手。` : '輪到道友出手。'); ui(); if (B.A && B.A.start) await B.A.start();
     if (B && B.auto && !B.busy && !B.over) setTimeout(() => { if (B && B.auto && !B.busy && !B.over) act(autoPick()); }, 600);
   }
   root.addEventListener('click', e => {
@@ -760,7 +862,7 @@
     if (b.dataset.bfe === 'ok') { const w = B.e.hp <= 0; close(w); return; }
     if (b.dataset.bfe === 'retry') { const cfg = B.cfg; B = null; begin(cfg); return; }
     if (b.disabled || B.busy || B.auto) return;
-    const k = b.dataset.bf; if (k === 'atk') act(['atk']); else if (k === 'sk') act(['sk', +b.dataset.i]); else if (k === 'ult') act(['ult']); else if (k === 'pill') act(['pill']);
+    const k = b.dataset.bf; if (k === 'atk') act(['atk']); else if (k === 'sk') act(['sk', +b.dataset.i]); else if (k === 'ult') act(['ult']); else if (k === 'pill') act(['pill']); else if (k === 'wine') act(['wine']);
   });
   window.BF113 = {
     on: false, BFD,
