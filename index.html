@@ -10224,10 +10224,15 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     });
     return h + '</div>';
   }
+  { const st = document.createElement('style'); st.textContent = `.ult148{display:flex;gap:10px;align-items:flex-start;margin:8px 0 2px;padding:10px;border-radius:12px;border:1px solid #d6a84a;background:linear-gradient(135deg,rgba(254,243,199,.85),rgba(255,251,235,.75));color:#3b2a14}
+.ult148.off{border-color:#cdbf9f;background:rgba(255,252,244,.6);opacity:.75}
+.ult148 .ic{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#fff7d6,#f5d38a);box-shadow:0 0 0 2px #d6a84a inset;font-size:24px}
+.ult148 .tx{flex:1;min-width:0}.ult148 .hd{font-family:'Noto Serif TC',serif;font-weight:800;font-size:14px}.ult148 .hd span{margin-left:6px;font-size:10.5px;padding:1px 6px;border-radius:99px;background:#9e2b25;color:#fff;vertical-align:1px}
+.ult148 .ef{font-size:12px;margin-top:2px}.ult148 .nb{font-size:12px;margin-top:3px;color:#7c4a03}.ult148 .nb b{font-size:15px;color:#9e2b25}.ult148 .sb{font-size:10.5px;color:#8a7a62;margin-top:2px}`; document.head.appendChild(st); }
   XT.skills = function (force) {   // renderSkills 的唯一實作
     const root = $('skills-panel'); if (!root || !root.offsetParent) return;
     const S = skState(), slots = skSlots(), cap = skCap(), sc = sch(), view = VIEWS.some(v => v[0] === skView) ? skView : 'learned';
-    const sig = JSON.stringify([S, slots, cap, view, sc.main, sc.sub, R(), state.sectSk, state.sect && state.sect.id, SKILLS.map(s => (R() >= s.realm && state.stones >= s.cost ? 1 : 0) + '' + (S.learned[s.id] ? (state.stones >= skUpCost(s, S.learned[s.id].lv) ? 1 : 0) : 0))]);
+    const sig = JSON.stringify([state.realmIdx && window.UNLOCK9 && UNLOCK9.on('school'), S, slots, cap, view, sc.main, sc.sub, R(), state.sectSk, state.sect && state.sect.id, SKILLS.map(s => (R() >= s.realm && state.stones >= s.cost ? 1 : 0) + '' + (S.learned[s.id] ? (state.stones >= skUpCost(s, S.learned[s.id].lv) ? 1 : 0) : 0))]);
     if (!force && sig === sig27 && root.querySelector('.sk27c')) return; sig27 = sig;
     const c = skAllCounts(), on = c.learn + c.up > 0;
     let h = `<button data-skall="1" ${on ? '' : 'disabled'} class="tap-effect w-full mb-2 py-2 rounded-lg font-bold text-xs ${on ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-500'}">${on ? `⚡ 一鍵領悟(可新學 ${c.learn} 門、可升級 ${c.up} 門)` : '⚡ 一鍵領悟(暫無可學/可升級)'}</button>`;
@@ -10239,6 +10244,12 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
       else h += `<div class="rounded-lg border border-dashed border-slate-700 bg-slate-950 p-1 text-center"><div class="text-xl text-slate-600">＋</div><div class="text-[9px] text-slate-500">空欄位</div></div>`;
     }
     h += `</div><div class="text-[10px] text-slate-500 mt-2">戰鬥時依欄位順序顯示按鈕;自動戰鬥會依局勢自動選擇(血低→療傷、Boss→護盾/控制、其餘→最強輸出)。每次施放 +1 熟練度,熟練度滿後花靈石領悟升級;Lv5「小成」冷卻 -1,Lv10「大成」效果強化。</div></div>`;
+    { let U = null; try { U = window.BF113 && BF113.ultInfo(); } catch (e) { }
+      const lk = !(R() >= 1 && window.UNLOCK9 && UNLOCK9.on('school')), m = U ? (Math.round(U.mult * 10) / 10) : 0;
+      h += `<div class="ult148 ${U ? '' : 'off'}"><div class="ic">${U ? `<b>${U.ic}</b>` : '<b>🔒</b>'}</div><div class="tx"><div class="hd">本命絕學${U ? `・<b>${U.n}</b><span>${SCN[U.k]}</span>` : ''}</div>`
+        + (U ? `<div class="ef">${U.desc}</div><div class="nb">傷害倍率 <b>×${m}</b>${U.from ? `(${U.from} ×${U.f}${U.mult > U.fl + .01 ? '' : `,保底 ×${U.fl}`})` : `(未裝備攻擊神通,保底 ×${U.fl})`}・重要戰鬥冷卻 ${U.cd} 回合</div><div class="sb">倍率跟著最強的攻擊神通走,換裝或升級神通會一起變強;並吃該神通的增傷加成。</div>`
+          : `<div class="ef">${lk ? '流派隨劇情開放(築基期後)。' : '擇定本命流派後,便能領悟該流派的本命絕學。'}</div>`) + '</div></div>';
+    }
     h += `<div class="sk27c">${VIEWS.map(([k, n]) => `<button data-skact="view" data-id="${k}" class="${view === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     if (view === 'sect') h += sectBlock();
     else {
@@ -16467,9 +16478,11 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   };
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
-  const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 6 } };
+  const ULT = { sword: { k: 'sword', n: '劍氣縱橫', ic: '🌬️', cd: 5, f: 1.6, fl: 5 }, magic: { k: 'magic', n: '五行法陣', ic: '🔯', cd: 6, f: 1.6, fl: 5 }, body: { k: 'body', n: '金身怒目', ic: '🪬', cd: 6, f: 1.6, fl: 5 }, pill: { k: 'pill', n: '丹爐煉化', ic: '♨️', cd: 6, f: 1, fl: 3 } };
+  const ULTD = { sword: '純粹的劍氣,一擊貫穿。', magic: '法陣灼燒敵人 3 回合,並定身 1 回合(有 40% 機率被抵抗)。', body: '激發金身,獲得氣血 40% 的護盾。', pill: '當場煉丹:回復 30% 氣血,攻擊提升 25%(3 回合)。' };
+  const ultBestOf = X => { let m = 0, by = null; (X.sk || []).forEach(k => { if (k.c && k.c.mult) { const v = k.c.mult * (k.sk.type === 'atk' ? (k.c.hits || 1) : 1); if (v > m) { m = v; by = k.sk; } } }); return { m, by }; };
   /* v126 本命絕學倍率:最強攻擊神通總倍率 ×1.6(保底 5) */
-  const ultM = X => { let m = 0; (X.sk || []).forEach(k => { if (k.c && k.c.mult) m = Math.max(m, k.c.mult * (k.sk.type === 'atk' ? (k.c.hits || 1) : 1)); }); return Math.max(5, m * 1.6); };
+  const ultM = X => { const u = X.ult || {}, f = u.f || 1.6; return Math.max(u.fl || 5, ultBestOf(X).m * f); };
   /* 增傷:比照最強攻擊神通吃到的流派/宗門/神通加成 */
   const ultDm = X => { let m = 0; if (window.sectDmgMult) (X.sk || []).forEach(k => { if (k.c && k.c.mult) m = Math.max(m, sectDmgMult(k.sk)); }); return m || ((window.sectDmgMult ? sectDmgMult(null) : 1) * 1.12); };
   const ultOf = () => { try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : null; return m && ULT[m] ? ULT[m] : null; } catch (e) { return null; } };
@@ -17004,7 +17017,10 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
       if (!a) { let best = -1, bv = 0; X.sk.forEach((k, i) => { if (S.cd[k.id] > 0) return; const v = k.sk.type === 'buff' ? (S.buff ? 0 : 2) : (k.c.mult || 0) * (k.c.hits || 1); if (v > bv) { bv = v; best = i; } }); a = best >= 0 ? ['sk', best] : ['atk']; }
       let dmg = 0;
       if (a[0] === 'atk') dmg = baseOf(X, Q.a, S.buff) * cr * (window.sectDmgMult ? sectDmgMult(null) : 1);
-      else if (a[0] === 'ult') { S.cd.ULT = X.ult.cd + 1; dmg = baseOf(X, ultM(X) * Q.u, S.buff) * cr * ultDm(X); }
+      else if (a[0] === 'ult') { S.cd.ULT = X.ult.cd + 1; dmg = baseOf(X, ultM(X) * Q.u, S.buff) * cr * ultDm(X); const uk = X.ult.k;
+        if (uk === 'magic') { S.dot = { d: baseOf(X, .35, S.buff), t: 3 }; if (Math.random() < .6) { S.stun = 1; S.ch = 0; } }
+        else if (uk === 'body') S.sh = Math.max(S.sh, X.p.max * .4);
+        else if (uk === 'pill') { S.php = Math.min(X.p.max, S.php + X.p.max * .3); S.buff = { pct: .25, turns: 4 }; } }
       else { const k = X.sk[a[1]], c = k.c, ty = k.sk.type; S.cd[k.id] = c.cd + 1;
         if (ty === 'shield') S.sh = Math.max(S.sh, X.p.max * c.pct); else if (ty === 'heal') S.php = Math.min(X.p.max, S.php + X.p.max * c.pct); else if (ty === 'buff') S.buff = { pct: c.pct, turns: c.turns + 1 };
         else { const f = .45 + .85 * Q.r; dmg = baseOf(X, c.mult * (ty === 'atk' ? c.hits : 1) * f, S.buff) * cr * (window.sectDmgMult ? sectDmgMult(k.sk) : 1);
@@ -17116,7 +17132,12 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
     await dealE(B.A && B.A.ultKill ? B.e.hp * 1.5 + 10 : base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
     setPose(1); await back(320);
-    log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!`);
+    const uk = !B.A && B.ult.k;
+    if (uk === 'magic' && B.e.hp > 0) { B.e.dot = { dmg: Math.max(1, Math.floor(base(.35))), turns: 3 }; num('e', '灼燒', 'tx'); await sleep(250); if (Math.random() < .6) { B.e.stun = 1; B.e.charge = 0; num('e', '定身', 'tx'); } else num('e', '抵抗', 'tx'); }
+    else if (uk === 'body') { B.p.sh = Math.max(B.p.sh, Math.floor(B.p.max * .4)); fxAura('sh'); num('p', '🛡' + fm(B.p.sh), 'hl'); }
+    else if (uk === 'pill') { const h = Math.floor(B.p.max * .3); B.p.hp = Math.min(B.p.max, B.p.hp + h); B.p.buff = { pct: .25, turns: 4 }; fxAura('hl'); num('p', '+' + fm(h), 'hl'); await sleep(250); num('p', '攻↑', 'tx'); }
+    ui();
+    log(q === 'pf' ? '本命絕學全力爆發!' : `本命絕學【${B.ult.n}】!` + (uk ? ULTD[uk].replace(/。$/, '') + '。' : ''));
   }
   async function doWine() {
     B.A.wineUsed = 1; setPose(4, 1000); sfx('sfx_skill'); await sleep(450); fxAura('hl');
@@ -17318,6 +17339,12 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     on: false, BFD,
     start(cfg) { return new Promise(res => { if (B) { res(false); return; } resolver = res; begin(cfg); }); },
     bgm: () => 'tianjie',
+    ultInfo() {
+      const u = ultOf(); if (!u) return null;
+      const S = skState(), slots = skSlots(), sk = S.equipped.slice(0, slots).filter(id => id && S.learned[id] && SK_BY_ID[id]).map(id => ({ id, sk: SK_BY_ID[id], c: skCalc(SK_BY_ID[id], S.learned[id].lv) }));
+      const X = { sk, ult: u }, b = ultBestOf(X);
+      return { k: u.k, n: u.n, ic: u.ic, cd: u.cd, f: u.f, fl: u.fl, mult: ultM(X), from: b.by ? b.by.name : '', desc: ULTD[u.k] };
+    },
     dbg: { build: c => build(c), sim: (X, h, a, t, q) => sim(X, h, a, t, q) }
   };
   /* ---------- v125 接上其他重要戰(塔主・九重劫・心魔・天地異種・秘境/輔修守關者) ---------- */
