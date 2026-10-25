@@ -18384,7 +18384,7 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
   setInterval(() => { if (X.isOpen && X.isOpen('mn')) dlRow(); }, 5000);
 })();
 
-/* ===== v163 一般歷練戰鬥的主角圖:依外觀與流派,改用重要戰鬥的背影動作圖(BP114)
+/* ===== v163 一般歷練戰鬥的主角圖:依外觀與流派改用背影動作圖(BP114);v164 站位改成主角左下、敵人右上 =====
    待機=1、出手=2、受擊=6;沒有該流派圖的外觀退回該外觀劍修圖,再退回原本的側身圖。 ===== */
 (() => {
   const ORIG = { S0: GEN3.S0, S1: GEN3.S1, S2: GEN3.S2 };
@@ -18404,7 +18404,15 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
   /* 033 換性別時會把 GEN3 重設回側身圖 → 重新套用 */
   setInterval(() => { try { if (GEN3.S0 !== key(1)) sig = ''; apply(); } catch (e) { } }, 800);
   const st = document.createElement('style');
-  st.textContent = '.bs-pl .bs-ps,.bs-pl .bs-ps.f14{height:132px}';
+  /* v164 站位:主角左下(背影朝右上)、敵人右上,與重要戰鬥同樣的遠近感;出手時往右上撲 */
+  st.textContent = `.bs-pl .bs-ps,.bs-pl .bs-ps.f14{height:138px}
+#battle-stage .bs-pl{left:4%!important;bottom:2px!important;z-index:4}
+#battle-stage .bs-mo{right:6%!important;bottom:40%!important;z-index:2}
+#battle-stage .bs-mo .bs-mi{transform:scale(.78);transform-origin:50% 100%}
+#battle-stage .bs-pet{left:3%!important;bottom:auto!important;top:6%!important;z-index:3}
+.bs-pl.atk{animation-name:bsl164!important}
+@keyframes bsl164{0%{transform:translate(0,0)}35%{transform:translate(calc(var(--dx)*.85),calc(var(--dy,60px)*-1)) scale(.82)}62%{transform:translate(calc(var(--dx)*.85),calc(var(--dy,60px)*-1)) scale(.82)}100%{transform:translate(0,0)}}`;
+  setInterval(() => { const s = document.getElementById('battle-stage'); if (s && s.clientHeight) s.style.setProperty('--dy', Math.round(s.clientHeight * .36) + 'px'); }, 1000);
   document.head.appendChild(st);
   setTimeout(apply, 600);
 })();
