@@ -27,8 +27,8 @@
       const f = parseFloat(getComputedStyle(e).fontSize); if (f > 0 && f < 12) e.style.setProperty('font-size', '12px', 'important');
     }
   }
-  let pend = new Set(), tm = 0;
-  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) pend.add(n); }); if (!tm) tm = setTimeout(() => { tm = 0; const L = [...pend]; pend.clear(); L.forEach(n => { if (document.contains(n)) { seen.delete(n); bump(n.parentElement || n); } }); }, 400); }).observe(document.body, { childList: true, subtree: true });
+  /* v165 新加入的元素在畫面繪出前就放大(MutationObserver 在繪製前執行),不再先小後大閃一下 */
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1 && document.contains(n)) { seen.delete(n); bump(n); if (n.firstChild && !n.closest(SKIP)) { const f = parseFloat(getComputedStyle(n).fontSize); let tx = false; for (const c of n.childNodes) if (c.nodeType === 3 && c.textContent.trim()) { tx = true; break; } if (tx && f > 0 && f < 12) n.style.setProperty('font-size', '12px', 'important'); } } }); }).observe(document.body, { childList: true, subtree: true });
   setTimeout(() => bump(document.body), 1500);
 
   /* ---------- 2. 紅點兩種:玩家看過的位置上一直亮著的紅點改成淡色;新出現的維持亮紅 ---------- */
