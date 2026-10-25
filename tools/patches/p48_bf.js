@@ -352,7 +352,7 @@
     const a1 = $('bf-auto'); if (a1) { a1.textContent = '自動:' + (B && B.auto ? '開' : '關'); a1.classList.toggle('on', !!(B && B.auto)); }
     const bt = root.querySelector('.bt'), cm = $('bf-cmd'); if (bt && cm) cm.style.bottom = bt.offsetHeight + 'px';
     const cp = $('bf-cp'); if (cp && B) { const g = state.gender === 'f' ? 'F' : 'M', h = B.p.hp / B.p.max < .3 ? 'h' : 'n', CP = window.CP124 || {}, U = window.UC121 || {};
-      const lk = state.look || 'o1', src = (B.A && B.A.cp && B.A.cp(h)) || CP[g + '_' + lk + '_' + h] || CP[g + '_' + lk + '_n'] || CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && !CP[g + '_h']); }
+      const lk = state.look || 'o1', sc = STY(), sk = sc !== 'sword' ? g + '_' + lk + '_' + sc + '_' : '', hk = sk && CP[sk + h] ? sk + h : sk && CP[sk + 'n'] ? sk + 'n' : '', src = (B.A && B.A.cp && B.A.cp(h)) || (hk && CP[hk]) || CP[g + '_' + lk + '_' + h] || CP[g + '_' + lk + '_n'] || CP[g + '_' + h] || CP[g + '_n'] || U[g + '_sword'] || playerArt(); if (cp.getAttribute('src') !== src) cp.src = src; cp.classList.toggle('cp', !!(CP[g + '_' + h] || CP[g + '_n'])); cp.classList.toggle('hurt', h === 'h' && (hk ? !hk.endsWith('_h') : !CP[g + '_h'])); }
   }
   const log = t => { const l = $('bf-log'); if (l) l.innerHTML = t; };
   function num(who, txt, cls) {
