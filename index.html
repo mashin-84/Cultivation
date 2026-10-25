@@ -9981,7 +9981,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     skillCds.ULT26 = U.cd; fx.pulse(stageEl('bs-p'), 'cast', 700); fx.banner(`${U.ic} ${U.n}`, '#f59e0b'); logAdventure(`${U.ic} 道友祭出本命絕學【${U.n}】!`);
     const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
     bT(() => {
-      if (sc === 'sword') hit(Math.max(4, bs.m * 2.0), 'god');
+      if (sc === 'sword') hit(Math.max(3, bs.m * 1.6), 'god');
       else if (sc === 'magic') {
         const d = hit(Math.max(2.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
         const resist = m.isBoss && Math.random() < .4; if (resist) { fx.num('抵抗', 'info', 'm'); } else { B.stun = 1; fx.stunned(); }
@@ -10005,7 +10005,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   }; }
   { const _c = chooseAutoAction; chooseAutoAction = function () {
     const B = currentBattle, sc = main();
-    if (B && sc && ULT[sc] && !(skillCds.ULT26 > 0)) { const hp = B.playerHp / B.playerMaxHp, mp = B.monster.curHp / B.monster.hp; if (sc === 'pill' ? hp < .55 : sc === 'body' ? hp < .7 : (B.monster.isBoss || mp > .5)) return 'ULT26'; }
+    if (B && sc && ULT[sc] && !(skillCds.ULT26 > 0)) { const hp = B.playerHp / B.playerMaxHp, mp = B.monster.curHp / B.monster.hp; if (B.monster.isBoss || mp > .5 || (sc === 'pill' && hp < .55) || (sc === 'body' && hp < .7)) return 'ULT26';   /* v161 四派都在開場出絕學;丹、體另在受傷時補放 */ }
     return _c.apply(this, arguments);
   }; }
 
