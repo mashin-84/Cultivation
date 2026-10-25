@@ -23,6 +23,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(caches.open(MEDIA).then(c => c.match(r).then(m => m || fetch(r).then(res => { if (res && res.status === 200) c.put(r, res.clone()); return res; }))));
     return;
   }
-  e.respondWith(fetch(r).then(res => { if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then(c => c.put(r, cp)); } return res; })
+  /* 主檔一律向伺服器確認是否有新版(GitHub Pages 預設讓瀏覽器快取 10 分鐘,不加這個會拿到舊版) */
+  e.respondWith(fetch(r, { cache: 'no-cache' }).then(res => { if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then(c => c.put(r, cp)); } return res; })
     .catch(() => caches.match(r, { ignoreSearch: true }).then(m => m || caches.match('./index.html'))));
 });
