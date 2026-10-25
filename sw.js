@@ -1,10 +1,17 @@
 /* 一念飛仙 離線支援
    - index.html 等主檔:有網路時抓最新版(更新立即生效),沒網路用快取
    - 圖片、音樂:先用快取(檔案多且不常改),第一次安裝後在背景把全部圖片存起來,之後離線也完整 */
-const CACHE = 'yinian-v3', MEDIA = 'yinian-media-v1';
+const CACHE = 'yinian-v4', MEDIA = 'yinian-media-v1';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const MUSIC = ['dongfu', 'lilian', 'zhandou', 'tianjie', 'wenqing', 'libie', 'weiju'].map(n => './music/' + n + '.webm');
-async function warm() {
+/* v160:背景下載只在 Wi-Fi(或不明網路但未開省流量)時進行;行動網路改由玩家在設定裡手動按下載 */
+function onWifi() { try { const n = self.navigator && self.navigator.connection; if (!n) return true; if (n.saveData) return false; if (n.type) return n.type === 'wifi' || n.type === 'ethernet'; return !/^(slow-2g|2g|3g)$/.test(n.effectiveType || ''); } catch (e) { return true; } }
+let warming = false;
+async function warm(force) {
+  if (warming || (!force && !onWifi())) return; warming = true;
+  try { await warm0(); } finally { warming = false; }
+}
+async function warm0() {
   const c = await caches.open(MEDIA);
   let list = []; try { list = await (await fetch('./assets/list.json', { cache: 'no-store' })).json(); } catch (e) { }
   const want = new Set(MUSIC.concat(list).map(u => new URL(u, self.registration.scope).href));
@@ -16,7 +23,7 @@ self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== MEDIA).map(k => caches.delete(k)))).then(() => self.clients.claim()));
   warm();
 });
-self.addEventListener('message', e => { if (e.data === 'warm') warm(); });
+self.addEventListener('message', e => { if (e.data === 'warm') warm(); else if (e.data === 'warm!') warm(true); });
 self.addEventListener('fetch', e => {
   const r = e.request; if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
   if (/\/(assets|music|sfx)\//.test(r.url) && !/list\.json$/.test(r.url)) {

@@ -1109,7 +1109,7 @@
         </p>
         <div class="flex space-x-2 pt-1">
           <button id="btn-confirm-reset" class="flex-1 py-1.5 bg-red-700 hover:bg-red-600 text-white font-bold text-xs rounded">
-            確定重置
+            確定散功(清空存檔)
           </button>
           <button id="btn-cancel-reset" class="px-3 py-1.5 bg-slate-800 text-slate-300 text-xs rounded">
             取消
@@ -2676,11 +2676,11 @@ function openTribulationModal(keepDemon = false) {
     if (pillCount > 0) {
       pillBtn.disabled = false;
       pillBtn.className = "tap-effect w-full py-2 rounded bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 text-xs border border-emerald-600";
-      pillBtn.innerText = `💊 使用渡劫丹 (+20% 成功率且失敗修為損失減半) [剩餘:${pillCount}]`;
+      pillBtn.innerText = `💊 服渡劫丹:成功率 +20%・失敗損失減半(剩 ${pillCount})`;
     } else {
       pillBtn.disabled = true;
       pillBtn.className = "w-full py-2 rounded bg-slate-800 text-slate-500 text-xs border border-slate-700 cursor-not-allowed";
-      pillBtn.innerText = `💊 暫無渡劫丹 (可在丹閣煉製或坊市購買)`;
+      pillBtn.innerText = `💊 沒有渡劫丹(丹房可煉、坊市可買)`;
     }
   }
 
@@ -4782,7 +4782,7 @@ function checkOfflineGains() {
     state.stones += gainStones;
 
     // FIX-B8: 離線壽元增加
-    const offlineYears = Math.floor(effectiveSec / AGE_TICK_SECONDS);
+    const offlineYears = Math.floor(effectiveSec / AGE_TICK_SECONDS * 0.25);   /* v160 閉關時壽元流逝較慢(線上的四分之一),避免睡一晚就老了半輩子 */
     state.age += offlineYears;
 
     // OPT-O3: 離線自動煉丹 (若有凝露靈草，最多煉製5顆聚氣丹)
@@ -7212,7 +7212,7 @@ const CAL9 = { R: [1, 2, 4, 8, 15, 28, 52, 95, 170], F: [1, 2.75, 6.2, 8.8, 7.1,
       btn.disabled = true; btn.className = 'w-full py-2.5 rounded-lg bg-slate-800 text-slate-400 font-serif-tc font-bold text-sm border border-amber-800/60 cursor-not-allowed';
       document.getElementById('breakthrough-status-badge').innerText = '須先通過試煉';
       document.getElementById('breakthrough-title').innerText = `境界見證:通關【${g.name}】`;
-      document.getElementById('breakthrough-desc').innerText = `修為雖已圓滿,仍須於${g.name}斬殺境主【${bossOf(g).name}】,方可引動天劫。(建議戰力 ${formatNum(C.REC[state.realmIdx] || 0)})`;
+      document.getElementById('breakthrough-desc').innerText = `修為雖已圓滿,仍須於${g.name}斬殺境主【${bossOf(g).name}】,方可引動天劫。${C.REC[state.realmIdx] ? `(建議戰力 ${formatNum(C.REC[state.realmIdx])})` : ''}`;
     } catch (e) { }
   };
 })();
@@ -8297,8 +8297,9 @@ const DECO_IMG={"base": {"crane": "assets/DECO_IMG_base/crane.webp?v=17b0ab6d", 
   /* ---------- 啟動與輪詢 ---------- */
   function tick() {
     init();
+    if (!window.__LOADED112) return;   /* v160:讀檔完成前不判斷(載入慢時 state 還是預設值) */
     if (!state.gender) { if (!$('modal-gender14')) showGender(); }
-    else if (appliedG !== state.gender) applySprites();
+    else { if ($('modal-gender14') && state.name) $('modal-gender14').remove(); if (appliedG !== state.gender) applySprites(); }
     check(); renderBanner();
   }
   applySprites();
@@ -9465,6 +9466,7 @@ ${R.bonus ? `<div class="x5-cd" style="margin-top:8px;border-color:#f59e0b"><b s
     if (ts < 4) { const t = ['tab-abode', 'tab-abode', 'tab-adventure', 'tab-crafting'][ts]; try { goToTab(t); } catch (e) { } return; }   /* 新手四步:依步驟前往對應分頁 */
     const n = nextStep(); if (n) n.go();
   });
+  window.GD9X = { next: nextStep, steps: STEPS, done: () => GD9().done };   /* v160 指引列改版讀取用 */
   X.act('gd9.list', () => X.open('guide'));
   X.act('gd9.step', t => { const s = STEPS.find(x => x.id === t.dataset.id); if (s) { X.close('guide'); s.go(); } });
   X.act('gd9.skipall', () => { const g = GD9(); STEPS.forEach(s => { if (!g.done[s.id]) g.skip[s.id] = 1; }); saveGame(); scan.sig = ''; scan(); });
@@ -9536,6 +9538,8 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
   /* 暫時改動 → 量戰力差 → 還原(純試算,不留痕跡) */
   function sim(fn, undo) { const c0 = cpNow(); let c1 = c0; try { fn(); c1 = cpNow(); } catch (e) { } finally { try { undo(); } catch (e) { } } return c1 - c0; }
   let CUR = [];
+  const unl = k => { try { return !window.UNLOCK9 || !UNLOCK9.on || UNLOCK9.on(k); } catch (e) { return true; } };
+  const gsc = it => (it.atk || 0) * 2 + (it.def || 0) * 1.5 + (it.hp || 0) * .3;
   function cands() {
     const L = [], inv = state.inventory || {}, sc = it => (it.atk || 0) * 2 + (it.def || 0) * 1.5 + (it.hp || 0) * .3;
     /* 1. 換上背包裡更強的裝備(免費) */
@@ -9547,7 +9551,26 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
     });
     if (sw.length) {
       const g = sim(() => sw.forEach(([s, c, b]) => { state.equipment[s] = b; }), () => sw.forEach(([s, c]) => { state.equipment[s] = c; }));
-      L.push({ ic: '🥋', n: '換上更強的裝備', d: `儲物袋裡有 ${sw.length} 件比身上更強`, gain: g, cost: 0, res: '免費', ok: true, btn: '一鍵換裝', run: () => autoEquipBest() });
+      L.push({ ic: '⚔️', n: '換上更強的裝備', d: `儲物袋裡有 ${sw.length} 件比身上更強`, gain: g, cost: 0, res: '免費', ok: true, btn: '一鍵換裝', run: () => autoEquipBest() });
+    }
+    /* 1b. v160 鍛造:材料已足、且比身上與袋中都強的裝備(每個部位取最強一件) */
+    if (unl('forge')) {
+      const best = {};
+      FORGE_RECIPES.forEach((r, idx) => {
+        const it = ITEMS[r.giveItem]; if (!it || !it.slot || (r.tier || 0) > (state.realmIdx || 0) + 1) return;
+        if (!r.need.every(n => (inv[n.item] || 0) >= n.count)) return;
+        const cur = state.equipment[it.slot], cs = cur && ITEMS[cur] ? gsc(ITEMS[cur]) : -1;
+        const bagBest = Object.keys(inv).reduce((m, k) => { const b = ITEMS[k]; return b && b.type === 'equipment' && b.slot === it.slot && inv[k] > 0 ? Math.max(m, gsc(b)) : m; }, -1);
+        if (gsc(it) <= Math.max(cs, bagBest)) return;
+        if (!best[it.slot] || gsc(it) > gsc(ITEMS[FORGE_RECIPES[best[it.slot]].giveItem])) best[it.slot] = idx;
+      });
+      Object.keys(best).forEach(slot => {
+        const idx = best[slot], r = FORGE_RECIPES[idx], it = ITEMS[r.giveItem], cur = state.equipment[slot];
+        const g = sim(() => { state.equipment[slot] = r.giveItem; }, () => { state.equipment[slot] = cur; });
+        if (g <= 0) return;
+        const cost = r.need.reduce((s, n) => s + n.count * price(n.item), 0);
+        L.push({ ic: it.icon || '🔨', n: `鍛造【${it.name}】`, d: `${SLOT_INFO[slot] ? SLOT_INFO[slot].n : ''}・材料已備齊,鍛成後自動穿上`, gain: g, cost, res: r.need.map(n => `${(ITEMS[n.item] || {}).name || n.item}×${n.count}`).join('、'), ok: true, btn: '鍛造', run: () => craftForge(idx) });
+      });
     }
     /* 2. 強化佩戴裝備 */
     let be = null;
@@ -9576,7 +9599,7 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
       if (g > 0) L.push({ ic: '📜', n: name, d: def.desc, gain: g, cost, res: `💎${fmt(cost)}`, ok: state.stones >= cost, why: `靈石差 ${fmt(Math.max(0, cost - state.stones))}`, btn: '修習', run: act });
     });
     /* 4. 先天天賦(道心點) */
-    TALENTS_DATA.forEach(tal => {
+    if (unl('talent')) TALENTS_DATA.forEach(tal => {
       state.talents = state.talents || {}; const lv = state.talents[tal.id] || 0; if (lv >= tal.maxLevel || tal.stat === 'maxAge') return; const nc = talCost(tal, lv), had = tal.id in state.talents;
       const g = sim(() => { state.talents[tal.id] = lv + 1; }, () => { if (had) state.talents[tal.id] = lv; else delete state.talents[tal.id]; });
       if (g > 0) L.push({ ic: '🌿', n: `天賦【${tal.name}】${lv + 1} 重`, d: lv >= 3 ? '第 4 重起每重效果較小' : tal.desc || '', gain: g, cost: 0, res: `☯ 道心點 ×${nc}`, ok: (state.daoPoints || 0) >= nc, why: '道心點不足', btn: '點天賦', run: () => upgradeTalent(tal.id) });
@@ -9584,7 +9607,7 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
     /* 5. 命格:煉體 1 層(靈石) */
     try {
       const b0 = state.body || 0;
-      if (b0 < bodyCap()) {
+      if (unl('body') && b0 < bodyCap()) {
         const cost = bodyCost(), g = sim(() => { state.body = b0 + 1; }, () => { state.body = b0; });
         if (g > 0) L.push({ ic: '🦴', n: `煉體至第 ${b0 + 1} 層`, d: '氣血、防禦、攻擊小幅提升', gain: g, cost, res: `💎${fmt(cost)}`, ok: state.stones >= cost, why: `靈石差 ${fmt(Math.max(0, cost - state.stones))}`, btn: '錘鍊',
           run: () => { const c = bodyCost(); if (state.stones < c || (state.body || 0) >= bodyCap()) return; state.stones -= c; state.body = (state.body || 0) + 1; showToast('錘鍊肉身,筋骨更勝往昔!'); } });
@@ -9599,9 +9622,14 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
           run: () => { const o = state.pets[pid]; if (!o) return; const c = petUpCost(o.lv); if (state.stones < c || o.lv >= petCap()) return; state.stones -= c; o.lv++; showToast(`${pd.n} 升級!`); } });
       }
     } catch (e) { }
+    /* v160 神通、流派心法:影響出招,戰力數字算不出,列為前往 */
+    const G = [];
+    try { if (skAnyAlert()) G.push({ ic: '⚡', n: '領悟/升級神通', d: '有可新學、可升級或可裝上的神通——戰鬥時的出手威力會變強', btn: '前往', ok: true, go: () => { goToTab('tab-techniques'); setTimeout(() => { const b = document.querySelector('[data-a51=sec][data-k=sk]'); if (b) b.click(); }, 150); } }); } catch (e) { }
+    try { if (window.SC38 && SC38.alert()) G.push({ ic: '☯', n: '參悟流派心法', d: '道行足夠,流派心法可再參悟一層', btn: '前往', ok: true, go: () => X.open('school') }); } catch (e) { }
     const c0 = Math.max(1, cpNow());
     L.forEach(x => { x.pct = x.gain / c0 * 100; x.eff = x.cost > 0 ? x.gain / x.cost : 1e12 + x.gain; });
     L.sort((a, b) => (b.ok - a.ok) || (b.eff - a.eff));
+    G.forEach(g => { g.gain = 0; g.pct = 0; g.res = ''; g.nav = true; L.push(g); });
     return L;
   }
   function farmAdvice(cp) {
@@ -9609,21 +9637,34 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
     for (let j = Math.min(7, state.realmIdx || 0); j >= 0; j--) if (REC(j) && cp / REC(j) >= 1.2 && j !== i) return `<div class="x5-sub" style="margin-top:6px;color:#fbbf24">⛏ 目前這區對你太吃力了——建議先到【${AREAS_DATA[j].name}】穩穩刷靈石與材料,等戰力補上來再回來。</div>`;
     return '';
   }
-  X.sheet('bk', '💡 破局建議', b => {
+  /* v160 「還能從哪裡提升」:尚未隨劇情開放的系統,以及開放了但效果看運氣的途徑 */
+  function moreHtml() {
+    const lock = ((window.UNLOCK9 && UNLOCK9.U) || []).filter(u => ['forge', 'talent', 'body', 'pet', 'treasure', 'school', 'sub', 'xian', 'tower'].includes(u.k) && !unl(u.k));
+    let h = '<div class="bk-h">還能從哪裡提升</div>';
+    h += `<div class="x5-row" style="flex-wrap:wrap;gap:6px"><button class="x5-btn gy" data-x5="bk.go" data-t="root" style="flex:1 1 30%">靈根洗髓</button>${unl('forge') ? '<button class="x5-btn gy" data-x5="bk.go" data-t="aff" style="flex:1 1 30%">器紋重洗</button>' : ''}<button class="x5-btn gy" data-x5="bk.go" data-t="tab-crafting" style="flex:1 1 30%">淬體丹</button></div>`;
+    if (lock.length) h += '<div class="x5-sub" style="margin:8px 0 4px">之後隨劇情開放:</div>' + lock.map(u => `<div class="bk-lk">🔒 <b>${u.name}</b><span>${u.hint || ''}</span></div>`).join('');
+    return h;
+  }
+  X.sheet('bk', '⚡ 戰力提升', b => {
     const T = target(), rec = REC(T.t), cp = cpNow(), a = AREAS_DATA[T.t], gr = window.areaGrade9 ? areaGrade9(T.t, cp) : ['', '#94a3b8'];
-    let h = `<div class="x5-card" style="margin-bottom:8px"><div class="x5-row" style="justify-content:space-between"><b style="color:#fcd34d">${a ? a.name : ''}${T.gate ? '・境主見證' : ''}</b><b style="color:${gr[1]}">${gr[0] || ''}</b></div><div class="x5-sub" style="margin-top:4px">你的戰力 <b style="color:#e2e8f0">${fmt(cp)}</b> ／ 建議 <b style="color:#e2e8f0">${fmt(rec)}</b>${rec && cp < rec * 1.2 ? `・距離「穩妥」還差約 <b style="color:#fbbf24">${fmt(Math.max(0, Math.ceil(rec * 1.2 - cp)))}</b>` : ''}</div>${farmAdvice(cp)}</div>`;
-    CUR = cands(); const okL = CUR.filter(x => x.ok), noL = CUR.filter(x => !x.ok), show = okL.slice(0, 3).concat(noL.slice(0, Math.max(0, 3 - okL.length)));
-    if (!show.length) h += `<div class="x5-card" style="text-align:center;color:#94a3b8">目前沒有可直接執行的提升項目。<br>多修煉、多歷練累積靈石與材料後再來看看。</div>`;
-    else {
-      h += `<div class="x5-sub" style="margin-bottom:6px">依「每花一點資源,戰力提升多少」排序,這是現在最划算的 ${show.length} 項:</div>`;
-      show.forEach(x => { const i = CUR.indexOf(x); h += `<div class="bk-row ${x.ok ? '' : 'no'}"><div class="ic">${x.ic}</div><div class="mid"><div class="nm">${x.n}</div><div class="x5-sub">${x.d || ''}</div><div class="x5-sub"><span class="g">+${fmt(Math.floor(x.gain))} 戰力(+${x.pct.toFixed(1)}%)</span>・${x.res}</div>${x.ok ? '' : `<div class="bk-no">${x.why || ''}</div>`}</div><button class="x5-btn ${x.ok ? 'am' : 'gy'}" data-x5="bk.run" data-i="${i}" ${x.ok ? '' : 'disabled'} style="flex:none">${x.btn}</button></div>`; });
-    }
-    h += `<div class="x5-sub" style="margin:10px 0 4px">其他途徑(戰力增幅需實際體驗)</div><div class="x5-row"><button class="x5-btn gy" data-x5="bk.go" data-t="tab-ming" style="flex:1">🦴 命格・靈寵</button><button class="x5-btn gy" data-x5="bk.go" data-t="tab-inventory" style="flex:1">🔮 器紋重洗</button><button class="x5-btn gy" data-x5="bk.go" data-t="tab-abode" style="flex:1">🌱 靈田煉丹</button></div>`;
+    let h = `<div class="x5-card" style="margin-bottom:8px"><div class="x5-row" style="justify-content:space-between"><b style="color:#fcd34d">${a ? a.name : ''}${T.gate ? '・境主見證' : ''}</b><b style="color:${gr[1]}">${gr[0] || ''}</b></div><div class="x5-sub" style="margin-top:4px">你的戰力 <b style="color:#e2e8f0">${fmt(cp)}</b> ${rec ? `／ 建議 <b style="color:#e2e8f0">${fmt(rec)}</b>` : ''}${rec && cp < rec * 1.2 ? `・距離「穩妥」還差約 <b style="color:#fbbf24">${fmt(Math.max(0, Math.ceil(rec * 1.2 - cp)))}</b>` : ''}</div>${farmAdvice(cp)}</div>`;
+    CUR = cands(); const okL = CUR.filter(x => x.ok), noL = CUR.filter(x => !x.ok && !x.nav).slice(0, 3);
+    const row = x => { const i = CUR.indexOf(x); return `<div class="bk-row ${x.ok ? '' : 'no'}"><div class="ic">${x.ic}</div><div class="mid"><div class="nm">${x.n}</div><div class="x5-sub">${x.d || ''}</div>${x.nav ? '' : `<div class="x5-sub"><span class="g">+${fmt(Math.floor(x.gain))} 戰力(+${x.pct.toFixed(1)}%)</span>・${x.res}</div>`}${x.ok ? '' : `<div class="bk-no">${x.why || ''}</div>`}</div><button class="x5-btn ${x.ok ? 'am' : 'gy'}" data-x5="bk.run" data-i="${i}" ${x.ok ? '' : 'disabled'} style="flex:none">${x.btn}</button></div>`; };
+    h += '<div class="bk-h">現在就能做</div>';
+    if (!okL.length) h += `<div class="x5-card" style="text-align:center;color:#94a3b8">目前沒有可直接執行的提升。<br>多修煉、多歷練累積靈石與材料後再來看看。</div>`;
+    else { h += `<div class="x5-sub" style="margin-bottom:6px">依「花費換到的戰力」排序,由上往下做最划算:</div>`; okL.forEach(x => { h += row(x); }); }
+    if (noL.length) { h += '<div class="bk-h">差一點就能做</div>'; noL.forEach(x => { h += row(x); }); }
+    h += moreHtml();
     b.innerHTML = h;
   });
   X.act('bk.open', () => X.open('bk'));
-  X.act('bk.go', t => { X.close('bk'); try { goToTab(t.dataset.t); } catch (e) { } });
-  X.act('bk.run', t => { const x = CUR[+t.dataset.i]; if (!x || !x.ok) return; try { x.run(); } catch (e) { } try { updateTopBar(); renderInventory(); } catch (e) { } saveGame(); X.refresh('bk'); upd(); });
+  X.act('bk.go', t => { X.close('bk'); const k = t.dataset.t;
+    try {
+      if (k === 'root') { goToTab('tab-techniques'); setTimeout(() => { const b = document.querySelector('[data-a51=sec][data-k=root]'); if (b) b.click(); }, 150); }
+      else if (k === 'aff') { goToTab('tab-techniques'); setTimeout(() => { try { AFF16.openSlot('weapon'); } catch (e) { } }, 150); }
+      else goToTab(k);
+    } catch (e) { } });
+  X.act('bk.run', t => { const x = CUR[+t.dataset.i]; if (!x || !x.ok) return; if (x.go) { X.close('bk'); try { x.go(); } catch (e) { } return; } try { x.run(); } catch (e) { } try { updateTopBar(); renderInventory(); } catch (e) { } saveGame(); X.refresh('bk'); upd(); });
   let sig = {};
   function upd() {
     try {
@@ -9631,15 +9672,16 @@ const GEN_AR={"bg": ["assets/GEN_AR/bg.webp?v=adb08ed3", "assets/GEN_AR/bg_1.web
       [['bk23', 'area-rec9', false], ['bk23g', 'breakthrough-desc', true]].forEach(([id, an, g]) => {
         const a = $(an); if (!a) return; let el = $(id);
         if (!el) { el = document.createElement('div'); el.id = id; el.style.cssText = 'margin-top:6px'; a.insertAdjacentElement('afterend', el); }
-        const show = need && (!g || T.gate), html = show ? `<button class="x5-btn am" data-x5="bk.open">💡 破局建議</button> <span class="x5-sub">戰力為建議值的 ${Math.round(cp / rec * 100)}%・點開看最划算的提升</span>` : '';
+        const show = need && (!g || T.gate), html = show ? `<button class="x5-btn am" data-x5="bk.open">⚡ 戰力提升</button> <span class="x5-sub">戰力為建議值的 ${Math.round(cp / rec * 100)}%・點開看最划算的提升</span>` : '';
         if (sig[id] !== html) { sig[id] = html; el.innerHTML = html; }
         el.style.display = show ? '' : 'none';
       });
     } catch (e) { }
   }
   setInterval(upd, 1500); setTimeout(upd, 800);
-
-  /* =====================  乾坤熔爐  ===================== */
+  { const s160 = document.createElement('style'); s160.textContent = '.bk-h{font-weight:900;font-size:13px;color:#8a5a12;margin:10px 0 6px}.bk-lk{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 10px;border-radius:8px;background:rgba(201,169,107,.14)!important;border:1px solid rgba(201,169,107,.45);color:#5a3a0c!important;margin-bottom:4px}.bk-lk span{opacity:.8}.bk-row{background:#fffaf0!important;border:1px solid #e0cfa8!important;color:#3a2e1c}.bk-row .nm{color:#8a5a12!important}.bk-row .g{color:#15803d!important}'; document.head.appendChild(s160); }
+  window.BK160 = { cands: () => cands(), ok: () => cands().filter(x => x.ok), target, cp: cpNow, rec: () => REC(target().t), open: () => X.open('bk') };
+/* =====================  乾坤熔爐  ===================== */
   const FV = () => {
     const f = state.furnace = (state.furnace && typeof state.furnace === 'object') ? state.furnace : {};
     if (f.mode !== 'rn' && f.mode !== 'st' && f.mode !== 'qi') f.mode = 'rn'; if (typeof f.keep !== 'number') f.keep = 30; f.on = !!f.on; if (typeof f.d !== 'string') f.d = '';
@@ -9904,7 +9946,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
 
   /* ============ 流派:回合制中的心法加成與本命絕學 ============ */
   const main = () => (R() >= 1 && S9) ? S9.SCH().main : null;
-  const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 6 } };
+  const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 5 } };
   const baseDmg = B => { const s = calculateTotalStats(), atk = Math.floor(s.atk * ((B.buff && B.buff.turns > 0) ? 1 + B.buff.pct : 1)); return Math.max(1, Math.floor(atk * atk / (atk + B.monster.def))); };
   /* 劍修:每第 5 次出手 ×1.8 */
   { const o = window.sectDmgMult; window.sectDmgMult = function () { let m = o ? o.apply(this, arguments) : 1; if (currentBattle && currentBattle.swProc) m *= 1.8; return m; }; }
@@ -9939,12 +9981,12 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     skillCds.ULT26 = U.cd; fx.pulse(stageEl('bs-p'), 'cast', 700); fx.banner(`${U.ic} ${U.n}`, '#f59e0b'); logAdventure(`${U.ic} 道友祭出本命絕學【${U.n}】!`);
     const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
     bT(() => {
-      if (sc === 'sword') hit(Math.max(3, bs.m * 1.6), 'god');
+      if (sc === 'sword') hit(Math.max(4, bs.m * 2.0), 'god');
       else if (sc === 'magic') {
-        const d = hit(Math.max(1.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
+        const d = hit(Math.max(2.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
         const resist = m.isBoss && Math.random() < .4; if (resist) { fx.num('抵抗', 'info', 'm'); } else { B.stun = 1; fx.stunned(); }
-      } else if (sc === 'body') { hit(Math.max(2, bs.m * 1.6), 'quake'); B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * .4)); fx.num('+🛡' + fmt(B.shield), 'heal', 'p'); logAdventure(`🛡️ 金身怒目,獲得 ${fmt(B.shield)} 點護盾。`); }
-      else if (sc === 'pill') { hit(Math.max(1, bs.m), 'god'); const h = Math.floor(B.playerMaxHp * .3); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); B.buff = { pct: .25, turns: 3 }; fx.num('+' + fmt(h), 'heal', 'p'); fx.spawn && hasFx() && fx.spawn(spr(7), 1000, 'onp'); logAdventure(`♨️ 丹爐煉化,恢復 ${fmt(h)} 點氣血,攻擊提升 25%(3 回合)。`); }
+      } else if (sc === 'body') { hit(Math.max(2.5, bs.m * 1.4), 'quake'); B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * .4)); fx.num('+🛡' + fmt(B.shield), 'heal', 'p'); logAdventure(`🛡️ 金身怒目,獲得 ${fmt(B.shield)} 點護盾。`); }
+      else if (sc === 'pill') { hit(Math.max(2, bs.m * 1.2), 'god'); const h = Math.floor(B.playerMaxHp * .3); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); B.buff = { pct: .25, turns: 3 }; fx.num('+' + fmt(h), 'heal', 'p'); fx.spawn && hasFx() && fx.spawn(spr(7), 1000, 'onp'); logAdventure(`♨️ 丹爐煉化,恢復 ${fmt(h)} 點氣血,攻擊提升 25%(3 回合)。`); }
       fx.status(); updateBattleUI();
     }, 320 / sp);
     bT(() => {
@@ -10527,6 +10569,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
       if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } continue; }
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
+      if (b.guide) { if (run.replay || !window.TUT160 || TUT160.done(b.guide)) continue; return doGuide(b.guide); }
       if (b.if !== undefined) {
         let ok = false; try { ok = typeof b.if === 'function' ? !!b.if(SD()) : !!SD().flags[b.if]; } catch (e) { }
         run.q.unshift(...(ok ? b.a : b.b)); continue;
@@ -10547,6 +10590,13 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     };
     let ok = false; try { ok = TB26.story(Object.assign({}, cfg, { onEnd: done })); } catch (e) { ok = false; }
     if (!ok) done(true);
+  }
+  /* v160 劇情引導:暫離對話畫面,讓玩家親手按一次對應的按鈕 */
+  function doGuide(k) {
+    run.fighting = true; run.choosing = false; clearTimeout(timer); clearInterval(typeT); $('st28cs').innerHTML = '';
+    $('st28').classList.remove('on');
+    let back = false; const done = () => { if (back || !run) return; back = true; run.fighting = false; $('st28').classList.add('on'); next(); };
+    try { if (!TUT160.run(k, done)) done(); } catch (e) { done(); }
   }
   function showFightLose(cfg) {
     run.choosing = true; run.cur = { fightCfg: cfg }; $('st28nx').style.visibility = 'hidden';
@@ -10694,8 +10744,8 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   const POST_GAP = 90000, OPT_GAP = 100000, PRESENT = 60000, BACKLOG_GAP = 60000;
   ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastTouch = Date.now(); }, true));
   function blocked() {
-    if (run || currentBattle) return true;
-    return ['modal-ascension', 'modal-tribulation', 'modal-offline', 'modal-death-reincarnate', 'modal-event-choice', 'modal-event-result', 'modal-battle-result', 'modal-gender14'].some(id => { const e = $(id); return e && !e.classList.contains('hidden') && e.offsetParent !== null; });
+    if (run || currentBattle || (window.TUT160 && TUT160.busy()) || (window.BF113 && BF113.on) || (window.THU160 && THU160.on)) return true;
+    return ['modal-ascension', 'modal-tribulation', 'modal-offline', 'modal-death-reincarnate', 'modal-event-choice', 'modal-event-result', 'modal-battle-result', 'modal-gender14', 'title34'].some(id => { const e = $(id); return e && !e.classList.contains('hidden') && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0; });
   }
   function badge() {
     const b = $('btn-story28'); if (!b) return;
@@ -10974,24 +11024,26 @@ window.ART28 = window.ART28 || { bg: {}, ch: {} };
       S('墨塵', 'kind', '這是聚靈陣。舊是舊了,還轉得動——只要有靈石餵著,它便替你引天地靈氣入體,你睡著了它也不歇。'),
       S('N', '', '要餵多少靈石?'),
       S('墨塵', 'kind', '陣越舊,越要靈石養;陣每升一階,吞吐便多一分。(笑)別心疼,靈石是花在刀口上的。'),
+      { guide: 'c1_arr' },
       N('洞府外的斜坡上,有幾塊荒了的田,雜草長得比人還高。'),
       S('墨塵', 'kind', '田也歸你。拔拔草,種點靈草罷,往後用得上。種什麼,何時收,慢慢摸索。'),
       N('他又從袖中取出兩樣東西。'),
       S('墨塵', 'kind', '一只須彌乾坤儲物袋,山門所發,袋裡自成一方小天地。如今不大,往後你的境界越高,它越裝得下。藥草、礦石、衣物、兵刃,都收進去,別隨手亂丟。'),
       S('墨塵', 'kind', '一件外門道袍。宗門庫房裡還存著幾件舊衣,哪天想換個樣子,自己去挑。'),
+      { guide: 'c1_look' },
       N('袋口還沒收緊,他又倒進去幾粒米黃色的小丹。'),
       S('墨塵', 'kind', '聚氣丹。記住:丹是借力,不是添命。你的氣海好比一口缸,丹只能補到滿;滿了再灌,只會漫出去,反倒傷了經脈。'),
       S('N', '', '那自己吐納呢?也是這樣嗎?'),
       S('墨塵', 'kind', '吐納是你自己的修行,滿了也不算白費——多出來的,沉在經脈裡,叫餘息。只是缸已盈,新氣只能在外圍打轉,來得慢些。等你破境,缸身拓開,餘息一併化進去,連丹毒也洗乾淨。'),
-      N('〔提示:氣海圓滿後仍可吐納,但吸收減半,餘息最多再存約兩層的量,突破後保留。聚氣丹只能服到圓滿,同一層內連服會積丹毒、藥力遞減,突破後清除。〕'),
+      { guide: 'c1_bag' },
       N('最後,他遞來一枚半個巴掌大的青玉,玉面上刻著細細的雲紋。'),
       S('墨塵', 'kind', '這是青雲玉冊。你走過的路,它替你記著;見過的妖獸藥材,它也記著;旁人給你的名號、值得一提的事,同樣記著。玉冊背面還刻著一篇總綱,叫《諸天太上仙經》——忘了規矩,翻它。'),
-      N('〔提示:道途錄、成就、圖鑑與稱號都在【仙途】分頁;仙經總綱在右上 ⚙ 設定中。〕'),
+      { guide: 'c1_book' },
       S('N', '', '為什麼要記這些?'),
       S('墨塵', 'sad', '修仙人壽元有限。練氣不過百年,往後每過一境,多些,卻也終有盡頭。把走過的路記下來,日後回頭看,才知道自己沒有白活。'),
       N('他說這話的時候,看的不是你,是窗外很遠很遠的地方。'),
       S('墨塵', 'kind', '(轉回頭,又是那副漫不經心的樣子)行了。最後一件——坐下,不必急著想,心神一動,便是一息,氣會自己來。為師就在山下,有事喊一聲。'),
-      N('〔提示:點擊洞府中央的「吐納」,即可吐納一息。〕'),
+      { guide: 'c1_tap' },
       N('你盤膝坐上石榻,學著他說的,緩緩吸了一口氣。你站在這間陌生、卻莫名熟悉的洞府裡,第一次覺得,自己有了一個可以叫作「落腳處」的地方。')
     ]
   });
@@ -11006,16 +11058,16 @@ window.ART28 = window.ART28 || { bg: {}, ch: {} };
       S('墨塵', 'kind', '靈根是天生的底子,哪一行旺,你就最擅長那一類的靈氣。打起架來,金剋木、木剋土、土剋水、水剋火、火剋金——妖獸也有屬性。拿你最旺的那一行去剋它,事半功倍;反過來被它剋住,就要吃虧。'),
       S('N', '', '五行相剋……我記住了。'),
       S('墨塵', 'kind', '你的靈根高低,日後運功時自會有感應。(頓了頓)天生歸天生。洞府後頭有一眼靈泉,泉水能洗髓,把靈根重洗一遍,洗好洗壞全看運氣,也要靈石。中意的那一行可以先守住,只是守得越多,洗一次越傷根基。'),
-      N('〔提示:靈根可在【人物】→「修行」查看;洗髓時可鎖定想保留的屬性,鎖得越多,花費越高。〕'),
+      { guide: 'c1_root' },
       N('他又讓你閉上眼,伸指在你眉心一點。一股涼意直透識海。'),
       S('墨塵', 'kind', '靈根決定你能盛多少,悟性決定你學多快。你的悟性,算中上。(收回手)可它不是死的——識海能錘鍊,靈石砸下去,開竅通神,這錢不虧。'),
       N('接著,他拋來一枚玉簡。'),
       S('墨塵', 'kind', '《太乙聚氣訣》。藏經閣裡最基礎的心法,為師替你抄了一份。心法,是運轉吐納的法門,參悟得越深,吐納越快,至多悟到第十重。別的心法,藏經閣裡還有幾部——得拿靈石去換悟。'),
-      N('〔提示:心法可在【人物】→「修行」參悟升級。〕'),
+      { guide: 'c1_tech' },
       S('墨塵', 'kind', '功法分幾類:心法管吐納,神通管打架,被動管體質。學得雜些無妨,湊夠三門,各家功法還會互相呼應,叫「道法共鳴」,通身都強。'),
       S('N', '', '弟子記下了。'),
       S('墨塵', 'kind', '往後的路,便是這樣一息一息地攢。氣海盈滿,運轉心法,自可破境。(拍了拍你的肩)不急。'),
-      N('〔提示:修為攢夠時,洞府的突破卡會亮起,點擊即可突破。〕'),
+      { guide: 'c1_brk' },
       N('你望著那五道長短不齊的光,忽然覺得,這條路,好像真的走得下去。')
     ]
   });
@@ -11065,7 +11117,7 @@ window.ART28 = window.ART28 || { bg: {}, ch: {} };
       N('結果,你們這一組不但過關,還意外拿了第一。'),
       S('管事', '', '過了關,領一門入門劍訣——《青雲劍訣》,青雲弟子人人都會的一招。往後想學別的神通,拿靈石來換;境界夠了,才學得動。'),
       S('管事', '', '神通要常用。用得熟了,出手會更快,威力也會更強。'),
-      N('〔提示:神通有出手間隙(冷卻),熟練度越高,間隙越短。〕'),
+      { guide: 'c1_skill' },
       S('蘇棠', 'happy', '我們是不是很厲害!?'),
       N('當天夜裡,蘇棠硬塞給你一個油紙包。'),
       S('蘇棠', 'happy', '慶祝新朋友!雖然只是兩個冷饅頭。'),
@@ -11174,16 +11226,17 @@ bg('sky:storm'),
       fx('shake'),
       N('天色,毫無徵兆地暗了。'),
       N('雲從四面八方湧來,在你頭頂三十丈處,旋成一個緩慢轉動的漩渦。漩渦的中心,隱隱有青白的電光遊走。'),
-      ch('s', 'c1_8', [
-        { t: '取出渡劫丹服下,護住心脈。', e: { f: 'jie1_pill' }, r: [
-          N('丹藥入腹,一股溫潤的藥力散入四肢百骸。這是你前幾日在丹房,一爐一爐試出來的。'),
-          S('墨塵', 'kind', '不錯。有備無患,不丟人。')
-        ] },
-        { t: '不借外物。這道坎,我自己過。', e: { f: 'jie1_bare', b: { mo: 1 } }, r: [
-          N('你把渡劫丹收了回去。雷聲在耳邊越來越近,你反而平靜了。'),
-          S('墨塵', 'kind', '(低聲)……這脾氣,倒是像極了一個人。')
-        ] }
-      ], '雷雲壓頂。第一道雷,馬上就要落下了。'),
+      N('雷雲壓頂。第一道雷,馬上就要落下了。'),
+      /* v160:是否服渡劫丹,依玩家在天劫時的實際選擇 */
+      ifF(() => !!(state.trib160 && state.trib160.r === 0 && state.trib160.pill), [
+        set({ f: 'jie1_pill' }),
+        N('你取出渡劫丹服下。丹藥入腹,一股溫潤的藥力散入四肢百骸。這是你前幾日在丹房,一爐一爐試出來的。'),
+        S('墨塵', 'kind', '不錯。有備無患,不丟人。')
+      ], [
+        set({ f: 'jie1_bare', b: { mo: 1 } }),
+        N('你沒有借助丹藥。雷聲在耳邊越來越近,你反而平靜了。'),
+        S('墨塵', 'kind', '(低聲)……這脾氣,倒是像極了一個人。')
+      ]),
       fx('flash'),
       N('第一道雷落下。你只覺得整個人被一柄巨錘從頭頂砸進了地裡,耳中一片嗡鳴。'),
       N('第二道雷落下。皮膚焦裂,真元被劈得七零八落,像一群被驚散的螞蟻。'),
@@ -13464,7 +13517,7 @@ bg('sky'),
       N('練氣二層。你照著墨塵的吩咐,先去外門任務堂報到。'),
       N('任務堂是一間掛滿木牌的長屋,牆上貼著今日的課業:靜坐冥想、踏破山河、丹鼎大師……每天子時換上一張新的。'),
       S('管事', '', '新來的?每日三張課業,做完了來領賞。賞不大,可積少成多。'),
-      N('〔提示:每日課業可在【仙途】分頁查看。〕'),
+      { guide: 'c1_daily' },
 
       S('蘇棠', 'happy', '(從人群裡擠過來)是你!跟你說,課業一天一換,別小看。連著做滿幾天,師姐說還有額外的獎!'),
       N('她又湊近了些,壓低聲音:'),
@@ -13472,7 +13525,7 @@ bg('sky'),
       S('N', '', '歷練呢?'),
       S('管事', '', '後山青雲林,妖獸分十關,每一關的盡頭有一頭境主,是那片地界妖獸的頭目。打倒境主,才算真正踏過那一境。'),
       S('管事', '', '受了傷就吃藥:回春丹療傷,聚氣丹補修為。丹藥隨身備著,臨陣別等人快倒了才想起來。'),
-      N('〔提示:【歷練】頁的「自動療傷」開啟後,氣血不足時會自動服用療傷丹藥。〕'),
+      { guide: 'c1_heal' },
       S('蘇棠', 'happy', '哎呀你別嚇他。……{N},別怕,我陪你去!'),
       N('她拍了拍你的肩膀,笑得像清晨的第一縷光。')
     ]
@@ -13562,7 +13615,6 @@ bg('sky'),
       S('墨塵', 'kind', '對。修道不止一條路。(伸出四根手指)劍、法、體、丹,是外門最常見的四條。'),
       S('墨塵', 'kind', '劍修攻伐無雙;法修引天地靈氣為己用,神通浩蕩;體修以肉身成聖,越戰越勇;丹修以丹入道,藥吃得起的人,最能活。'),
       S('墨塵', 'kind', '築基了,路該擇了。擇一條做本命流派,為師不攔。往後你有這一道專屬的神通,一脈專屬的傳承。只是想改道,要費時、要費靈石,別三天換一次。'),
-      N('〔提示:本命流派可在【人物】→「修行」的【流派】中查看與更換,更換設有冷卻時間。〕'),
       S('N', '', '只能擇一條嗎?'),
       S('墨塵', 'kind', '眼下是。(神色略深)等你金丹了,再說輔修——一個人身上容得下第二條路,只是那要過一關試煉。'),
       N('夕陽照在演武場的青石上。你低頭看著自己握劍的手,忽然有些想問問它:你想走哪條路?')
@@ -13681,8 +13733,7 @@ bg('sky'),
       S('N', '', '你不是說,你們一族從不跟人類結契?'),
       S('白澤', '', '(別過臉)本座那是自願的,不算結契!——總之別愣著,這蛋再多放一會兒,就被雷劈熟了。'),
       N('你小心地捧起蛋。它在你掌心跳了一下,像一顆微弱、卻倔強的心。'),
-      S('白澤', '', '之後的事——孵它、養它、看它慢慢長大——慢慢來。往後多撿幾枚,本座也不嫌你煩。(尾巴悄悄纏上了蛋殼)'),
-      N('〔提示:靈寵蛋可在洞府【靈獸園】中孵化與培養。〕')
+      S('白澤', '', '之後的事——孵它、養它、看它慢慢長大——慢慢來。往後多撿幾枚,本座也不嫌你煩。(尾巴悄悄纏上了蛋殼)')
     ],
     fn: U('pet', { eggs: 1, rt: '靈寵蛋 ×1' })
   });
@@ -13770,7 +13821,6 @@ bg('sky'),
       N('玉簡一展,一道青色的印記沒入你眉心。識海中,九座雷臺依次亮起,像九重天。'),
       S('墨塵', 'kind', '這叫劫印。風、火、雷、水、心魔、金、木、天罰、混沌,九重劫,依次演練。每過一重,劫氣就被你吸收一分——那是仙緣,也是你的底氣。'),
       S('墨塵', 'kind', '過了的還能重修,每日幾回,當作磨刀石。劫印裡的雷再凶,也殺不死你。真正的雷劫,可不會留情。'),
-      N('〔提示:九重劫可反覆挑戰,每日有次數限制。〕'),
 
       N('他看著你,目光忽然很深。'),
       S('墨塵', 'sad', '最後那一道,為師沒法教。它不是用來躲的,是用來「受」的。……等到了那天,別怕。'),
@@ -14304,9 +14354,9 @@ header .flex.justify-between.mb-0\\.5{margin-bottom:1px!important}
   @keyframes ca43n{0%{opacity:0;transform:translateY(-50%) scale(1.9)}26%{opacity:1;transform:translateY(-50%) scale(1)}84%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.05)}}
   @keyframes ca43i{0%,20%{opacity:0;transform:scale(.6)}32%{opacity:1;transform:scale(1)}85%{opacity:.9}100%{opacity:0}}
   @keyframes ca43f{0%,86%{opacity:0}90%{opacity:.75}100%{opacity:0}}
-  .sk43{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center}
-  .sk43 .rg{position:absolute;width:62%;aspect-ratio:1;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 22px var(--c),inset 0 0 22px var(--c);opacity:0;animation:sk43r var(--d) ease-out forwards}
-  .sk43 .tx{position:relative;font-family:'Noto Serif TC','Songti TC',serif;font-weight:900;font-size:32px;letter-spacing:5px;color:#fff;text-shadow:0 0 8px var(--c),0 0 20px var(--c),0 2px 0 #000;opacity:0;animation:sk43t var(--d) cubic-bezier(.2,.8,.2,1) forwards}
+  .sk43{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:6%}
+  .sk43 .rg{position:absolute;top:22%;width:46%;aspect-ratio:1;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 22px var(--c),inset 0 0 22px var(--c);opacity:0;animation:sk43r var(--d) ease-out forwards}
+  .sk43 .tx{position:relative;font-family:'Noto Serif TC','Songti TC',serif;font-weight:900;font-size:19px;letter-spacing:4px;color:#fff;padding:3px 16px;border-radius:999px;background:rgba(15,12,8,.42);text-shadow:0 0 6px var(--c),0 1px 0 #000;opacity:0;animation:sk43t var(--d) cubic-bezier(.2,.8,.2,1) forwards}
   .sk43 .gl{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,var(--c) 0,transparent 55%);opacity:0;animation:sk43g var(--d) ease-out forwards;mix-blend-mode:screen}
   @keyframes sk43r{0%{opacity:0;transform:scale(.2)}30%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
   @keyframes sk43t{0%{opacity:0;transform:scale(1.7)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
@@ -16012,6 +16062,7 @@ body:not(#z74) i.rd{display:block}
   /* 決定目標曲:回傳 [曲名, 是否立即] */
   function target() {
     if (window.BF113 && BF113.on) return [BF113.bgm(), true];   /* v113 重要戰鬥 */
+    if (window.THU160 && THU160.on) return ['tianjie', true];   /* v160 雷劫過場 */
     const st = document.getElementById('st28');
     if (st && window.ST28 && ST28.busy() && getComputedStyle(st).display !== 'none') return [storyMood, true];
     const tab = tabNow(), B = typeof currentBattle !== 'undefined' ? currentBattle : null;
@@ -16478,7 +16529,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   };
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
-  const ULT = { sword: { k: 'sword', n: '劍氣縱橫', ic: '🌬️', cd: 5, f: 1.6, fl: 5 }, magic: { k: 'magic', n: '五行法陣', ic: '🔯', cd: 6, f: 1.6, fl: 5 }, body: { k: 'body', n: '金身怒目', ic: '🪬', cd: 6, f: 1.6, fl: 5 }, pill: { k: 'pill', n: '丹爐煉化', ic: '♨️', cd: 6, f: 1, fl: 3 } };
+  const ULT = { sword: { k: 'sword', n: '劍氣縱橫', ic: '🌬️', cd: 5, f: 2.0, fl: 6.5 }, magic: { k: 'magic', n: '五行法陣', ic: '🔯', cd: 6, f: 1.6, fl: 5 }, body: { k: 'body', n: '金身怒目', ic: '🪬', cd: 6, f: 1.4, fl: 4.5 }, pill: { k: 'pill', n: '丹爐煉化', ic: '♨️', cd: 5, f: 1.2, fl: 4 } };
   const ULTD = { sword: '純粹的劍氣,一擊貫穿。', magic: '法陣灼燒敵人 3 回合,並定身 1 回合(有 40% 機率被抵抗)。', body: '激發金身,獲得氣血 40% 的護盾。', pill: '當場煉丹:回復 30% 氣血,攻擊提升 25%(3 回合)。' };
   const ultBestOf = X => { let m = 0, by = null; (X.sk || []).forEach(k => { if (k.c && k.c.mult) { const v = k.c.mult * (k.sk.type === 'atk' ? (k.c.hits || 1) : 1); if (v > m) { m = v; by = k.sk; } } }); return { m, by }; };
   /* v126 本命絕學倍率:最強攻擊神通總倍率 ×1.6(保底 5) */
@@ -17066,7 +17117,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
   async function doAtk() {
     setPose(1); if (B.A && B.A.once) await B.A.once('atk'); const q = await qTiming('⚔ ' + ATKN()[0]);
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q), n = q === 'pf' ? 3 : q === 'gd' ? 2 : 1;
-    { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; log(q === 'pf' ? L[0] : q === 'gd' ? L[1] : L[2]); }
+    { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; const L2 = (B.A && B.A.alog) || L; log(q === 'pf' ? L2[0] : q === 'gd' ? L2[1] : L2[2]); }
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
     if (STY() === 'magic') {   /* 法修:原地連甩符咒 */
       for (let k = 0; k < n && B.e.hp > 0; k++) {
@@ -17221,6 +17272,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     const E = B.e, d = B.d; await sleep(400);
     if (win) { setPose(9); sfx('sfx_win', () => audio.playFanfare()); $('bf-ei').style.transition = 'opacity 1s'; $('bf-ei').style.opacity = '.15'; }
     else sfx('sfx_lose');
+    { const pi = $('bf-pi'); if (pi) { pi.style.transition = 'opacity .8s'; pi.style.opacity = '.28'; } }
     const box = $('bf-end');
     box.innerHTML = `<div class="stamp ${win ? 'w' : 'l'}">${win ? '勝' : '敗'}</div><div class="say">${B.pt || E.art.src ? `【${E.name}】` : ''}${win ? (d.win || '敗了……') : (d.lose || '不過如此。')}</div>
       <div class="say" style="font-size:11px;opacity:.75">${B.cfg.rematch ? '(重戰:不影響劇情與獎勵)' : ''}</div><div class="bts">${win ? '<button data-bfe="ok">繼續</button>' : (B.cfg.engine ? '<button data-bfe="ok">離開</button>' : '<button data-bfe="retry">⚔ 再戰一次</button><button data-bfe="ok">離開</button>')}</div>`;
@@ -17243,7 +17295,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
       B.d = { intro: '(低吼著逼近,口涎滴在焦土上)' }; B.dM = () => 9; B.pt = null;
       B.G = { allow: ['atk'], tip: '點【揮鋤】還手!' };
       B.A = {
-        who: '你', atk: ['揮鋤', '看準時機・用盡全力砸下去'],
+        who: '你', atk: ['揮鋤', '看準時機・用盡全力砸下去'], alog: ['鋤頭結結實實砸中三下,妖狼痛得一縮!', '鋤頭砸中兩下。', '鋤頭只擦過妖狼的皮毛。'],
         pose: n => K(n === 1 && B.p.hp / B.p.max < .4 ? 6 : MAP[n] || 1),
         tip: n => [.64, .23],
         cp: h => C[`kidcp_${g}_${h}`],
@@ -17317,7 +17369,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     const bgk = B.d.bg || cfg.bg;
     root.style.backgroundImage = `url("${cfg.bgSrc || (bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
     $('bf-en').textContent = cfg.name; $('bf-el').textContent = cfg.label || B.d.title || '';
-    $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
+    $('bf-pi').src = pose(1) || playerArt(); $('bf-pi').style.opacity = ''; const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     if (cfg.script && SCR[cfg.script]) SCR[cfg.script](cfg); root.classList.toggle('scr', !!B.A); $('bf-pi').src = pose(1) || playerArt();
@@ -17635,6 +17687,701 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
   const tick = () => { story(); pen(); };
   tick(); setInterval(tick, 2000);
   try { _mapSig = ''; renderMap(); } catch (e) { }
+})();
+
+/* ===== v160 劇情引導教學:劇情講到哪個系統,就帶玩家親手按一次那個按鈕 =====
+   用法:劇情節拍 { guide: '鍵' }(對話暫停,做完回到劇情);系統由 sysUnlock 開啟時,自動排入 'u_系統鍵' 的教學。
+   每個教學只會跑一次(state.tut160);重看劇情時略過。找不到目標按鈕的步驟自動跳過,不會卡住。 */
+(() => {
+  const $ = id => document.getElementById(id), X = window.X5;
+  const NM = { mo: '墨塵', su: '蘇棠', ba: '白澤', gu: '顧青衍', tl: '鐵老', gs: '管事', ye: '夜無咎' };
+  const nav = (t, s) => ({ el: `[data-n25="${t}"]`, tap: 1, t: s });
+  const sub = (k, s) => ({ el: `[data-a51=sec][data-k=${k}]`, tap: 1, t: s });
+  const back = s => ({ el: '[data-a51=back]', tap: 1, t: s, opt: 1 });
+  const mid = s => ({ el: null, t: s });
+  const shut = { fn: () => closeSheets() };
+  /* ---------- 教學內容(文字用說話者的口吻) ---------- */
+  const D = {
+    /* 第一章・山門贈物(墨塵) */
+    c1_arr: { w: 'mo', s: [
+      { tab: 'tab-abode', el: '[data-a53=arr]', tap: 1, t: '地上這圈陣紋,就是聚靈陣。點它看看。' },
+      { el: '#btn-upgrade-array', tap: 1, t: '餵它靈石,陣就升一階,吞吐便多一分。先升一階——你睡著了,它也替你吐納。' },
+      { el: '#ov53 [data-a53=x]', tap: 1, t: '好,收起來。往後靈石寬裕了,記得回來餵它。', opt: 1 }] },
+    c1_bag: { w: 'mo', s: [
+      nav('tab-inventory', '儲物袋在這一頁。'),
+      { el: '[data-c13=all]', t: '藥草、礦石、衣物、兵刃,撿到什麼都收在袋裡。點一樣東西,能看它的用途與出處。' },
+      { el: '[data-a54=pill]', t: '聚氣丹從這裡服。丹只補到氣海滿為止;同一層連著吃會積丹毒,藥力越來越弱,破境時才洗得乾淨。' }] },
+    c1_look: { w: 'mo', s: [
+      nav('tab-techniques', '這一頁是你自己:身上穿的、手上拿的,都在這。'),
+      { el: '[data-l14=open]', t: '想換件衣裳,點「更衣」。庫房的舊衣不多,往後你走得越遠,能挑的越多。' }] },
+    c1_book: { w: 'mo', s: [
+      nav('tab-records', '青雲玉冊收在這一頁。'),
+      { el: '[data-a54=path]', t: '走過的路、見過的妖獸藥材、旁人給你的名號,玉冊都替你記著。忘了規矩,右上角設定裡有《諸天太上仙經》。' }] },
+    c1_tap: { w: 'mo', s: [
+      { tab: 'tab-abode', el: '#btn-tap-cultivate', tap: 1, t: '坐下。心神一動,便是一息——點這裡,吐納。' }] },
+    /* 第一章・測靈根(墨塵) */
+    c1_root: { w: 'mo', s: [
+      nav('tab-techniques', '靈根長在你身上,自然記在你這一頁。'),
+      sub('root', '點「靈根」。'),
+      back('五行高低都在這。靈泉洗髓也在這頁:中意的那一行先鎖住再洗,鎖得越多越貴。看完按返回。')] },
+    c1_tech: { w: 'mo', s: [
+      sub('tech', '心法收在「功法」裡。'),
+      { el: '[data-action="upgrade-tech"]', tap: 1, t: '《太乙聚氣訣》再悟一重,吐納就快一分。靈石砸下去,不虧。', opt: 1 },
+      back('別的心法也在這兒,拿靈石換悟。湊夠三門,還有道法共鳴。回去吧。')] },
+    c1_brk: { w: 'mo', s: [
+      { tab: 'tab-abode', el: '#btn-trigger-breakthrough', t: '氣海盈滿時,這張突破卡會亮起來。點它,便能破境。' }] },
+    /* 第一章・入門試煉(管事) */
+    c1_skill: { w: 'gs', s: [
+      nav('tab-techniques', '劍訣領了,去看看你的神通欄。'),
+      sub('sk', '點「神通」。'),
+      back('《青雲劍訣》已經裝上。打得越多越熟,熟練度滿了,拿靈石來領悟升級——出手更快,威力更強。')] },
+    /* 第一章・任務堂(管事) */
+    c1_daily: { w: 'gs', s: [
+      nav('tab-records', '每日課業貼在任務堂,你在「仙途」這頁就看得到。'),
+      { el: '[data-a54=daily]', t: '每天三張,子時換新。做完了來領賞。' }] },
+    c1_heal: { w: 'gs', s: [
+      nav('tab-adventure', '歷練在這一頁。'),
+      { el: '#btn-auto-pill', t: '開著「自動療傷」,氣血見底時會自己吃回春丹。丹藥隨身備著,別等快倒了才想起來。' }] },
+    /* 系統開啟後的教學 */
+    u_sect: { w: 'mo', s: [
+      { tab: 'tab-abode', el: '[data-x5="sm44.open"]', t: '山門在這。每踏進一個新的大境界,站穩了,就能持令牌下山遊學。' }] },
+    u_alch: { w: 'mo', s: [
+      nav('tab-crafting', '丹房就在「丹器」這一頁。'),
+      { el: '[data-c52=alch]', tap: 1, t: '神農鼎在「煉丹」。', opt: 1 },
+      { el: '[data-ca52]', tap: 1, t: '凝露靈草夠了。點火,先煉一爐聚氣丹。' },
+      { tab: 'tab-abode', el: '[data-h44=gd]', tap: 1, t: '靈草不只靠歷練撿。洞府外那幾塊田,如今也能種了——點進去。' },
+      { el: '[data-x5="gd.sow"]', tap: 1, t: '不知道種什麼,就照想煉的丹來種,省心。' },
+      { el: '[data-x5="gd.sowg"][data-id="pill_1"]', tap: 1, t: '先種凝露靈草,聚氣丹用得上。熟了記得回來收。' }, shut] },
+    u_forge: { w: 'tl', s: [
+      nav('tab-crafting', '我那爐子,在「丹器」這頁。'),
+      { el: '[data-c52=forge]', tap: 1, t: '切到「煉器」。' },
+      { el: '[data-cf52]', tap: 1, t: '寒鐵石夠了。錘下去——鍛你的第一柄劍。' },
+      nav('tab-techniques', '鍛出來比身上好的,自己會穿上。去看看。'),
+      { el: '[data-enhall]', t: '拿靈材往上砸,就是強化;這顆鈕一次砸到底。打不過的時候,先回來看看裝備。' }] },
+    u_talent: { w: 'ba', s: [
+      nav('tab-techniques', '(打了個哈欠)樹影在你這一頁。'),
+      sub('tal', '點「天賦」。'),
+      back('道心點夠了,就喚醒一枚。花哪一枚,你自己想。本座睡了。')] },
+    u_school: { w: 'mo', s: [
+      nav('tab-techniques', '路該擇了。'),
+      { el: '[data-x5="sc.open"]', tap: 1, t: '點「流派」。' },
+      mid('劍、法、體、丹,擇一條做本命——按「擇為本命」。想改道要費時費靈石,別三天兩頭換。'), shut] },
+    u_secret: { w: 'su', s: [
+      nav('tab-adventure', '走,去歷練頁!'),
+      { el: '#x32-asub-d', t: '「每日秘境」就是靈潮衝開的小洞天,每天換三處。遣神識進去就行,離線了它也替你探!' }] },
+    u_body: { w: 'mo', s: [
+      { tab: 'tab-abode', el: '[data-x5="mg.open"][data-k="body"]', tap: 1, t: '煉體台在洞府。點它。' },
+      mid('拿靈石錘鍊筋骨,氣血、防禦、攻擊都會長。每過一個大境界,能多練五重。'), shut] },
+    u_sub: { w: 'gu', s: [
+      nav('tab-techniques', '輔修的事,在你的流派頁。'),
+      { el: '[data-x5="sc.open"]', tap: 1, t: '點「流派」。' },
+      mid('每一派都有一道試煉。過了,那一派就能當輔修,兩條路一起走。'), shut] },
+    u_heart: { w: 'ba', s: [
+      nav('tab-records', '(難得正經)道心閣在「仙途」。'),
+      { el: '[data-a54=dao]', t: '這一世攢下的東西,有些能帶到下一世。在這裡兌換。' }] },
+    u_avatar: { w: 'mo', s: [
+      nav('tab-adventure', '元嬰出竅,能分身了。'),
+      { el: '#x32-asub-d', t: '每日秘境裡,可以遣化身代你去探。人不必到,收穫照拿。' }] },
+    u_pet: { w: 'ba', s: [
+      { tab: 'tab-abode', el: '[data-x5="mg.open"][data-k="pet"]', tap: 1, t: '靈獸園在洞府。那顆蛋,放進去孵。' },
+      mid('孵出來的靈寵會陪你出戰。餵牠靈石,牠就長。(哼)別指望牠比本座聰明。'), shut] },
+    u_tower: { w: 'su', s: [
+      nav('tab-adventure', '塔!在歷練頁!'),
+      { el: '[data-tower]', t: '九九登天塔,一百層,每九層有塔主。打不上去就先回來養一養,塔不會跑!' }] },
+    u_treasure: { w: 'ba', s: [
+      { tab: 'tab-abode', el: '[data-x5="mg.open"][data-k="treasure"]', tap: 1, t: '藏寶閣在洞府。點進去。' },
+      mid('殘片集齊了,就能重煉法寶。法寶的加成跟裝備疊在一起。'), shut] },
+    u_xian: { w: 'mo', s: [
+      nav('tab-techniques', '神識的事,在你這一頁。'),
+      { el: '[data-x5="xj.open"]', tap: 1, t: '點「天機」。' },
+      mid('神識、天機閣、道果都在這裡。仙緣要省著用,用在刀口上。'), shut] },
+    u_jie: { w: 'mo', s: [
+      nav('tab-techniques', '劫印在天機裡。'),
+      { el: '[data-x5="xj.open"]', tap: 1, t: '點「天機」。' },
+      mid('九重劫可以反覆演練,每天有次數。過一重,便強一分。'), shut] }
+  };
+  /* ---------- 工具 ---------- */
+  const T = () => { if (!state.tut160 || typeof state.tut160 !== 'object') state.tut160 = {}; return state.tut160; };
+  const isDone = k => !!T()[k];
+  const vis = e => { if (!e) return false; const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden'; };
+  const find = sel => { if (!sel) return null; try { return [...document.querySelectorAll(sel)].find(vis) || null; } catch (e) { return null; } };
+  function closeSheets() { try { const x = document.querySelector('#ov53 [data-a53=x]'); if (x && vis(x)) x.click(); } catch (e) { } try { document.querySelectorAll('[id^=x5s-]').forEach(e => { if (vis(e) && X && X.close) X.close(e.id.slice(4)); }); } catch (e) { } }
+  const fmt = t => String(t).replace(/\{N\}/g, state.name || '你');
+  function face(w) { const A = (window.ART28 && ART28.ch) || {}; const k = Object.keys(A).find(x => x.indexOf(w + '_') === 0 && !/_(sad|cold|angry)$/.test(x)) || Object.keys(A).find(x => x.indexOf(w + '_') === 0); return k ? A[k] : ''; }
+  /* ---------- 畫面 ---------- */
+  const st = document.createElement('style');
+  st.textContent = `#tut160{position:fixed;inset:0;z-index:2147483000;pointer-events:none;font-family:inherit}
+#tut160 .b{position:fixed;background:rgba(24,18,10,.62);pointer-events:auto}
+#tut160 .r{position:fixed;border:2px solid #f5c542;border-radius:12px;box-shadow:0 0 0 3px rgba(245,197,66,.25),0 0 18px 4px rgba(245,197,66,.55);pointer-events:none;animation:tut160p 1.2s ease-in-out infinite}
+@keyframes tut160p{50%{box-shadow:0 0 0 6px rgba(245,197,66,.15),0 0 26px 8px rgba(245,197,66,.75)}}
+#tut160 .bb{position:fixed;left:12px;right:12px;pointer-events:auto;display:flex;gap:10px;align-items:flex-start;background:linear-gradient(180deg,#fffaf0,#f3e8d2);border:1.5px solid #c9a96b;border-radius:14px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);color:#2a241c}
+#tut160 .av{flex:none;width:52px;height:52px;border-radius:50%;background:#e8dcc2 center 12%/cover no-repeat;border:2px solid #c9a96b}
+#tut160 .tx{flex:1;min-width:0}#tut160 .nm{font-weight:900;font-size:13px;color:#8a5a12;margin-bottom:2px}
+#tut160 .t{font-size:14px;line-height:1.55}#tut160 .ok{margin-top:8px;float:right;min-height:40px;padding:6px 18px;border-radius:10px;font-weight:900;font-size:14px;background:#b45309;color:#fff;border:1px solid #f59e0b}
+#tut160 .hint{font-size:11px;color:#9a7b4c;margin-top:4px}`;
+  document.head.appendChild(st);
+  let cur = null, raf = 0;
+  function ui() {
+    let o = $('tut160'); if (o) return o;
+    o = document.createElement('div'); o.id = 'tut160';
+    o.innerHTML = '<div class="b" data-p="t"></div><div class="b" data-p="b"></div><div class="b" data-p="l"></div><div class="b" data-p="r"></div><div class="r"></div><div class="bb"><div class="av"></div><div class="tx"><div class="nm"></div><div class="t"></div><div class="hint"></div><button class="ok">知道了</button></div></div>';
+    document.body.appendChild(o);
+    const okH = e => { e.stopPropagation(); e.preventDefault(); if (cur && !cur.tap && !cur.okd) { cur.okd = 1; adv(); } };
+    o.querySelector('.ok').addEventListener('pointerup', okH); o.querySelector('.ok').addEventListener('click', okH);
+    return o;
+  }
+  function place() {
+    if (!cur) return; const o = ui(), W = innerWidth, H = innerHeight, bb = o.querySelector('.bb'), ring = o.querySelector('.r');
+    const P = o.querySelectorAll('.b'); let r = null;
+    if (cur.el) { if (!document.contains(cur.el) || !vis(cur.el)) { const e = find(cur.sel); if (e) cur.el = e; } if (cur.el && vis(cur.el)) r = cur.el.getBoundingClientRect(); }
+    if (r) {
+      const p = 6, x0 = Math.max(0, r.left - p), y0 = Math.max(0, r.top - p), x1 = Math.min(W, r.right + p), y1 = Math.min(H, r.bottom + p);
+      cur.hole = [x0, y0, x1, y1];
+      const S = (e, l, t, w, h) => { e.style.left = l + 'px'; e.style.top = t + 'px'; e.style.width = Math.max(0, w) + 'px'; e.style.height = Math.max(0, h) + 'px'; };
+      P[0].style.background = ''; S(P[0], 0, 0, W, y0); S(P[1], 0, y1, W, H - y1); S(P[2], 0, y0, x0, y1 - y0); S(P[3], x1, y0, W - x1, y1 - y0);
+      S(ring, x0, y0, x1 - x0, y1 - y0); ring.style.display = '';
+      const below = (y0 + y1) / 2 < H * .5; bb.style.top = below ? Math.min(H - 170, y1 + 12) + 'px' : ''; bb.style.bottom = below ? '' : Math.min(H - 170, H - y0 + 12) + 'px';
+    } else {
+      cur.hole = null; P[0].style.cssText = `left:0;top:0;width:${W}px;height:${H}px;background:rgba(24,18,10,.35)`; [1, 2, 3].forEach(i => { P[i].style.width = '0px'; P[i].style.height = '0px'; });
+      ring.style.display = 'none'; bb.style.top = ''; bb.style.bottom = '96px';
+    }
+    raf = requestAnimationFrame(place);
+  }
+  function show(step) {
+    const o = ui(); o.style.display = '';
+    const w = cur.w; o.querySelector('.av').style.backgroundImage = face(w) ? `url("${face(w)}")` : 'none';
+    o.querySelector('.av').style.display = face(w) ? '' : 'none';
+    o.querySelector('.nm').textContent = NM[w] || '';
+    o.querySelector('.t').textContent = fmt(step.t || '');
+    o.querySelector('.hint').textContent = cur.tap ? '點亮起來的地方' : '';
+    o.querySelector('.ok').style.display = cur.tap ? 'none' : '';
+    cancelAnimationFrame(raf); place();
+  }
+  /* 依序執行步驟;找不到按鈕就等一下,再找不到就略過 */
+  function go() {
+    if (!cur) return;
+    const step = cur.steps[cur.i]; if (!step) return end();
+    if (step.fn) { try { step.fn(); } catch (e) { } cur.i++; return setTimeout(go, 150); }
+    if (step.tab) { const nb = document.querySelector(`[data-n25="${step.tab}"]`); if (nb && !nb.classList.contains('on')) nb.click(); }
+    cur.sel = step.el; cur.tap = !!step.tap && !!step.el; cur.el = null; cur.pend = false; cur.okd = 0;
+    if (!step.el) { show(step); return; }
+    let tries = 0;
+    (function look() {
+      if (!cur) return; const e = find(step.el);
+      if (e) { cur.el = e; try { e.scrollIntoView({ block: 'center', behavior: 'instant' }); } catch (er) { } show(step); return; }
+      if (++tries > 25) { cur.i++; return go(); }
+      setTimeout(look, 100);
+    })();
+  }
+  function adv() { if (!cur) return; cur.i++; cur.el = null; cur.hole = null; setTimeout(go, 60); }
+  function end() {
+    const c = cur; cur = null; cancelAnimationFrame(raf); const o = $('tut160'); if (o) o.style.display = 'none';
+    if (!c) return; T()[c.k] = 1; try { saveGame(); } catch (e) { } try { updateTopBar(); } catch (e) { }
+    if (c.cb) setTimeout(c.cb, 120);
+  }
+  /* 點在亮起的範圍內 → 讓那顆按鈕照常運作,稍後進下一步;點在暗處 → 被遮罩擋下 */
+  const inHole = ev => { const h = cur && cur.hole; if (!h) return false; const p = ev.touches ? ev.touches[0] : ev; if (!p) return false; return p.clientX >= h[0] && p.clientX <= h[2] && p.clientY >= h[1] && p.clientY <= h[3]; };
+  document.addEventListener('pointerdown', ev => { if (cur && cur.tap && inHole(ev)) cur.pend = true; }, true);
+  document.addEventListener('click', ev => {
+    if (!cur || !cur.tap || !(cur.pend || inHole(ev))) return;
+    cur.pend = false; const k = cur.i, o = $('tut160');
+    /* 萬一點到的是遮罩本身(版面剛好在變動),把這一下轉交給底下真正的按鈕 */
+    if (o && o.contains(ev.target) && inHole(ev)) {
+      ev.stopPropagation(); ev.preventDefault(); o.style.display = 'none';
+      const real = document.elementFromPoint(ev.clientX, ev.clientY); o.style.display = '';
+      if (real && !o.contains(real)) { try { real.click(); } catch (e) { } }
+    }
+    setTimeout(() => { if (cur && cur.i === k) adv(); }, 380);
+  }, true);
+  /* ---------- 對外 ---------- */
+  function run(k, cb) {
+    const d = D[k]; if (!d || cur || isDone(k)) return false;
+    cur = { k, w: d.w, steps: d.s.slice(), i: 0, cb }; go(); return true;
+  }
+  /* 系統開啟後排隊:等劇情、戰鬥畫面、彈窗都收起來再開始 */
+  const Q = [];
+  const free = () => {
+    if (cur || !state.gender || $('title34')) return false;
+    if (window.ST28 && ST28.busy && ST28.busy()) return false;
+    if ((window.BF113 && BF113.on) || (window.THU160 && THU160.on)) return false;
+    return ![...document.querySelectorAll('[id^=modal-]')].some(e => !e.classList.contains('hidden') && vis(e));
+  };
+  setInterval(() => { if (!Q.length || !free()) return; const k = Q.shift(); if (!run(k)) return; }, 1000);
+  const queue = k => { if (D[k] && !isDone(k) && !Q.includes(k)) Q.push(k); };
+  { const o = window.sysUnlock; if (typeof o === 'function') window.sysUnlock = function (k) { const had = !!(state.un9 && state.un9[k]); const r = o.apply(this, arguments); if (!had && state.un9 && state.un9[k]) queue('u_' + k); return r; }; }
+  window.TUT160 = { run, queue, done: isDone, busy: () => !!cur, D, cur: () => cur && { k: cur.k, i: cur.i, tap: cur.tap, hole: cur.hole, t: (cur.steps[cur.i] || {}).t } };
+})();
+
+/* ===== v160 體驗修正:戰力提升入口・卡關時的離線收益・指引列改版・奇遇當場處理 ===== */
+(() => {
+  const $ = id => document.getElementById(id), X = window.X5, fmt = n => formatNum(Math.floor(n));
+  const vis = e => { if (!e) return false; const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden'; };
+  const css = document.createElement('style');
+  css.textContent = `
+/* 指引列(取代原本的新手氣泡條與自動歷練狀態列) */
+#tutorial-guide-banner.g160{display:flex!important;align-items:center;gap:8px;margin-top:6px;padding:7px 8px 7px 10px!important;border-radius:12px!important;
+  background:linear-gradient(90deg,#fff1cf,#f6dfa8)!important;border:1.5px solid #c9962f!important;box-shadow:0 2px 6px rgba(120,80,20,.18);color:#5a3a0c!important;cursor:pointer}
+#tutorial-guide-banner.g160.hidden{display:none!important}
+#tutorial-guide-banner.g160 .gi{flex:none;width:30px;height:30px;border-radius:50%;background:#b45309;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;box-shadow:0 0 0 2px #fde68a}
+#tutorial-guide-banner.g160 .gm{flex:1;min-width:0}
+#tutorial-guide-banner.g160 .gt{font-size:13.5px;font-weight:800;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#tutorial-guide-banner.g160 .ga{font-size:12px;color:#0f766e;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+#tutorial-guide-banner.g160 .ga:empty{display:none}
+#tutorial-guide-banner.g160 .gb{flex:none;min-height:44px;min-width:56px;padding:0 12px;border-radius:10px;background:#b45309;color:#fff;font-weight:900;font-size:14px;border:1px solid #f59e0b}
+#tutorial-guide-banner.g160.fl{animation:g160f 1.4s ease-out}
+@keyframes g160f{0%{box-shadow:0 0 0 0 rgba(245,158,11,.9)}30%{transform:scale(1.02)}100%{box-shadow:0 0 0 14px rgba(245,158,11,0)}}
+#auto-explore-status-bar,#btn-pending-events,#btn-events-batch{display:none!important}
+/* 人物頁「戰力提升」 */
+.pu160{position:relative;display:inline-flex;align-items:center;gap:3px;margin-top:4px;min-height:34px;padding:0 10px;border-radius:9px;background:linear-gradient(180deg,#d97706,#b45309);color:#fff;font-weight:900;font-size:12.5px;border:1px solid #f59e0b;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.pu160 .rd{position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 0 2px #fff}
+.lb160{display:block;width:100%;margin-top:8px;min-height:44px;border-radius:10px;font-weight:900;font-size:14px;background:#b45309;color:#fff;border:1px solid #f59e0b}
+.ofg160{margin-top:8px;padding:8px;border-radius:10px;background:rgba(180,83,9,.08);border:1px solid rgba(180,83,9,.35);font-size:12.5px;text-align:left;line-height:1.5}`;
+  document.head.appendChild(css);
+
+  /* ================= 1. 溢出修為不白費:超過氣海上限的部分化為道行與器紋石 ================= */
+  const OV = () => { if (!state.ovf160 || typeof state.ovf160 !== 'object') state.ovf160 = { q: 0, dao: 0, rn: 0 }; return state.ovf160; };
+  {
+    const og = QG.govern; let ref = null, L = 0;
+    QG.govern = function () {
+      try {
+        if (ref === state && Number.isFinite(state.qi)) {
+          const d = state.qi - L;
+          if (d > 0) {
+            const max = getRealmInfo().maxQi, cap = max * QI_RESERVE_MULT, full = Math.min(d, Math.max(0, max - L));
+            const v = L + full + (d - full) * QI_OVERFLOW_RATE, kept = Math.min(v, Math.max(cap, L));
+            if (v > kept) {   /* 以「本層氣海」為單位累計;每小時最多累計 2 份,避免低境界時一晚換到一大堆 */
+              const o = OV(), now = Date.now(); if (typeof o.b !== 'number') { o.b = 2; o.bt = now; }
+              o.b = Math.min(24, o.b + (now - (o.bt || now)) / 36e5 * 2); o.bt = now;
+              const add = Math.min(o.b, (v - kept) / Math.max(1, max)); o.q += add; o.b -= add;
+            }
+          }
+        }
+      } catch (e) { }
+      const r = og.apply(this, arguments); ref = state; L = state.qi; return r;
+    };
+  }
+  /* 每累計 0.5 份氣海 → 道行 +1(築基後才有道行);每 1.5 份 → 器紋石 +1 */
+  function convert() {
+    const o = OV(); let dao = 0, rn = 0, st = 0;
+    if (o.q >= .5) {
+      const u = Math.floor(o.q / .5); o.q -= u * .5;
+      /* 道行在築基、器紋石在煉器開啟後才用得上;之前一律折成靈石 */
+      if ((state.realmIdx || 0) >= 1 && window.SCH19 && SCH19.gainDao) { SCH19.gainDao(u); dao = u; } else st += u * Math.max(20, Math.floor(X.sb() * .5));
+      o.rq = (o.rq || 0) + u; const r = Math.floor(o.rq / 3); o.rq -= r * 3;
+      if (r) { if (window.UNLOCK9 && UNLOCK9.on('forge')) { state.inventory.rn_1 = (state.inventory.rn_1 || 0) + r; rn = r; } else st += r * Math.max(20, Math.floor(X.sb() * .5)); }
+      if (st) state.stones += st;
+      o.dao += dao; o.rn += rn; o.st = (o.st || 0) + st;
+    }
+    return { dao, rn, st };
+  }
+  setInterval(() => { try { const g = convert(); if (g.dao || g.rn) { try { X.dirty && X.dirty(); } catch (e) { } } } catch (e) { } }, 5000);
+
+  /* ================= 2. 戰力提升:卡在哪、差多少 ================= */
+  function gateInfo() {
+    try {
+      if (!window.BK160) return null; const T = BK160.target(); if (!T.gate) return null;
+      const a = AREAS_DATA[T.t]; if (!a) return null; const b = a.monsters.find(m => m.isBoss) || a.monsters[a.monsters.length - 1];
+      return { i: T.t, area: a.name, boss: b ? b.name : '境主', cp: BK160.cp(), rec: BK160.rec() };
+    } catch (e) { return null; }
+  }
+  /* 離線結算:修為已滿時說清楚卡在哪,並給「戰力提升」入口;溢出部分顯示換到了什麼 */
+  {
+    const og = checkOfflineGains;
+    checkOfflineGains = function () {
+      const o0 = Object.assign({}, OV()), m = $('modal-offline'), was = m && !m.classList.contains('hidden');
+      const r = og.apply(this, arguments);
+      try {
+        if (!m || m.classList.contains('hidden') || was) return r;
+        const g = convert(), o1 = OV(), dao = (o1.dao - (o0.dao || 0)), rn = (o1.rn - (o0.rn || 0)), st2 = ((o1.st || 0) - (o0.st || 0));
+        const qiEl = $('offline-gain-qi'); let box = $('ofg160');
+        if (!box) { box = document.createElement('div'); box.id = 'ofg160'; box.className = 'ofg160'; const ref = qiEl && qiEl.closest('.space-y-1, .rounded-lg, div'); (ref && ref.parentElement ? ref.parentElement : m.firstElementChild).appendChild(box); }
+        let h = '';
+        if (qiEl && /^\+0$/.test(qiEl.innerText.trim())) qiEl.innerText = '氣海已滿';
+        const parts = [dao ? `<b>道行 +${dao}</b>` : '', rn ? `<b>器紋石 +${rn}</b>` : '', st2 ? `<b>靈石 +${fmt(st2)}</b>` : ''].filter(Boolean);
+        if (parts.length) h += `<div>溢出的靈氣沉入經脈,化為:${parts.join('、')}</div>`;
+        const G = gateInfo();
+        if (G && state.qi >= getRealmInfo().maxQi) h += `<div style="margin-top:4px">修為已圓滿,但仍須在【${G.area}】斬殺境主【${G.boss}】才能突破。<br>你的戰力 <b>${fmt(G.cp)}</b>${G.rec ? ` ／ 建議 <b>${fmt(G.rec)}</b>` : ''}</div>${G.rec && G.cp < G.rec ? '<button class="lb160" data-x5="of160.bk">⚡ 查看戰力提升</button>' : ''}`;
+        box.innerHTML = h; box.style.display = h ? '' : 'none';
+      } catch (e) { }
+      return r;
+    };
+    X.act('of160.bk', () => { const m = $('modal-offline'); if (m) m.classList.add('hidden'); setTimeout(() => { try { BK160.open(); } catch (e) { } }, 120); });
+  }
+  /* 人物頁的「戰力提升」按鈕(有可做的提升時亮紅點,紅點也會傳到底部「人物」分頁) */
+  let okN = 0, okT = 0;
+  function okCount() {
+    if (Date.now() - okT < 4000) return okN; okT = Date.now();
+    try { const c0 = Math.max(1, BK160.cp()); okN = BK160.ok().filter(x => x.nav || x.gain / c0 >= .02).length; } catch (e) { okN = 0; }
+    return okN;
+  }
+  function puBtn() {
+    const hd = document.querySelector('#ch51 .hd'), cp = hd && hd.querySelector('.cp'); if (!cp) return;
+    let b = $('pu160');
+    if (!b) { b = document.createElement('button'); b.id = 'pu160'; b.className = 'pu160'; b.dataset.x5 = 'bk.open'; cp.insertAdjacentElement('afterend', b); }
+    const n = window.BK160 ? okCount() : 0, h = `⚡ 戰力提升${n ? '<i class="rd"></i>' : ''}`;
+    if (b.dataset.h !== h) { b.dataset.h = h; b.innerHTML = h; }
+  }
+  setInterval(() => { try { puBtn(); } catch (e) { } }, 1500);
+  /* 歷練打輸:結果視窗多一顆「查看戰力提升」 */
+  {
+    const og = showBattleResultModal;
+    showBattleResultModal = function (isWin) {
+      const B = currentBattle;
+      const r = og.apply(this, arguments);
+      try {
+        let b = $('lb160');
+        if (!b) { const box = $('battle-result-loot-box'); if (box) { box.insertAdjacentHTML('afterend', '<button id="lb160" class="lb160" data-x5="lb160.go">⚡ 打不過?看看怎麼變強</button>'); b = $('lb160'); } }
+        if (b) b.style.display = !isWin && B && !B.isTower && !B.isWB && !B.isDemonTrib && !B.isJie ? '' : 'none';
+      } catch (e) { }
+      return r;
+    };
+    X.act('lb160.go', () => { const c = $('btn-close-battle-result'); if (c) c.click(); else { const m = $('modal-battle-result'); if (m) m.classList.add('hidden'); } setTimeout(() => { try { BK160.open(); } catch (e) { } }, 150); });
+  }
+
+  /* ================= 3. 指引列:跟著實際進度走,卡太久就換成「現在最該做的事」 ================= */
+  const GS = () => { if (!state.g160 || typeof state.g160 !== 'object') state.g160 = { k: '', s: 0 }; return state.g160; };
+  function storyNext() {
+    try {
+      const A = window.ST28; if (!A || !A.nodes) return null; const s = A.S(), seen = id => !!s.seen[id];
+      const ok = f => { try { return !f || f(); } catch (e) { return false; } };
+      const m = A.nodes.find(n => !n.opt && !seen(n.id)); if (m && ok(m.at)) return m;
+      return A.nodes.find(n => n.opt && !seen(n.id) && (!n.after || seen(n.after)) && ok(n.at)) || null;
+    } catch (e) { return null; }
+  }
+  const NEWBIE = ['點洞府中央的【吐納聚氣】,累積修為', '點【聚】升級聚靈陣,吐納會更快', '到【歷練】打第一場仗:青雲後山', '到【丹器】煉第一爐聚氣丹'];
+  function goTab(t, after) { try { goToTab(t); } catch (e) { } if (after) setTimeout(after, 180); }
+  /* 看劇情:正在戰鬥中(自動歷練)就等這一場打完再開始 */
+  let wantStory = null;
+  function playStory(id) {
+    if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { wantStory = id; try { showToast('這一場打完,劇情就開始。'); } catch (e) { } return; }
+    $('btn-story28').click(); setTimeout(() => { const b = document.querySelector(`[data-x5="st28.play"][data-id="${id}"]`); if (b) b.click(); }, 200);
+  }
+  setInterval(() => { if (wantStory && !currentBattle && !(window.ST28 && ST28.busy())) { const id = wantStory; wantStory = null; playStory(id); } }, 400);
+  function pick() {
+    const brkB = $('btn-trigger-breakthrough');
+    /* 1. 新劇情 */
+    const sn = !(window.ST28 && ST28.busy()) && storyNext();
+    if (sn && $('btn-story28') && $('btn-story28').classList.contains('dot')) return { k: 'st:' + sn.id, ic: '卷', t: `新的劇情:〈${sn.title}〉`, go: () => playStory(sn.id) };
+    /* 2. 新手四步 */
+    /* 新手四步:實際做過就算完成(劇情引導裡可能先做了後面的步驟) */
+    try { const S = X.ST(); let s = state.tutorialStep || 0;
+      if (s === 0 && (S.taps || 0) > 0) s = 1; if (s === 1 && (state.arrayLevel || 1) > 1) s = 2; if (s === 2 && (S.kills || 0) > 0) s = 3; if (s === 3 && (S.craft || 0) > 0) s = 4;
+      if (s !== (state.tutorialStep || 0) && (state.tutorialStep || 0) < 4) state.tutorialStep = s; } catch (e) { }
+    const ts = state.tutorialStep || 0;
+    if (ts < 4) {
+      if (ts === 3 && window.UNLOCK9 && !UNLOCK9.on('alch')) return { k: 'nb3', ic: '修', t: '修煉到【練氣第5層】,煉丹閣就會開啟', go: () => goTab('tab-abode') };
+      return { k: 'nb' + ts, ic: String(ts + 1), t: NEWBIE[ts], go: () => goTab(['tab-abode', 'tab-abode', 'tab-adventure', 'tab-crafting'][ts], () => { const e = ts === 0 ? $('btn-tap-cultivate') : ts === 1 ? document.querySelector('[data-a53=arr]') : null; if (e) e.scrollIntoView({ block: 'center' }); }) };
+    }
+    /* 3. 可以突破 */
+    if (brkB && !brkB.disabled && state.qi >= getRealmInfo().maxQi && !gateInfo()) return { k: 'brk', ic: '破', t: '修為圓滿,可以突破了!', go: () => goTab('tab-abode', () => { const b = $('btn-trigger-breakthrough'); if (b) b.scrollIntoView({ block: 'center' }); }) };
+    /* 4. 卡在境界見證 */
+    const G = gateInfo();
+    if (G && state.qi >= getRealmInfo().maxQi) {
+      if (G.cp < G.rec) return { k: 'gate', ic: '力', t: `斬殺【${G.boss}】才能突破・戰力 ${fmt(G.cp)}/${fmt(G.rec)},先變強`, go: () => BK160.open() };
+      return { k: 'gate2', ic: '戰', t: `前往【${G.area}】斬殺境主【${G.boss}】`, go: () => goTab('tab-adventure', () => { const b = document.querySelector(`[data-area="${G.i}"]`); if (b) b.click(); }) };
+    }
+    /* 5. 修行指引任務鏈(同一步卡超過 15 分鐘,改指向最划算的戰力提升) */
+    const g = GS(), n = window.GD9X && GD9X.next();
+    let top = null; try { const c0 = Math.max(1, BK160.cp()); top = BK160.ok().find(x => !x.nav && x.gain / c0 >= .03) || null; } catch (e) { }
+    if (n && !(g.k === 'gd:' + n.id && g.s > 900 && top)) return { k: 'gd:' + n.id, ic: '引', t: n.d, go: () => { try { n.go(); } catch (e) { } } };
+    /* 6. 現在最划算的戰力提升 */
+    if (top) return { k: 'bk', ic: '力', t: `可以變強:${top.n.replace(/<[^>]+>/g, '')}`, go: () => BK160.open() };
+    return null;
+  }
+  let curG = null;
+  function render() {
+    const bn = $('tutorial-guide-banner'); if (!bn) return;
+    if (!bn.classList.contains('g160')) {
+      bn.className = 'g160'; bn.innerHTML = '<div class="gi"></div><div class="gm"><div class="gt"></div><div class="ga"></div></div><button class="gb" id="tut-go">前往</button>';
+      bn.addEventListener('click', e => {
+        if (e.target.closest('.ga')) { goTab('tab-adventure'); return; }
+        if (curG && curG.go) curG.go();
+      });
+    }
+    curG = pick();
+    const ga = bn.querySelector('.ga'), at = state.autoExplore ? (typeof autoStatusLine === 'function' ? autoStatusLine() : '自動歷練中') : '';
+    if (ga.textContent !== at) ga.textContent = at;
+    if (!curG) { bn.classList.toggle('hidden', !at); bn.querySelector('.gt').textContent = at ? '' : ''; bn.querySelector('.gi').textContent = '歷'; bn.querySelector('.gb').style.display = at ? 'none' : ''; if (at) { curG = { go: () => goTab('tab-adventure') }; } return; }
+    bn.classList.remove('hidden'); bn.querySelector('.gb').style.display = '';
+    const gt = bn.querySelector('.gt'); if (gt.textContent !== curG.t) { gt.textContent = curG.t; bn.classList.remove('fl'); void bn.offsetWidth; bn.classList.add('fl'); }
+    bn.querySelector('.gi').textContent = curG.ic;
+    const g = GS(); if (g.k !== curG.k) { g.k = curG.k; g.s = 0; }
+  }
+  updateTutorialBanner = function () { try { render(); } catch (e) { } };
+  setInterval(() => { try { if (document.visibilityState === 'visible') GS().s += 2; render(); } catch (e) { } }, 2000);
+  setTimeout(() => { try { render(); } catch (e) { } }, 600);
+
+  /* ================= 4. 奇遇:不再存進奇遇簿,遇到時當場處理 ================= */
+  function autoResolve(entry, quiet) {
+    const ev = CHOICE_EVENTS[entry.idx]; if (!ev) return null;
+    const area = AREAS_DATA[entry.areaId] || AREAS_DATA[state.currentArea] || AREAS_DATA[0];
+    let res = null; try { res = ev.actionB(area); } catch (e) { res = null; }
+    res = res || { ok: null, title: '機緣已逝', gains: [] };
+    if (!quiet) { try { logAdventure(`<span class="text-amber-300">🏮 奇遇【${ev.title}】:${ev.choiceB} → ${res.title || ''}${res.gains && res.gains.length ? '(' + res.gains.join('、') + ')' : ''}</span>`); } catch (e) { } }
+    return res;
+  }
+  triggerEventChoice = function (area) {
+    const idx = window.pickEventIdx ? pickEventIdx() : Math.floor(Math.random() * CHOICE_EVENTS.length);
+    /* 手動歷練且就在歷練頁:當場跳出事件卡讓玩家選;自動歷練中:照穩妥的選項自動處理,寫進紀事 */
+    if (!state.autoExplore && isOnAdventureTab() && !eventModalOpen()) { presentChoiceEvent(idx, state.currentArea, null); return; }
+    const res = autoResolve({ idx, areaId: state.currentArea });
+    if (res) { try { adventureNotice(`🏮 奇遇【${CHOICE_EVENTS[idx].title}】已自動處理`); } catch (e) { } }
+    try { updateTopBar(); renderInventory(); } catch (e) { } saveGame();
+  };
+  /* 舊存檔裡排隊的奇遇:讀檔後一次處理完 */
+  setTimeout(() => {
+    try {
+      const L = (state.pendingEvents || []).slice(); if (!L.length) return; state.pendingEvents = [];
+      let n = 0; L.forEach(e => { if (autoResolve(e)) n++; });
+      try { updateTopBar(); renderInventory(); } catch (e) { } saveGame();
+      if (n) showToast(`🏮 奇遇簿已收起:舊奇遇 ${n} 件已自動處理,收穫已入袋(詳見歷練紀事)。`);
+    } catch (e) { }
+  }, 2500);
+  { const og = renderAutoStatusBar; renderAutoStatusBar = function () { try { return og.apply(this, arguments); } catch (e) { } }; }
+  window.G160 = { pick, render, convert, gateInfo };
+})();
+
+/* ===== v160 雷劫過場:大境界天劫改成全畫面演出(程式特效;之後可換生成圖) =====
+   原本的天劫小卡保留,只用來看成功率、選擇是否服渡劫丹;按下「運功硬抗天劫」後進入本過場,三重雷劈完才擲骰判定成敗。 */
+(() => {
+  const $ = id => document.getElementById(id);
+  const css = document.createElement('style');
+  css.textContent = `#thu160{position:fixed;inset:0;z-index:2147482000;overflow:hidden;background:#0b0d16 center/cover no-repeat;touch-action:none;user-select:none;-webkit-user-select:none}
+#thu160 .tint{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,24,.92) 0%,rgba(18,16,40,.7) 45%,rgba(8,8,16,.85) 100%);transition:background 1.2s}
+#thu160 .cl{position:absolute;left:-30%;width:160%;height:46%;top:-12%;background:radial-gradient(ellipse at 30% 60%,rgba(60,58,96,.95),transparent 55%),radial-gradient(ellipse at 70% 50%,rgba(40,38,70,.95),transparent 60%),radial-gradient(ellipse at 50% 30%,rgba(90,86,140,.7),transparent 55%);filter:blur(6px);animation:thu160c 9s linear infinite}
+#thu160 .cl.b{top:-4%;opacity:.7;animation-duration:13s;animation-direction:reverse}
+@keyframes thu160c{from{transform:translateX(-6%) rotate(0)}50%{transform:translateX(6%) rotate(1deg)}to{transform:translateX(-6%) rotate(0)}}
+#thu160 .eye{position:absolute;left:50%;top:14%;width:120px;height:120px;margin-left:-60px;border-radius:50%;background:radial-gradient(circle,rgba(190,170,255,.55),rgba(120,100,220,.15) 45%,transparent 70%);animation:thu160e 2.4s ease-in-out infinite}
+@keyframes thu160e{50%{transform:scale(1.25);opacity:.75}}
+#thu160 .pc{position:absolute;left:50%;bottom:9%;height:46%;transform:translateX(-50%);filter:drop-shadow(0 0 0 rgba(255,255,255,0));transition:filter .25s}
+#thu160 .pc.lit{filter:drop-shadow(0 0 14px rgba(200,220,255,.95)) brightness(1.6)}
+#thu160 .pc.gold{filter:drop-shadow(0 0 22px rgba(255,214,102,.95)) brightness(1.15)}
+#thu160 .aura{position:absolute;left:50%;bottom:7%;width:70%;height:52%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 70%,rgba(140,200,255,.35),transparent 65%);opacity:0;transition:opacity .4s}
+#thu160 .aura.on{opacity:1}#thu160 .aura.gold{background:radial-gradient(ellipse at 50% 70%,rgba(255,214,102,.55),transparent 65%);opacity:1}
+#thu160 svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#thu160 .fl{position:absolute;inset:0;background:#eef2ff;opacity:0;pointer-events:none}
+#thu160 .fl.go{animation:thu160f .55s ease-out}
+@keyframes thu160f{0%{opacity:.95}100%{opacity:0}}
+#thu160.shk{animation:thu160s .35s linear}
+@keyframes thu160s{20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-4px,3px)}80%{transform:translate(3px,-2px)}}
+#thu160 .tt{position:absolute;left:0;right:0;top:40%;text-align:center;color:#f5f3ff;font-weight:900;font-size:26px;letter-spacing:.18em;text-shadow:0 0 12px rgba(160,140,255,.9),0 2px 4px #000;opacity:0;transition:opacity .35s}
+#thu160 .tt.on{opacity:1}#thu160 .tt small{display:block;font-size:13px;letter-spacing:.05em;font-weight:700;margin-top:6px;color:#ddd6fe}
+#thu160 .bar{position:absolute;left:12%;right:12%;bottom:5%;height:10px;border-radius:6px;background:rgba(255,255,255,.12);border:1px solid rgba(200,210,255,.4);overflow:hidden}
+#thu160 .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#93c5fd,#e0e7ff);transition:width .5s}
+#thu160 .bl{position:absolute;left:12%;bottom:calc(5% + 14px);color:#c7d2fe;font-size:12px;font-weight:800}
+#thu160 .end{position:absolute;left:0;right:0;bottom:12%;text-align:center;opacity:0;transition:opacity .5s;pointer-events:none}
+#thu160 .end.on{opacity:1;pointer-events:auto}
+#thu160 .end b{display:block;font-size:30px;letter-spacing:.2em;color:#fde68a;text-shadow:0 0 16px rgba(253,230,138,.9),0 2px 4px #000}
+#thu160 .end b.f{color:#fca5a5;text-shadow:0 0 14px rgba(239,68,68,.8),0 2px 4px #000}
+#thu160 .end p{margin:8px 24px 14px;color:#f1f5f9;font-size:14px;line-height:1.55;text-shadow:0 1px 3px #000}
+#thu160 .end button{min-height:46px;padding:0 34px;border-radius:12px;font-weight:900;font-size:15px;background:linear-gradient(180deg,#f59e0b,#b45309);color:#fff;border:1px solid #fde68a}
+#thu160 .col{position:absolute;left:50%;top:0;bottom:0;width:38%;transform:translateX(-50%);background:linear-gradient(180deg,rgba(255,236,170,0),rgba(255,236,170,.55) 40%,rgba(255,214,102,.75));filter:blur(8px);opacity:0;transition:opacity 1s}
+#thu160 .col.on{opacity:1}`;
+  document.head.appendChild(css);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const NAMES = [['第一重・玄雷', '護體罡氣激盪'], ['第二重・煞火雷', '血肉經脈重塑'], ['第三重・九霄紫極神雷', '灌頂而下,生死一線']];
+  function poseKey(n) {
+    const B = window.BP114 || {}, g = state.gender === 'f' ? 'F_' : 'M_', lk = state.look || 'o1';
+    let sc = ''; try { const m = (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main : ''; sc = m && m !== 'sword' ? m : ''; } catch (e) { }
+    return (sc && B[g + lk + '_' + sc + '_' + n]) || B[g + lk + '_' + n] || B[g + 'o1_' + n] || '';
+  }
+  function bolt(svg, tx, ty) {
+    const W = innerWidth; let x = tx + (Math.random() - .5) * W * .5, y = -10, pts = [[x, y]];
+    const steps = 9; for (let i = 1; i <= steps; i++) { const f = i / steps; x = x + (tx - x) * (.35 + f * .4) + (Math.random() - .5) * 60 * (1 - f); y = ty * f; pts.push([x, y]); }
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    svg.innerHTML = `<path d="${d}" stroke="#c4b5fd" stroke-width="14" fill="none" opacity=".35" stroke-linejoin="round"/><path d="${d}" stroke="#eef2ff" stroke-width="4" fill="none" stroke-linejoin="round"/>`;
+    svg.animate([{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0 }], { duration: 520 }); setTimeout(() => { svg.innerHTML = ''; }, 520);
+  }
+  let busy = false;
+  async function play() {
+    busy = true; window.THU160.on = true;
+    const realm = state.realmIdx || 0, next = (REALM_DATA[realm + 1] || {}).name || '下一境界';
+    let bgSrc = ''; try { const G = window.GEN3 || (typeof GEN3 !== 'undefined' ? GEN3 : {}); bgSrc = G['A' + Math.min(7, realm)] || G.A0 || ''; } catch (e) { }
+    const o = document.createElement('div'); o.id = 'thu160';
+    o.innerHTML = `<div class="tint"></div><div class="cl"></div><div class="cl b"></div><div class="eye"></div><div class="col"></div><div class="aura"></div><img class="pc" alt="" draggable="false"><svg></svg><div class="fl"></div><div class="tt"></div><div class="bl">護體罡氣</div><div class="bar"><i></i></div><div class="end"><b></b><p></p><button>繼續</button></div>`;
+    if (bgSrc) o.style.backgroundImage = `url("${bgSrc}")`;
+    document.body.appendChild(o);
+    const pc = o.querySelector('.pc'), svg = o.querySelector('svg'), fl = o.querySelector('.fl'), tt = o.querySelector('.tt'), bar = o.querySelector('.bar i'), aura = o.querySelector('.aura');
+    pc.src = poseKey(1) || (typeof playerArt === 'function' ? playerArt() : '');
+    tt.innerHTML = `天劫降臨<small>欲踏入【${next}】,須硬抗三重天雷</small>`; tt.classList.add('on');
+    await sleep(1900); tt.classList.remove('on'); await sleep(350);
+    for (let i = 0; i < 3; i++) {
+      tt.innerHTML = `${NAMES[i][0]}<small>${NAMES[i][1]}</small>`; tt.classList.add('on');
+      pc.src = poseKey(5) || pc.src; aura.classList.add('on');
+      await sleep(700);
+      const r = pc.getBoundingClientRect(); bolt(svg, r.left + r.width / 2, r.top + r.height * .18);
+      try { if (!(window.SFX && SFX.play('sfx_thunder'))) audio.playThunder(); } catch (e) { }
+      fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go');
+      o.classList.remove('shk'); void o.offsetWidth; o.classList.add('shk');
+      pc.classList.add('lit'); pc.src = poseKey(6) || pc.src;
+      bar.style.width = (100 - (i + 1) * 28) + '%';
+      await sleep(260); pc.classList.remove('lit');
+      await sleep(620); pc.src = poseKey(5) || pc.src; tt.classList.remove('on');
+      await sleep(320);
+    }
+    /* 三重雷過後才判定 */
+    const r0 = state.realmIdx;
+    try { resolveTribulationOutcome(); } catch (e) { }
+    const ok = state.realmIdx > r0, end = o.querySelector('.end'), eb = end.querySelector('b'), ep = end.querySelector('p');
+    if (ok) {
+      o.querySelector('.col').classList.add('on'); aura.className = 'aura gold'; pc.classList.add('gold'); pc.src = poseKey(9) || poseKey(1) || pc.src;
+      o.querySelector('.tint').style.background = 'linear-gradient(180deg,rgba(60,48,20,.55),rgba(20,18,30,.5) 55%,rgba(10,10,16,.75))';
+      bar.style.width = '100%'; bar.style.background = 'linear-gradient(90deg,#fde68a,#f59e0b)';
+      eb.textContent = '渡劫功成'; eb.className = '';
+      ep.textContent = `雷雲散盡,天光灑落。你踏入了【${REALM_DATA[state.realmIdx].name}】。`;
+      try { if (window.SFX) SFX.play('sfx_win'); } catch (e) { }
+    } else {
+      aura.classList.remove('on'); pc.src = poseKey(6) || pc.src; bar.style.width = '6%';
+      eb.textContent = '天雷浩瀚'; eb.className = 'f';
+      ep.textContent = '第三重雷劈散了凝聚的真元。肉身尚在——調息之後,還能再來。(連續失敗會提高下次的成功率)';
+      try { if (window.SFX) SFX.play('sfx_lose'); } catch (e) { }
+    }
+    end.classList.add('on');
+    await new Promise(res => { end.querySelector('button').onclick = res; });
+    o.style.transition = 'opacity .4s'; o.style.opacity = '0'; await sleep(420); o.remove();
+    busy = false; window.THU160.on = false;
+    try { updateTopBar(); } catch (e) { }
+  }
+  /* 取代原本按下「運功硬抗天劫」後的小卡演出 */
+  executeTribulation = function () {
+    if (busy) return;
+    try { audio.init(); } catch (e) { }
+    state.trib160 = { r: state.realmIdx || 0, pill: !!(usePillInTrib && (state.inventory['pill_3'] || 0) > 0) };   /* 劇情裡的雷劫依實際是否服丹 */
+    if (usePillInTrib && (state.inventory['pill_3'] || 0) > 0) { state.inventory['pill_3']--; try { showToast('已吞服渡劫丹,藥力護持周身!'); } catch (e) { } }
+    const m = $('modal-tribulation'); if (m) m.classList.add('hidden');
+    play();
+  };
+  window.THU160 = { on: false, play };
+})();
+
+/* ===== v160 介面:字級下限 12px・小按鈕加大點擊區・紅點分「新出現/可操作」兩種・歷練區域標題同步・多餘材料・卡關時的修為丹・離線資源下載 ===== */
+(() => {
+  const $ = id => document.getElementById(id), X = window.X5, fmt = n => formatNum(Math.floor(n));
+  const css = document.createElement('style');
+  css.textContent = `
+#btn-story28,#btn-menu25{min-width:42px!important;min-height:40px!important}
+#btn-edit-name{min-width:36px!important;min-height:40px!important}
+#btn-clear-log,[data-log13]{min-height:40px!important;min-width:44px!important;font-size:13px!important}
+#btn-use-heal,#btn-auto-pill{min-height:40px!important}
+.inv13-chips button,#cr52 .chips button,[data-k52],[data-s52],[data-c13]{min-height:38px!important}
+/* 紅點:淡色 = 早就在那、可以做但不急;亮紅 = 新出現 */
+.rd.f160,.dot25.f160,.x5-dot.f160,.rd14.f160{background:#f59e0b!important;opacity:.55;transform:scale(.8);box-shadow:none!important;animation:none!important}
+#btn-story28.dot.f160::after{background:#f59e0b!important;opacity:.55}
+`;
+  document.head.appendChild(css);
+
+  /* ---------- 1. 字級下限:畫面上小於 12px 的文字一律放大到 12px(戰鬥畫面、劇情、標題頁、圖示數字除外) ---------- */
+  const SKIP = '#bf113,#st28,#title34,#thu160,#tut160,svg,.ct,.bx,.dot25,.rd,.x5-dot,i.ii,.em,#battle-stage,.bf-num';
+  const seen = new WeakSet();
+  function bump(root) {
+    const list = root.querySelectorAll ? root.querySelectorAll('*') : [];
+    for (const e of list) {
+      if (seen.has(e)) continue; seen.add(e);
+      if (!e.firstChild || e.closest(SKIP)) continue;
+      let txt = false; for (const n of e.childNodes) if (n.nodeType === 3 && n.textContent.trim()) { txt = true; break; }
+      if (!txt) continue;
+      const f = parseFloat(getComputedStyle(e).fontSize); if (f > 0 && f < 12) e.style.setProperty('font-size', '12px', 'important');
+    }
+  }
+  let pend = new Set(), tm = 0;
+  new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) pend.add(n); }); if (!tm) tm = setTimeout(() => { tm = 0; const L = [...pend]; pend.clear(); L.forEach(n => { if (document.contains(n)) { seen.delete(n); bump(n.parentElement || n); } }); }, 400); }).observe(document.body, { childList: true, subtree: true });
+  setTimeout(() => bump(document.body), 1500);
+
+  /* ---------- 2. 紅點兩種:玩家看過的位置上一直亮著的紅點改成淡色;新出現的維持亮紅 ---------- */
+  const RD = '.rd,.x5-dot,.rd14,[data-dot="1"]';
+  const SN = () => { if (!Array.isArray(state.rd160)) state.rd160 = []; return state.rd160; };
+  const vis = e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
+  function keyOf(d) {
+    const h = d.closest('button,[data-x5],[data-a51],[data-a53],[data-a54],[data-c52],[data-m6],[data-n25]') || d.parentElement; if (!h) return '';
+    const a = [...h.attributes].filter(x => /^data-(x5|a51|a53|a54|c52|m6|k|id|s51|n25|i13|r52)$/.test(x.name)).map(x => x.name + '=' + x.value).join('&');
+    return (h.closest('[id^=tab-],[id^=x5s-],#ch51,#ab53r,#nav25') || {}).id + '|' + (a || (h.textContent || '').trim().slice(0, 8));
+  }
+  let lastTab = '', tabT = 0;
+  const MAP = { 'tab-abode': ['tab-abode', 'ab53r'], 'tab-techniques': ['tab-techniques', 'ch51', 'pc44', 'bk51'], 'tab-adventure': ['tab-adventure'], 'tab-crafting': ['tab-crafting'], 'tab-inventory': ['tab-inventory'], 'tab-records': ['tab-records', 'tab-sect'] };
+  const TAB = {}; Object.keys(MAP).forEach(t => MAP[t].forEach(c => { TAB[c] = t; }));
+  function dots() {
+    const S = SN(), set = new Set(S), tab = (document.querySelector('.tab-panel:not(.hidden)') || {}).id || '';
+    if (tab !== lastTab) { lastTab = tab; tabT = Date.now(); }
+    const settled = Date.now() - tabT > 2500, unseen = {}, live = new Set();
+    document.querySelectorAll(RD).forEach(d => {
+      if (d.closest('#nav25') || getComputedStyle(d).display === 'none') return;
+      const k = keyOf(d); if (!k) return; live.add(k);
+      const c = k.split('|')[0], t = TAB[c] || (c && c.indexOf('x5s-') === 0 ? 'sheet' : '');
+      const onPage = d.getClientRects().length > 0 && (t === tab || t === 'sheet');
+      if (onPage && settled && !set.has(k)) { S.push(k); set.add(k); }   /* 所在頁面開著超過 2.5 秒 = 看過 */
+      const old = set.has(k); d.classList.toggle('f160', old);
+      if (!old && t) unseen[t] = 1;
+    });
+    /* 看過但已經消失的紅點從清單移除,之後再出現就又是「新的」 */
+    for (let i = S.length - 1; i >= 0; i--) if (!live.has(S[i])) S.splice(i, 1);
+    if (S.length > 400) S.splice(0, S.length - 400);
+    /* 底部分頁:裡面有新的紅點 → 亮紅;只剩看過的 → 淡色 */
+    document.querySelectorAll('#nav25 [data-n25]').forEach(b => { const d = b.querySelector('.dot25'); if (d) d.classList.toggle('f160', !unseen[b.dataset.n25]); });
+  }
+  setInterval(() => { try { dots(); } catch (e) { } }, 1200);
+
+  /* ---------- 3. 歷練頁區域標題:跟著目前區域走 ---------- */
+  setInterval(() => {
+    try {
+      if (state.towerMode) return; const a = AREAS_DATA[state.currentArea || 0], el = $('current-area-title'); if (!a || !el) return;
+      const want = `${a.name} (${(REALM_DATA[a.realmReq] || {}).name || ''})`; if (el.innerText !== want) { el.innerText = want; const d = $('current-area-desc'); if (d) d.innerText = a.desc; }
+    } catch (e) { }
+  }, 700);
+
+  /* ---------- 4. 多餘材料:行囊的「賣材」—— 有乾坤熔爐就開熔爐(可設保留量、自動煉化),否則把每種超過 30 個的材料賣成靈石 ---------- */
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-a54="smat"]'); if (!b) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    if (window.UNLOCK9 && UNLOCK9.on('forge')) { X.open('fn'); return; }
+    const inv = state.inventory || {}; let n = 0, st = 0;
+    Object.keys(inv).forEach(k => { const it = ITEMS[k]; if (!it || it.type !== 'material' || k === 'rn_1' || !(it.price > 0)) return; const x = inv[k] - 30; if (x > 0) { n += x; st += x * it.price; inv[k] -= x; } });
+    if (!n) { showToast('每種材料都還不到 30 個,先留著吧。'); return; }
+    state.stones += st; try { audio.playQiChime(); } catch (er) { } showToast(`賣出多餘材料 ${fmt(n)} 件(每種保留 30),靈石 +${fmt(st)}`);
+    try { updateTopBar(); renderInventory(); } catch (er) { } saveGame();
+  }, true);
+  /* 行囊頁頂端:材料堆太多時給一行提示 */
+  setInterval(() => {
+    try {
+      const hd = document.querySelector('#tab-inventory .hd'); if (!hd) return; let tip = $('mt160');
+      const inv = state.inventory || {}, over = Object.keys(inv).filter(k => { const it = ITEMS[k]; return it && it.type === 'material' && k !== 'rn_1' && inv[k] >= 200; }).length;
+      if (!tip) { tip = document.createElement('div'); tip.id = 'mt160'; tip.style.cssText = 'font-size:12px;color:#8a5a12;margin:4px 2px 0;display:none'; hd.insertAdjacentElement('afterend', tip); }
+      const h = over ? `有 ${over} 種材料堆了上百個——點右上「賣材」${window.UNLOCK9 && UNLOCK9.on('forge') ? '送進乾坤熔爐煉化' : '換成靈石'}。` : '';
+      if (tip.textContent !== h) tip.textContent = h; tip.style.display = h ? '' : 'none';
+    } catch (e) { }
+  }, 3000);
+
+  /* ---------- 5. 氣海已滿時服修為丹:藥力化入經脈,換成道行與器紋石(與溢出靈氣同一套換算) ---------- */
+  {
+    const og = qiPillUse;
+    qiPillUse = function (key, all, quiet) {
+      const info = getRealmInfo(), item = ITEMS[key];
+      if (quiet || !item || !(state.inventory[key] > 0) || state.qi < info.maxQi - 0.5) return og.apply(this, arguments);
+      const n = all ? state.inventory[key] : 1, v = qiPillVal(key) * .5 / Math.max(1, info.maxQi) * n;
+      if (!state.ovf160 || typeof state.ovf160 !== 'object') state.ovf160 = { q: 0, dao: 0, rn: 0 };
+      state.ovf160.q += v; state.inventory[key] -= n; if (state.inventory[key] <= 0) delete state.inventory[key];
+      const g = window.G160 ? G160.convert() : { dao: 0, rn: 0, st: 0 };
+      showToast(`氣海已盈,${item.name} ×${n} 的藥力化入經脈${g.dao || g.rn || g.st ? ':' + [g.dao ? '道行 +' + g.dao : '', g.rn ? '器紋石 +' + g.rn : '', g.st ? '靈石 +' + formatNum(g.st) : ''].filter(Boolean).join('、') : '(積蓄中,攢夠了會化為道行與器紋石)'}`);
+      try { audio.playQiChime(); renderInventory(); updateTopBar(); } catch (e) { } saveGame();
+      return n;
+    };
+  }
+
+  /* ---------- 6. 離線資源:只在 Wi-Fi 時背景下載;設定裡看得到進度,也能手動下載 ---------- */
+  const swPost = m => { try { navigator.serviceWorker && navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage(m); } catch (e) { } };
+  setInterval(() => swPost('warm'), 90000); setTimeout(() => swPost('warm'), 8000);
+  async function progress() {
+    try { if (!window.caches) return null; const list = await (await fetch('assets/list.json', { cache: 'no-store' })).json(); const c = await caches.open('yinian-media-v1'), ks = new Set((await c.keys()).map(r => r.url)); const base = new URL('./', location.href).href; const have = list.filter(u => ks.has(new URL(u, base).href)).length; return [have, list.length]; } catch (e) { return null; }
+  }
+  async function dlRow() {
+    const b = $('x5b-mn'); if (!b || !X.isOpen('mn')) return; let r = $('dl160');
+    if (!r) { r = document.createElement('div'); r.id = 'dl160'; r.className = 'x5-card'; r.style.cssText = 'margin-bottom:8px;display:flex;align-items:center;gap:10px'; b.appendChild(r); }
+    const p = await progress(); if (!p) { r.style.display = 'none'; return; }
+    const done = p[0] >= p[1];
+    r.innerHTML = `<span style="flex:1"><b style="font-size:14px">離線資源</b><br><span style="font-size:12px">${done ? '圖片已全部存在手機裡,沒網路也能玩。' : `已下載 ${p[0]}/${p[1]} 張圖。用 Wi-Fi 時會自動在背景下載;行動網路下可手動下載(約 50MB)。`}</span></span>${done ? '' : '<button class="x5-btn am" data-x5="dl160.go" style="flex:none">下載</button>'}`;
+  }
+  X.act('dl160.go', () => { swPost('warm!'); showToast('開始下載離線資源,可以繼續玩。'); setTimeout(dlRow, 3000); });
+  { const o = X.open; X.open = function (id) { const r = o.apply(this, arguments); if (id === 'mn') setTimeout(dlRow, 50); return r; }; }
+  setInterval(() => { if (X.isOpen && X.isOpen('mn')) dlRow(); }, 5000);
 })();
 
 /* v91 網頁 App:只在 http(s) 網址註冊離線支援 */
