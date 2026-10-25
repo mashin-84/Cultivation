@@ -143,10 +143,15 @@
     });
     return h + '</div>';
   }
+  { const st = document.createElement('style'); st.textContent = `.ult148{display:flex;gap:10px;align-items:flex-start;margin:8px 0 2px;padding:10px;border-radius:12px;border:1px solid #d6a84a;background:linear-gradient(135deg,rgba(254,243,199,.85),rgba(255,251,235,.75));color:#3b2a14}
+.ult148.off{border-color:#cdbf9f;background:rgba(255,252,244,.6);opacity:.75}
+.ult148 .ic{width:44px;height:44px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#fff7d6,#f5d38a);box-shadow:0 0 0 2px #d6a84a inset;font-size:24px}
+.ult148 .tx{flex:1;min-width:0}.ult148 .hd{font-family:'Noto Serif TC',serif;font-weight:800;font-size:14px}.ult148 .hd span{margin-left:6px;font-size:10.5px;padding:1px 6px;border-radius:99px;background:#9e2b25;color:#fff;vertical-align:1px}
+.ult148 .ef{font-size:12px;margin-top:2px}.ult148 .nb{font-size:12px;margin-top:3px;color:#7c4a03}.ult148 .nb b{font-size:15px;color:#9e2b25}.ult148 .sb{font-size:10.5px;color:#8a7a62;margin-top:2px}`; document.head.appendChild(st); }
   XT.skills = function (force) {   // renderSkills 的唯一實作
     const root = $('skills-panel'); if (!root || !root.offsetParent) return;
     const S = skState(), slots = skSlots(), cap = skCap(), sc = sch(), view = VIEWS.some(v => v[0] === skView) ? skView : 'learned';
-    const sig = JSON.stringify([S, slots, cap, view, sc.main, sc.sub, R(), state.sectSk, state.sect && state.sect.id, SKILLS.map(s => (R() >= s.realm && state.stones >= s.cost ? 1 : 0) + '' + (S.learned[s.id] ? (state.stones >= skUpCost(s, S.learned[s.id].lv) ? 1 : 0) : 0))]);
+    const sig = JSON.stringify([state.realmIdx && window.UNLOCK9 && UNLOCK9.on('school'), S, slots, cap, view, sc.main, sc.sub, R(), state.sectSk, state.sect && state.sect.id, SKILLS.map(s => (R() >= s.realm && state.stones >= s.cost ? 1 : 0) + '' + (S.learned[s.id] ? (state.stones >= skUpCost(s, S.learned[s.id].lv) ? 1 : 0) : 0))]);
     if (!force && sig === sig27 && root.querySelector('.sk27c')) return; sig27 = sig;
     const c = skAllCounts(), on = c.learn + c.up > 0;
     let h = `<button data-skall="1" ${on ? '' : 'disabled'} class="tap-effect w-full mb-2 py-2 rounded-lg font-bold text-xs ${on ? 'bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-500'}">${on ? `⚡ 一鍵領悟(可新學 ${c.learn} 門、可升級 ${c.up} 門)` : '⚡ 一鍵領悟(暫無可學/可升級)'}</button>`;
@@ -158,6 +163,12 @@
       else h += `<div class="rounded-lg border border-dashed border-slate-700 bg-slate-950 p-1 text-center"><div class="text-xl text-slate-600">＋</div><div class="text-[9px] text-slate-500">空欄位</div></div>`;
     }
     h += `</div><div class="text-[10px] text-slate-500 mt-2">戰鬥時依欄位順序顯示按鈕;自動戰鬥會依局勢自動選擇(血低→療傷、Boss→護盾/控制、其餘→最強輸出)。每次施放 +1 熟練度,熟練度滿後花靈石領悟升級;Lv5「小成」冷卻 -1,Lv10「大成」效果強化。</div></div>`;
+    { let U = null; try { U = window.BF113 && BF113.ultInfo(); } catch (e) { }
+      const lk = !(R() >= 1 && window.UNLOCK9 && UNLOCK9.on('school')), m = U ? (Math.round(U.mult * 10) / 10) : 0;
+      h += `<div class="ult148 ${U ? '' : 'off'}"><div class="ic">${U ? `<b>${U.ic}</b>` : '<b>🔒</b>'}</div><div class="tx"><div class="hd">本命絕學${U ? `・<b>${U.n}</b><span>${SCN[U.k]}</span>` : ''}</div>`
+        + (U ? `<div class="ef">${U.desc}</div><div class="nb">傷害倍率 <b>×${m}</b>${U.from ? `(${U.from} ×${U.f}${U.mult > U.fl + .01 ? '' : `,保底 ×${U.fl}`})` : `(未裝備攻擊神通,保底 ×${U.fl})`}・重要戰鬥冷卻 ${U.cd} 回合</div><div class="sb">倍率跟著最強的攻擊神通走,換裝或升級神通會一起變強;並吃該神通的增傷加成。</div>`
+          : `<div class="ef">${lk ? '流派隨劇情開放(築基期後)。' : '擇定本命流派後,便能領悟該流派的本命絕學。'}</div>`) + '</div></div>';
+    }
     h += `<div class="sk27c">${VIEWS.map(([k, n]) => `<button data-skact="view" data-id="${k}" class="${view === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
     if (view === 'sect') h += sectBlock();
     else {
