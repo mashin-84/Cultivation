@@ -1,6 +1,6 @@
 /* ============ 流派:回合制中的心法加成與本命絕學 ============ */
   const main = () => (R() >= 1 && S9) ? S9.SCH().main : null;
-  const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 6 } };
+  const ULT = { sword: { n: '劍氣縱橫', ic: '🌬️', cd: 5 }, magic: { n: '五行法陣', ic: '🔯', cd: 6 }, body: { n: '金身怒目', ic: '🪬', cd: 6 }, pill: { n: '丹爐煉化', ic: '♨️', cd: 5 } };
   const baseDmg = B => { const s = calculateTotalStats(), atk = Math.floor(s.atk * ((B.buff && B.buff.turns > 0) ? 1 + B.buff.pct : 1)); return Math.max(1, Math.floor(atk * atk / (atk + B.monster.def))); };
   /* 劍修:每第 5 次出手 ×1.8 */
   { const o = window.sectDmgMult; window.sectDmgMult = function () { let m = o ? o.apply(this, arguments) : 1; if (currentBattle && currentBattle.swProc) m *= 1.8; return m; }; }
@@ -35,12 +35,12 @@
     skillCds.ULT26 = U.cd; fx.pulse(stageEl('bs-p'), 'cast', 700); fx.banner(`${U.ic} ${U.n}`, '#f59e0b'); logAdventure(`${U.ic} 道友祭出本命絕學【${U.n}】!`);
     const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
     bT(() => {
-      if (sc === 'sword') hit(Math.max(3, bs.m * 1.6), 'god');
+      if (sc === 'sword') hit(Math.max(4, bs.m * 2.0), 'god');
       else if (sc === 'magic') {
-        const d = hit(Math.max(1.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
+        const d = hit(Math.max(2.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
         const resist = m.isBoss && Math.random() < .4; if (resist) { fx.num('抵抗', 'info', 'm'); } else { B.stun = 1; fx.stunned(); }
-      } else if (sc === 'body') { hit(Math.max(2, bs.m * 1.6), 'quake'); B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * .4)); fx.num('+🛡' + fmt(B.shield), 'heal', 'p'); logAdventure(`🛡️ 金身怒目,獲得 ${fmt(B.shield)} 點護盾。`); }
-      else if (sc === 'pill') { hit(Math.max(1, bs.m), 'god'); const h = Math.floor(B.playerMaxHp * .3); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); B.buff = { pct: .25, turns: 3 }; fx.num('+' + fmt(h), 'heal', 'p'); fx.spawn && hasFx() && fx.spawn(spr(7), 1000, 'onp'); logAdventure(`♨️ 丹爐煉化,恢復 ${fmt(h)} 點氣血,攻擊提升 25%(3 回合)。`); }
+      } else if (sc === 'body') { hit(Math.max(2.5, bs.m * 1.4), 'quake'); B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * .4)); fx.num('+🛡' + fmt(B.shield), 'heal', 'p'); logAdventure(`🛡️ 金身怒目,獲得 ${fmt(B.shield)} 點護盾。`); }
+      else if (sc === 'pill') { hit(Math.max(2, bs.m * 1.2), 'god'); const h = Math.floor(B.playerMaxHp * .3); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); B.buff = { pct: .25, turns: 3 }; fx.num('+' + fmt(h), 'heal', 'p'); fx.spawn && hasFx() && fx.spawn(spr(7), 1000, 'onp'); logAdventure(`♨️ 丹爐煉化,恢復 ${fmt(h)} 點氣血,攻擊提升 25%(3 回合)。`); }
       fx.status(); updateBattleUI();
     }, 320 / sp);
     bT(() => {

@@ -119,11 +119,11 @@ function openTribulationModal(keepDemon = false) {
     if (pillCount > 0) {
       pillBtn.disabled = false;
       pillBtn.className = "tap-effect w-full py-2 rounded bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 text-xs border border-emerald-600";
-      pillBtn.innerText = `💊 使用渡劫丹 (+20% 成功率且失敗修為損失減半) [剩餘:${pillCount}]`;
+      pillBtn.innerText = `💊 服渡劫丹:成功率 +20%・失敗損失減半(剩 ${pillCount})`;
     } else {
       pillBtn.disabled = true;
       pillBtn.className = "w-full py-2 rounded bg-slate-800 text-slate-500 text-xs border border-slate-700 cursor-not-allowed";
-      pillBtn.innerText = `💊 暫無渡劫丹 (可在丹閣煉製或坊市購買)`;
+      pillBtn.innerText = `💊 沒有渡劫丹(丹房可煉、坊市可買)`;
     }
   }
 

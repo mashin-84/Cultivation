@@ -244,6 +244,7 @@
       if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } continue; }
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
+      if (b.guide) { if (run.replay || !window.TUT160 || TUT160.done(b.guide)) continue; return doGuide(b.guide); }
       if (b.if !== undefined) {
         let ok = false; try { ok = typeof b.if === 'function' ? !!b.if(SD()) : !!SD().flags[b.if]; } catch (e) { }
         run.q.unshift(...(ok ? b.a : b.b)); continue;
@@ -264,6 +265,13 @@
     };
     let ok = false; try { ok = TB26.story(Object.assign({}, cfg, { onEnd: done })); } catch (e) { ok = false; }
     if (!ok) done(true);
+  }
+  /* v160 劇情引導:暫離對話畫面,讓玩家親手按一次對應的按鈕 */
+  function doGuide(k) {
+    run.fighting = true; run.choosing = false; clearTimeout(timer); clearInterval(typeT); $('st28cs').innerHTML = '';
+    $('st28').classList.remove('on');
+    let back = false; const done = () => { if (back || !run) return; back = true; run.fighting = false; $('st28').classList.add('on'); next(); };
+    try { if (!TUT160.run(k, done)) done(); } catch (e) { done(); }
   }
   function showFightLose(cfg) {
     run.choosing = true; run.cur = { fightCfg: cfg }; $('st28nx').style.visibility = 'hidden';
@@ -411,8 +419,8 @@
   const POST_GAP = 90000, OPT_GAP = 100000, PRESENT = 60000, BACKLOG_GAP = 60000;
   ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastTouch = Date.now(); }, true));
   function blocked() {
-    if (run || currentBattle) return true;
-    return ['modal-ascension', 'modal-tribulation', 'modal-offline', 'modal-death-reincarnate', 'modal-event-choice', 'modal-event-result', 'modal-battle-result', 'modal-gender14'].some(id => { const e = $(id); return e && !e.classList.contains('hidden') && e.offsetParent !== null; });
+    if (run || currentBattle || (window.TUT160 && TUT160.busy()) || (window.BF113 && BF113.on) || (window.THU160 && THU160.on)) return true;
+    return ['modal-ascension', 'modal-tribulation', 'modal-offline', 'modal-death-reincarnate', 'modal-event-choice', 'modal-event-result', 'modal-battle-result', 'modal-gender14', 'title34'].some(id => { const e = $(id); return e && !e.classList.contains('hidden') && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0; });
   }
   function badge() {
     const b = $('btn-story28'); if (!b) return;

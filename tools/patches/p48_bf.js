@@ -17,7 +17,7 @@
   };
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
-  const ULT = { sword: { k: 'sword', n: '劍氣縱橫', ic: '🌬️', cd: 5, f: 1.6, fl: 5 }, magic: { k: 'magic', n: '五行法陣', ic: '🔯', cd: 6, f: 1.6, fl: 5 }, body: { k: 'body', n: '金身怒目', ic: '🪬', cd: 6, f: 1.6, fl: 5 }, pill: { k: 'pill', n: '丹爐煉化', ic: '♨️', cd: 6, f: 1, fl: 3 } };
+  const ULT = { sword: { k: 'sword', n: '劍氣縱橫', ic: '🌬️', cd: 5, f: 2.0, fl: 6.5 }, magic: { k: 'magic', n: '五行法陣', ic: '🔯', cd: 6, f: 1.6, fl: 5 }, body: { k: 'body', n: '金身怒目', ic: '🪬', cd: 6, f: 1.4, fl: 4.5 }, pill: { k: 'pill', n: '丹爐煉化', ic: '♨️', cd: 5, f: 1.2, fl: 4 } };
   const ULTD = { sword: '純粹的劍氣,一擊貫穿。', magic: '法陣灼燒敵人 3 回合,並定身 1 回合(有 40% 機率被抵抗)。', body: '激發金身,獲得氣血 40% 的護盾。', pill: '當場煉丹:回復 30% 氣血,攻擊提升 25%(3 回合)。' };
   const ultBestOf = X => { let m = 0, by = null; (X.sk || []).forEach(k => { if (k.c && k.c.mult) { const v = k.c.mult * (k.sk.type === 'atk' ? (k.c.hits || 1) : 1); if (v > m) { m = v; by = k.sk; } } }); return { m, by }; };
   /* v126 本命絕學倍率:最強攻擊神通總倍率 ×1.6(保底 5) */
@@ -605,7 +605,7 @@
   async function doAtk() {
     setPose(1); if (B.A && B.A.once) await B.A.once('atk'); const q = await qTiming('⚔ ' + ATKN()[0]);
     const m = q === 'pf' ? 1.5 : q === 'gd' ? 1 : .55, cr = critRoll(q), n = q === 'pf' ? 3 : q === 'gd' ? 2 : 1;
-    { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; log(q === 'pf' ? L[0] : q === 'gd' ? L[1] : L[2]); }
+    { const L = { sword: ['劍光如虹,三連斬命中要害!', '道友連斬兩劍。', '劍勢一偏,只削到衣角。'], magic: ['三張符咒接連炸開,張張命中!', '兩張符咒破空而去。', '符咒偏了準頭,只擦過一角。'], body: ['拳如崩山,三連擊結結實實打中!', '兩拳接連轟出。', '拳勢落空,只擦過衣角。'], pill: ['丹爐連砸三記,砸得對手踉蹌!', '丹爐砸中兩下。', '丹爐只擦過對手。'] }[STY()]; const L2 = (B.A && B.A.alog) || L; log(q === 'pf' ? L2[0] : q === 'gd' ? L2[1] : L2[2]); }
     const tot = base(m) * (cr ? critM() : 1) * (window.sectDmgMult ? sectDmgMult(null) : 1); B.fxc = q === 'pf' ? '#fff3b0' : '#ffffff';
     if (STY() === 'magic') {   /* 法修:原地連甩符咒 */
       for (let k = 0; k < n && B.e.hp > 0; k++) {
@@ -760,6 +760,7 @@
     const E = B.e, d = B.d; await sleep(400);
     if (win) { setPose(9); sfx('sfx_win', () => audio.playFanfare()); $('bf-ei').style.transition = 'opacity 1s'; $('bf-ei').style.opacity = '.15'; }
     else sfx('sfx_lose');
+    { const pi = $('bf-pi'); if (pi) { pi.style.transition = 'opacity .8s'; pi.style.opacity = '.28'; } }
     const box = $('bf-end');
     box.innerHTML = `<div class="stamp ${win ? 'w' : 'l'}">${win ? '勝' : '敗'}</div><div class="say">${B.pt || E.art.src ? `【${E.name}】` : ''}${win ? (d.win || '敗了……') : (d.lose || '不過如此。')}</div>
       <div class="say" style="font-size:11px;opacity:.75">${B.cfg.rematch ? '(重戰:不影響劇情與獎勵)' : ''}</div><div class="bts">${win ? '<button data-bfe="ok">繼續</button>' : (B.cfg.engine ? '<button data-bfe="ok">離開</button>' : '<button data-bfe="retry">⚔ 再戰一次</button><button data-bfe="ok">離開</button>')}</div>`;
@@ -782,7 +783,7 @@
       B.d = { intro: '(低吼著逼近,口涎滴在焦土上)' }; B.dM = () => 9; B.pt = null;
       B.G = { allow: ['atk'], tip: '點【揮鋤】還手!' };
       B.A = {
-        who: '你', atk: ['揮鋤', '看準時機・用盡全力砸下去'],
+        who: '你', atk: ['揮鋤', '看準時機・用盡全力砸下去'], alog: ['鋤頭結結實實砸中三下,妖狼痛得一縮!', '鋤頭砸中兩下。', '鋤頭只擦過妖狼的皮毛。'],
         pose: n => K(n === 1 && B.p.hp / B.p.max < .4 ? 6 : MAP[n] || 1),
         tip: n => [.64, .23],
         cp: h => C[`kidcp_${g}_${h}`],
@@ -856,7 +857,7 @@
     const bgk = B.d.bg || cfg.bg;
     root.style.backgroundImage = `url("${cfg.bgSrc || (bgk && window.ART28 && ART28.bg[bgk]) || (GEN3 && (GEN3['A' + Math.min(7, state.realmIdx || 0)] || GEN3.A0))}")`;
     $('bf-en').textContent = cfg.name; $('bf-el').textContent = cfg.label || B.d.title || '';
-    $('bf-pi').src = pose(1) || playerArt(); const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
+    $('bf-pi').src = pose(1) || playerArt(); $('bf-pi').style.opacity = ''; const ei = $('bf-ei'); ei.style.opacity = ''; ei.style.transition = '';
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     if (cfg.script && SCR[cfg.script]) SCR[cfg.script](cfg); root.classList.toggle('scr', !!B.A); $('bf-pi').src = pose(1) || playerArt();

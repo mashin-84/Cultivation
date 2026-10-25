@@ -36,6 +36,7 @@
   /* 決定目標曲:回傳 [曲名, 是否立即] */
   function target() {
     if (window.BF113 && BF113.on) return [BF113.bgm(), true];   /* v113 重要戰鬥 */
+    if (window.THU160 && THU160.on) return ['tianjie', true];   /* v160 雷劫過場 */
     const st = document.getElementById('st28');
     if (st && window.ST28 && ST28.busy() && getComputedStyle(st).display !== 'none') return [storyMood, true];
     const tab = tabNow(), B = typeof currentBattle !== 'undefined' ? currentBattle : null;

@@ -17,9 +17,9 @@
   @keyframes ca43n{0%{opacity:0;transform:translateY(-50%) scale(1.9)}26%{opacity:1;transform:translateY(-50%) scale(1)}84%{opacity:1}100%{opacity:0;transform:translateY(-50%) scale(1.05)}}
   @keyframes ca43i{0%,20%{opacity:0;transform:scale(.6)}32%{opacity:1;transform:scale(1)}85%{opacity:.9}100%{opacity:0}}
   @keyframes ca43f{0%,86%{opacity:0}90%{opacity:.75}100%{opacity:0}}
-  .sk43{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center}
-  .sk43 .rg{position:absolute;width:62%;aspect-ratio:1;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 22px var(--c),inset 0 0 22px var(--c);opacity:0;animation:sk43r var(--d) ease-out forwards}
-  .sk43 .tx{position:relative;font-family:'Noto Serif TC','Songti TC',serif;font-weight:900;font-size:32px;letter-spacing:5px;color:#fff;text-shadow:0 0 8px var(--c),0 0 20px var(--c),0 2px 0 #000;opacity:0;animation:sk43t var(--d) cubic-bezier(.2,.8,.2,1) forwards}
+  .sk43{position:absolute;inset:0;z-index:8;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;padding-top:6%}
+  .sk43 .rg{position:absolute;top:22%;width:46%;aspect-ratio:1;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 22px var(--c),inset 0 0 22px var(--c);opacity:0;animation:sk43r var(--d) ease-out forwards}
+  .sk43 .tx{position:relative;font-family:'Noto Serif TC','Songti TC',serif;font-weight:900;font-size:19px;letter-spacing:4px;color:#fff;padding:3px 16px;border-radius:999px;background:rgba(15,12,8,.42);text-shadow:0 0 6px var(--c),0 1px 0 #000;opacity:0;animation:sk43t var(--d) cubic-bezier(.2,.8,.2,1) forwards}
   .sk43 .gl{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,var(--c) 0,transparent 55%);opacity:0;animation:sk43g var(--d) ease-out forwards;mix-blend-mode:screen}
   @keyframes sk43r{0%{opacity:0;transform:scale(.2)}30%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
   @keyframes sk43t{0%{opacity:0;transform:scale(1.7)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}

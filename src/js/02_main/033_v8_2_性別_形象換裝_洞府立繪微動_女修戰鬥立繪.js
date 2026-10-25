@@ -383,8 +383,9 @@
   /* ---------- 啟動與輪詢 ---------- */
   function tick() {
     init();
+    if (!window.__LOADED112) return;   /* v160:讀檔完成前不判斷(載入慢時 state 還是預設值) */
     if (!state.gender) { if (!$('modal-gender14')) showGender(); }
-    else if (appliedG !== state.gender) applySprites();
+    else { if ($('modal-gender14') && state.name) $('modal-gender14').remove(); if (appliedG !== state.gender) applySprites(); }
     check(); renderBanner();
   }
   applySprites();

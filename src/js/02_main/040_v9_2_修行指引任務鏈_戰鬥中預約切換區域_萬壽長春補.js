@@ -50,6 +50,7 @@
     if (ts < 4) { const t = ['tab-abode', 'tab-abode', 'tab-adventure', 'tab-crafting'][ts]; try { goToTab(t); } catch (e) { } return; }   /* 新手四步:依步驟前往對應分頁 */
     const n = nextStep(); if (n) n.go();
   });
+  window.GD9X = { next: nextStep, steps: STEPS, done: () => GD9().done };   /* v160 指引列改版讀取用 */
   X.act('gd9.list', () => X.open('guide'));
   X.act('gd9.step', t => { const s = STEPS.find(x => x.id === t.dataset.id); if (s) { X.close('guide'); s.go(); } });
   X.act('gd9.skipall', () => { const g = GD9(); STEPS.forEach(s => { if (!g.done[s.id]) g.skip[s.id] = 1; }); saveGame(); scan.sig = ''; scan(); });

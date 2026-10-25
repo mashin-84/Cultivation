@@ -77,7 +77,7 @@
       btn.disabled = true; btn.className = 'w-full py-2.5 rounded-lg bg-slate-800 text-slate-400 font-serif-tc font-bold text-sm border border-amber-800/60 cursor-not-allowed';
       document.getElementById('breakthrough-status-badge').innerText = '須先通過試煉';
       document.getElementById('breakthrough-title').innerText = `境界見證:通關【${g.name}】`;
-      document.getElementById('breakthrough-desc').innerText = `修為雖已圓滿,仍須於${g.name}斬殺境主【${bossOf(g).name}】,方可引動天劫。(建議戰力 ${formatNum(C.REC[state.realmIdx] || 0)})`;
+      document.getElementById('breakthrough-desc').innerText = `修為雖已圓滿,仍須於${g.name}斬殺境主【${bossOf(g).name}】,方可引動天劫。${C.REC[state.realmIdx] ? `(建議戰力 ${formatNum(C.REC[state.realmIdx])})` : ''}`;
     } catch (e) { }
   };
 })();

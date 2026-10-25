@@ -40,7 +40,7 @@ function checkOfflineGains() {
     state.stones += gainStones;
 
     // FIX-B8: 離線壽元增加
-    const offlineYears = Math.floor(effectiveSec / AGE_TICK_SECONDS);
+    const offlineYears = Math.floor(effectiveSec / AGE_TICK_SECONDS * 0.25);   /* v160 閉關時壽元流逝較慢(線上的四分之一),避免睡一晚就老了半輩子 */
     state.age += offlineYears;
 
     // OPT-O3: 離線自動煉丹 (若有凝露靈草，最多煉製5顆聚氣丹)
