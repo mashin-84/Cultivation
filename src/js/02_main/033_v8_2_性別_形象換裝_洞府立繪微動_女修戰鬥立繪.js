@@ -346,7 +346,7 @@
     m.classList.remove('lk14-hide'); state.lookSeen = state.wardrobe.slice(); renderLook(); renderBanner();
   }
   function closeLook() { const m = $('modal-look14'); if (m) m.classList.add('lk14-hide'); }
-  const lockG14 = () => !!(state.story27 && state.story27.seen && state.story27.seen['1.1']);
+  const lockG14 = () => !window.FREE143 && !!(state.story27 && state.story27.seen && state.story27.seen['1.1']);
   function renderLook() {
     const m = ensureModal(); init();
     const g = state.gender || 'm', o = OBY[sel] || OUT[0], own = state.wardrobe.includes(o.id), a = art(g, o.id);
