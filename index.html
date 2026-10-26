@@ -18629,7 +18629,7 @@ window.SJ172 = (() => {
 /* ===== v174 動畫過場:MOV174.play(名稱) → Promise(true 播過 / false 沒有影片) =====
    影片放 src/pwa/movie/名稱.mp4(只在網站版);沒有檔案、單檔版、載入失敗都回傳 false,由呼叫端沿用原本演出 */
 window.MOV174 = (() => {
-  const MAP = {"tribulation": "037912a5"};
+  const MAP = {"opening": "0ff83308", "tribulation": "037912a5"};
   const ok = n => !!MAP[n] && /^https?:$/.test(location.protocol);
   /* v176 字幕:[開始比例, 結束比例, 文字] */
   const SUBS = {
