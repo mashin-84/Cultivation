@@ -259,6 +259,7 @@
       if (b.fx) { fxDo(b.fx); continue; }
       if (b.clr) { $('st28p').className = 'st-p'; $('st28p').innerHTML = ''; run.pk = ''; continue; }
       if (b.set) { if (!run.replay) apply(b.set); continue; }
+      if (b.mov) { if (!run.replay && window.MOV174 && MOV174.has(b.mov)) { MOV174.play(b.mov).then(() => next()); return; } continue; }   /* v180 劇情中途動畫 */
       if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } if (window.MOV174 && MOV174.has('end_' + b.edg)) { MOV174.play('end_' + b.edg).then(() => next()); return; } continue; }   /* v179 結局動畫 end_fly/slay/one */
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
