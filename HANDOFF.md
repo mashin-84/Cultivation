@@ -1,4 +1,4 @@
-# 《一念飛仙》交接說明（最終版183）
+# 《一念飛仙》交接說明（最終版184）
 
 ## 新對話第一步
 1. 把 GitHub 倉庫 `mashin-84/Cultivation` 加進對話（要推送權限）。
@@ -68,6 +68,7 @@
 - v178(p91_yx_done.py):遊學已拿到該境界宗門功法(sectGrad)但劇情沒標看過者,每 2 秒自動補標 seen,避免 at() 因 inGrad 為 false 而永遠鎖住。原則:任何支線錯過都不可變成永遠解不開(其他節點條件皆為「境界以上」或 after 鏈,已檢查)。
 - v179(p92_mov_hooks.py)通用動畫接口:放 `src/pwa/movie/名稱.mp4` 即自動生效,不用改程式。`n_節點id`=該劇情節點開頭播(重看也播);`end_fly|slay|one`=結局記錄時播;`tribulation_f`=女主雷劫(沒有就用 tribulation)。beat `{ mov: 名稱 }` 可放在劇情中途(重看不播),目前 6.6 毀掉天門分支有 cut_gate、接受歸位分支有 gate_obey、暫緩分支有 gate_wait(flag k4_wait)。規劃中:n_1.2 妖潮夜、n_4.4 正魔大戰、n_5.7 飛升、n_8.3 天道之戰、三個結局。
 - v182(p93_gallery.py):11 支影片全部放入 src/pwa/movie(n_1.2/n_4.4/n_5.7/n_8.3/end_fly/end_slay/end_one/tribulation_f/cut_gate/gate_obey,橫式置中裁 720x1280、crf26),opening 第 4 段換中性版重接。劇情總覽「🎬 動畫回顧」(sheet mvl182,MVL 表:只列已經歷的,未經歷 ？？？;天門兩支看 flags k4_obey/k4_smash)。
+- v184(p94_skip.py):放入 gate_wait.mp4;影片不再點畫面跳過,改右上「跳過」鍵→暫停並詢問(繼續觀看/跳過);雷劫有影片且成功時不出程式成功卡,直接回遊戲並 toast(失敗仍顯示結果卡)。
 - **測試開關 FREE143（v143，目前開著）**：`src/js/02_main/000_…js` 第 2 行 `window.FREE143 = true`，換流派免靈石、無冷卻，劇情開始後也能換男女。測完要改成 `false` 恢復限制。
 
 ## 待辦

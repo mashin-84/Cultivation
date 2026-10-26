@@ -94,6 +94,11 @@
       ep.textContent = '第三重雷劈散了凝聚的真元。肉身尚在——調息之後,還能再來。(連續失敗會提高下次的成功率)';
       try { if (window.SFX) SFX.play('sfx_lose'); } catch (e) { }
     }
+    if (mv && ok) {   /* v184 有雷劫動畫且成功:不出成功卡,直接回遊戲 */
+      o.remove(); busy = false; window.THU160.on = false;
+      try { showToast(`渡劫功成!踏入【${REALM_DATA[state.realmIdx].name}】`); updateTopBar(); } catch (e) { }
+      return;
+    }
     end.classList.add('on');
     await new Promise(res => { end.querySelector('button').onclick = res; });
     o.style.transition = 'opacity .4s'; o.style.opacity = '0'; await sleep(420); o.remove();

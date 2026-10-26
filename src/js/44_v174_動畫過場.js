@@ -17,14 +17,19 @@ window.MOV174 = (() => {
       o.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .35s';
       o.innerHTML = '<video playsinline webkit-playsinline preload="auto" style="width:100%;height:100%;object-fit:cover"></video>'
         + '<div class="sub" style="position:absolute;left:8%;right:8%;bottom:22%;text-align:center;color:#fff8e6;font-size:20px;line-height:1.7;letter-spacing:3px;font-family:serif;text-shadow:0 0 8px #000,0 2px 4px #000;opacity:0;transition:opacity .6s;pointer-events:none"></div>'
-        + '<div style="position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));color:rgba(255,255,255,.75);font-size:13px;letter-spacing:2px;text-shadow:0 1px 3px #000;pointer-events:none">點擊跳過</div>';
+        + '<button class="skp" style="position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top));padding:6px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.35);color:#fff;font-size:14px;letter-spacing:2px">跳過 ▸▸</button>'
+        + '<div class="cf" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)"><div style="background:#fbf7ee;color:#3b2f22;border-radius:14px;padding:20px 22px;text-align:center;min-width:220px;box-shadow:0 6px 24px rgba(0,0,0,.4)"><div style="font-size:17px;margin-bottom:16px">要跳過這段動畫嗎?</div><div style="display:flex;gap:12px;justify-content:center"><button class="no" style="padding:8px 18px;border-radius:10px;border:1px solid #b9a888;background:#fff;color:#3b2f22;font-size:15px">繼續觀看</button><button class="yes" style="padding:8px 18px;border-radius:10px;border:none;background:#b8452f;color:#fff;font-size:15px">跳過</button></div></div></div>';
       const v = o.querySelector('video'); let done = false, played = false;
       const fin = () => { if (done) return; done = true; clearTimeout(to); o.style.opacity = '0'; setTimeout(() => { try { v.pause(); } catch (e) { } o.remove(); }, 380); res(played); };
       try { const A = typeof audio !== 'undefined' ? audio : null; v.volume = Math.max(0, Math.min(1, (A && A.volume) || .8)); v.muted = !!(A && A.enabled === false); } catch (e) { }
       v.onplaying = () => { played = true; o.style.opacity = '1'; };
       const sb = o.querySelector('.sub'), SL = SUBS[n] || []; let si = -1;
       v.ontimeupdate = () => { if (!SL.length || !v.duration) return; const f = v.currentTime / v.duration, i = SL.findIndex(x => f >= x[0] && f < x[1]); if (i === si) return; si = i; if (i < 0) sb.style.opacity = '0'; else { sb.innerHTML = SL[i][2]; sb.style.opacity = '1'; } };
-      v.onended = fin; v.onerror = fin; o.onclick = () => { played = true; fin(); };
+      v.onended = fin; v.onerror = fin;
+      const cf = o.querySelector('.cf');   /* v184 跳過要確認:按跳過 → 暫停並詢問 */
+      o.querySelector('.skp').onclick = e => { e.stopPropagation(); try { v.pause(); } catch (x) { } cf.style.display = 'flex'; };
+      cf.querySelector('.no').onclick = e => { e.stopPropagation(); cf.style.display = 'none'; v.play().catch(() => { }); };
+      cf.querySelector('.yes').onclick = e => { e.stopPropagation(); played = true; fin(); };
       const to = setTimeout(() => { if (!played) fin(); }, 6000);   /* 6 秒還沒開始播(網路慢)就放棄,改用原本演出 */
       v.src = 'movie/' + n + '.mp4?v=' + MAP[n];
       document.body.appendChild(o);
