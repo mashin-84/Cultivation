@@ -10942,7 +10942,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   X.act('st28.refight', t => { const n = BY[t.dataset.id], f = n && fightOf(n); if (!f || !window.BF113 || run) return; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { try { showToast('戰鬥中無法重戰。'); } catch (e) { } return; } X.close('st28'); BF113.start(Object.assign({}, f, { rematch: true })).then(() => { try { X.open('st28'); } catch (e) { } }); });
   /* v182 動畫回顧:只列已經歷過的(避免劇透) */
   const MVL = [['opening', '開場・一念而已', () => true], ['n_1.2', '妖潮夜', () => seen('1.2')], ['tribulation', '雷劫(男)', () => (state.realmIdx || 0) >= 1], ['tribulation_f', '雷劫(女)', () => (state.realmIdx || 0) >= 1],
-    ['n_4.4', '正魔大戰', () => seen('4.4')], ['n_5.7', '飛升', () => seen('5.7')], ['gate_obey', '天門前・歸位', () => flag('k4_obey')], ['cut_gate', '斬天門', () => flag('k4_smash')],
+    ['n_4.4', '正魔大戰', () => seen('4.4')], ['n_5.7', '飛升', () => seen('5.7')], ['gate_obey', '天門前・歸位', () => flag('k4_obey')], ['cut_gate', '斬天門', () => flag('k4_smash')], ['gate_wait', '天門前・暫緩', () => flag('k4_wait')],
     ['n_8.3', '天道之戰', () => seen('8.3')], ['end_fly', '結局・飛仙', () => !!SD().endings.fly], ['end_slay', '結局・弒天', () => !!SD().endings.slay], ['end_one', '結局・歸一', () => !!SD().endings.one]];
   X.sheet('mvl182', () => '🎬 動畫回顧', b => {
     let h = '<div class="x5-sub" style="margin-bottom:8px">經歷過的動畫可在此重看;未經歷的以 ？？？ 表示。</div>';
@@ -12778,7 +12778,7 @@ bg('sky'),
           S('N', '', '我不答應,也不拒絕。給我一段時間。'),
           S('仙官', '', '真君,天道不容久等。'),
           S('N', '', '天地有萬萬年,不差這幾天。'),
-          N('仙官面色微變,最終緩緩退開。眾仙班也站起身來,卻都低著頭,不敢直視你的眼睛。'),
+          { mov: 'gate_wait' }, N('仙官面色微變,最終緩緩退開。眾仙班也站起身來,卻都低著頭,不敢直視你的眼睛。'),
           S('夜無咎', 'smile', '很好。留得青山在,才有機會劈開那扇門。'),
           S('白澤', '', '(鬆了口氣)哼,你總算不再是一個人悶著想事情了。'),
           N('你抬頭看向天門。這一次,你沒有迴避它的目光。')
