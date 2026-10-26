@@ -114,7 +114,7 @@
   const isDone = k => !!T()[k];
   const vis = e => { if (!e) return false; const r = e.getBoundingClientRect(), s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden'; };
   const find = sel => { if (!sel) return null; try { return [...document.querySelectorAll(sel)].find(vis) || null; } catch (e) { return null; } };
-  function closeSheets() { try { const x = document.querySelector('#ov53 [data-a53=x]'); if (x && vis(x)) x.click(); } catch (e) { } try { document.querySelectorAll('[id^=x5s-]').forEach(e => { if (vis(e) && X && X.close) X.close(e.id.slice(4)); }); } catch (e) { } }
+  function closeSheets() { try { ['#ov53 [data-a53=x]', '#ov54 [data-a54=x]'].forEach(s => { const x = document.querySelector(s); if (x && vis(x)) x.click(); }); } catch (e) { } try { document.querySelectorAll('[id^=x5s-]').forEach(e => { if (vis(e) && X && X.close) X.close(e.id.slice(4)); }); } catch (e) { } }
   const fmt = t => String(t).replace(/\{N\}/g, state.name || '你');
   function face(w) { const A = (window.ART28 && ART28.ch) || {}; const k = Object.keys(A).find(x => x.indexOf(w + '_') === 0 && !/_(sad|cold|angry)$/.test(x)) || Object.keys(A).find(x => x.indexOf(w + '_') === 0); return k ? A[k] : ''; }
   /* ---------- 畫面 ---------- */
@@ -205,6 +205,7 @@
   /* ---------- 對外 ---------- */
   function run(k, cb) {
     const d = D[k]; if (!d || cur || isDone(k)) return false;
+    closeSheets();   /* v166 先收起開著的面板(例如從道心閣轉世時道心閣還開著) */
     cur = { k, w: d.w, steps: d.s.slice(), i: 0, cb }; go(); return true;
   }
   /* 系統開啟後排隊:等劇情、戰鬥畫面、彈窗都收起來再開始 */
