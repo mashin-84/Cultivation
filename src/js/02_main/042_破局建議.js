@@ -152,4 +152,9 @@
   }
   setInterval(upd, 1500); setTimeout(upd, 800);
   { const s160 = document.createElement('style'); s160.textContent = '.bk-h{font-weight:900;font-size:13px;color:#8a5a12;margin:10px 0 6px}.bk-lk{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 10px;border-radius:8px;background:rgba(201,169,107,.14)!important;border:1px solid rgba(201,169,107,.45);color:#5a3a0c!important;margin-bottom:4px}.bk-lk span{opacity:.8}.bk-row{background:#fffaf0!important;border:1px solid #e0cfa8!important;color:#3a2e1c}.bk-row .nm{color:#8a5a12!important}.bk-row .g{color:#15803d!important}'; document.head.appendChild(s160); }
-  window.BK160 = { cands: () => cands(), ok: () => cands().filter(x => x.ok), target, cp: cpNow, rec: () => REC(target().t), open: () => X.open('bk') };
+  /* v168 效能:指引列與紅點只要「能不能做」,狀態沒變就沿用上次的試算(最多 20 秒) */
+  let memo = null, memoSig = '', memoT = 0;
+  const sigNow = () => { const inv = state.inventory || {}; let n = 0, s = 0; for (const k in inv) { n++; s += inv[k] * (k.length + 1); }
+    return [state.realmIdx, state.subRealm, Math.floor(Math.log2((state.stones || 0) + 1) * 6), state.daoPoints || 0, state.body || 0, n, s, JSON.stringify(state.equipment || {}), JSON.stringify(state.enhance || {}), (state.techniques || []).map(t => t.level).join(','), JSON.stringify(state.talents || {}), Object.keys((state.skills || {}).learned || {}).length].join('|'); };
+  const okMemo = () => { const g = sigNow(); if (!memo || g !== memoSig || Date.now() - memoT > 20000) { memo = cands().filter(x => x.ok); memoSig = g; memoT = Date.now(); } return memo; };
+  window.BK160 = { cands: () => cands(), ok: okMemo, target, cp: cpNow, rec: () => REC(target().t), open: () => X.open('bk') };

@@ -32,6 +32,7 @@
   }
   function bkUpdate(){
     try{
+      if(document.hidden||!(document.getElementById('tab-abode')||{}).offsetParent) return;   /* v168 效能:不在洞府頁不算 */
       bkInit(); const b=$('bk48'); if(!b||!b.offsetParent&&b.style.display!=='none'&&!document.getElementById('tab-abode').offsetParent) return;
       const r=state.realmIdx, sub=state.subRealm, R=REALM_DATA[r]; if(!R||!REALM_DATA[r+1]&&sub>=R.subMax){ b.style.display='none'; return; }
       const major=sub>=R.subMax, nr=major?r+1:r, ns=major?1:sub+1;
@@ -51,11 +52,11 @@
     try{
       const idx=AREAS_DATA.findIndex(a=>a.id===area.id); SC.on=false; SC.idx=idx;
       if(idx<0) return area;
-      const cyc=Math.min(5,state.reincarnationCount|0), cm=1+.2*cyc;
+      const cyc=Math.min(5,state.reincarnationCount|0), cm=1+.05*cyc;   /* v168 周目怪物加成 20%→5% */
       let kh=1,ka=1;
       if(state.realmIdx>=5 && idx>=Math.min(7,state.realmIdx-1)){
         const rec=(CAL9&&CAL9.REC&&CAL9.REC[idx])||0, cp=calculateTotalStats().combatPower;
-        if(rec>0){ const r=cp/rec; if(r>1.2){ kh=Math.min(80,Math.pow(r/1.2,3.8)); ka=Math.min(3,Math.pow(r/1.2,.45)); } }
+        if(rec>0){ const r=cp/rec; if(r>1.2){ kh=Math.min(6,Math.pow(r/1.2,.85));   /* v168 原 3.8 次方:越強打怪越慢,改成增幅低於戰力增幅 */ ka=Math.min(3,Math.pow(r/1.2,.45)); } }
       }
       SC.kh=kh; SC.ka=ka; SC.cm=cm; SC.on=(kh>1.05||cyc>0);
       if(!SC.on) return area;

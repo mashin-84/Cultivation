@@ -26,7 +26,7 @@ const TAP_INSIGHT_PER_LV = 3;
 function getRealmInfo() {
   const realm = REALM_DATA[state.realmIdx] || REALM_DATA[0];
   // OPT-O3: 漸進指數需求公式
-  const maxQi = Math.floor(realm.baseQi * (QI_NEED_MULT[state.realmIdx] || 1) * Math.pow(realm.subMax === 6 ? SUB6_GROW : 1.35, Math.max(0, state.subRealm - 1)) * Math.pow(1.25, Math.min(8, (state.story27 && state.story27.loops) || 0)));
+  const maxQi = Math.floor(realm.baseQi * (QI_NEED_MULT[state.realmIdx] || 1) * Math.pow(realm.subMax === 6 ? SUB6_GROW : 1.35, Math.max(0, state.subRealm - 1)));   /* v168 周目不再加倍修為需求 */
   let title = realm.name;
   if (realm.subMax > 1) {
     title += `第${state.subRealm}層`;
@@ -117,7 +117,7 @@ function calculateTotalStats() {
   if (daoUpgrades['dao_qi']) {
     const _dq = daoUpgrades['dao_qi']; rawQiRate = Math.floor(rawQiRate * (1 + 0.15 * (_dq <= 4 ? _dq : 4 + (_dq - 4) * 0.3))); // v12.0:混沌道體 4 級後每級效果 30%
   }
-  { const _lp = (state.story27 && state.story27.loops) || 0; if (_lp) rawQiRate = Math.floor(rawQiRate * (1 + Math.min(0.15, 0.05 * _lp))); // 周目永久加成
+  { const _lp = (state.story27 && state.story27.loops) || 0; if (_lp) rawQiRate = Math.floor(rawQiRate * (1 + Math.min(0.9, 0.3 * _lp)));   /* v168 每周目 +30%,上限 +90% */ // 周目永久加成
   }
 
   // 仙界靈氣加成(飛升後)

@@ -522,7 +522,7 @@
       const step = () => { if (done) return; if (holding) { const f = (performance.now() - t0) / T; v = f <= 1 ? f : Math.max(0, 1 - (f - 1) * 3); h.style.setProperty('--v', (v * 100) + '%'); if (f > 1.4) fin(); } else if (performance.now() - tStart > 6000) fin(); requestAnimationFrame(step); };
       const fin = () => { if (done) return; done = true; const pv = v * 360; const r = pv >= 306 && pv <= 352 ? 'pf' : v >= .6 ? 'gd' : 'ms'; qClose(); result(r); res(r); };
       q.onpointerdown = e => { if (holding) return; holding = true; t0 = performance.now(); h.querySelector('span').innerHTML = '蓄力中'; };
-      q.onpointerup = () => { if (holding) fin(); };
+      q.onpointerup = () => { if (!holding) return; if (performance.now() - t0 < 250) { holding = false; v = 0; h.style.setProperty('--v', '0%'); h.querySelector('span').innerHTML = '要按住<br>不要放'; return; } fin(); };   /* v168 點一下不算失誤 */
       requestAnimationFrame(step);
     });
   }
@@ -590,7 +590,8 @@
     let a = .05, b = 20; for (let i = 0; i < 26; i++) { const m = Math.sqrt(a * b); if (score(m) > margin) a = m; else b = m; }
     X.e.hp = X.e.max = Math.max(10, ehp); X.e.atk = Math.max(1, Math.floor(atkOf(Math.sqrt(a * b))));
   }
-  function base(mult) { return baseOf(B, mult, B.p.buff); }
+  function base(mult) { return baseOf(B, mult, B.p.buff) * (B.swX || 1); }
+  const SCHM = () => { try { return (state.realmIdx || 0) >= 1 && window.SCH19 ? SCH19.SCH().main || '' : ''; } catch (e) { return ''; } };
   async function dealE(total, hits, crit, key) {
     hits = Math.max(1, hits); const per = total / hits;
     for (let i = 0; i < hits; i++) {
@@ -741,7 +742,12 @@
   async function act(a) {
     if (!B || B.busy) return; B.busy = true; ui();
     try {
+      const sc5 = B.A ? '' : SCHM();   /* v168 流派被動 */
+      if (sc5 === 'pill' && a[0] !== 'pill') { const h = Math.floor(B.p.max * .02); if (h > 0 && B.p.hp < B.p.max) { B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); } }
+      if (sc5 === 'sword' && a[0] !== 'pill') { B.swN = (B.swN || 0) + 1; if (B.swN % 5 === 0) { B.swX = 1.8; num('p', '劍氣貫穿', 'tx'); } }
       if (a[0] === 'atk') await doAtk(); else if (a[0] === 'sk') await doSkill(a[1]); else if (a[0] === 'ult') await doUlt(); else if (a[0] === 'pill') { await doPill(); } else if (a[0] === 'wine') await doWine();
+      if (B.swX) { B.swX = 0; log('劍意凝聚,這一擊化為劍氣貫穿(傷害 ×1.8)!'); }
+      if (sc5 === 'magic' && a[0] === 'sk' && B.e.hp > 0) { await sleep(250); const d = Math.floor(base(1.2)); B.e.hp = Math.max(0, B.e.hp - d); impact('#c4b5fd', false); num('e', fm(d), ''); log(`三枚靈球追射,再造成 ${fm(d)} 傷害。`); ui(); await sleep(300); }
       if (a[0] !== 'pill' && !B.A) await petHit();
       if (B.A && B.A.after) B.A.after(a);
       if (B.e.hp <= 0) return end(true);
@@ -750,6 +756,7 @@
       await sleep(300); await enemyTurn();
       if (B.e.hp <= 0) return end(true);
       if (B.p.hp <= 0) return end(false);
+      if (sc5 === 'body' && !B.bodyLow && B.p.hp / B.p.max < .3) { B.bodyLow = true; B.p.sh = Math.max(B.p.sh, Math.floor(B.p.max * .15)); num('p', '🛡' + fm(B.p.sh), 'hl'); log('金身護體,危急之際再得護盾。'); ui(); }
       Object.keys(B.cd).forEach(k => { if (B.cd[k] > 0) B.cd[k]--; });
       if (B.p.buff && --B.p.buff.turns <= 0) B.p.buff = null;
       B.turn++;
@@ -861,9 +868,10 @@
     if (B.e.art.src) { ei.src = B.e.art.src; ei.style.display = ''; ei.classList.toggle('bffl', !!B.e.art.flip); } else ei.style.display = 'none';
     $('bf-end').classList.remove('on'); root.classList.add('on'); try { BGM96 && BGM96.sync(true); } catch (e) { }
     if (cfg.script && SCR[cfg.script]) SCR[cfg.script](cfg); root.classList.toggle('scr', !!B.A); $('bf-pi').src = pose(1) || playerArt();
+    if (!B.A && SCHM() === 'body') B.p.sh = Math.max(B.p.sh || 0, Math.floor(B.p.max * .15));   /* v168 體修開戰護盾 */
     ui(); log('');
     await cut({ img: B.pt || B.e.art.src, flip: !B.pt && B.e.art.flip, sub: cfg.label || B.d.title || '', big: cfg.name, say: B.d.intro || cfg.intro || '來吧!' });
-    goBurst(); log(B.A && B.A.who ? `輪到${B.A.who}出手。` : '輪到道友出手。'); ui(); if (B.A && B.A.start) await B.A.start();
+    goBurst(); log(B.A && B.A.who ? `輪到${B.A.who}出手。` : cfg.story160 ? '輪到道友出手。<br><span style="font-size:12px;opacity:.85">〔劇情戰:對手依你當下的能力而定,無法單靠數值碾壓——看準時機、善用神通與絕學才是勝負關鍵〕</span>' : '輪到道友出手。'); ui(); if (B.A && B.A.start) await B.A.start();
     if (B && B.auto && !B.busy && !B.over) setTimeout(() => { if (B && B.auto && !B.busy && !B.over) act(autoPick()); }, 600);
   }
   root.addEventListener('click', e => {

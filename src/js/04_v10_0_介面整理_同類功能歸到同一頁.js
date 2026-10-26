@@ -93,6 +93,6 @@
   }
   arrange();
   let n = 0; const fast = setInterval(() => { arrange(); if (++n > 12) clearInterval(fast); }, 800);
-  setInterval(arrange, 1500);
+  setInterval(() => { if (!document.hidden) arrange(); }, 1500);
   window.UI6 = { arrange };
 })();

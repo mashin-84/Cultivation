@@ -106,9 +106,17 @@
       }
     }
     /* 戰鬥舞台內的特效變動不需重算;其餘變動在重繪前立即套用,避免舊樣式閃現 */
-    if (recs.some(r => { const n = r.target.nodeType === 1 ? r.target : r.target.parentElement; return !(n && n.closest && n.closest('#battle-stage')); })) pass();
+    /* v168 效能:只處理有變動的區塊(原本每次變動都重掃整頁按鈕,手機長時間掛機會發熱) */
+    if (busy) return; busy = true;
+    try {
+      const roots = new Set();
+      for (const r of recs) { const n = r.target.nodeType === 1 ? r.target : r.target.parentElement; if (!n || !n.closest || n.closest('#battle-stage')) continue; roots.add(n); if (r.type === 'childList') r.addedNodes.forEach(a => { if (a.nodeType === 1) roots.add(a); }); }
+      const seen = new Set();
+      roots.forEach(n => { const L = n.matches && n.matches('button,.x5-btn') ? [n] : []; if (n.querySelectorAll) n.querySelectorAll('button,.x5-btn').forEach(b => L.push(b)); const up = n.closest && n.closest('button,.x5-btn'); if (up) L.push(up);
+        L.forEach(el => { if (seen.has(el)) return; seen.add(el); if (el.offsetParent || el.getClientRects().length) apply(el); }); });
+    } catch (e) { } busy = false;
   });
-  function start() { mo.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'disabled'], attributeOldValue: true }); pass(); }
+  function start() { mo.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'disabled', 'style'], attributeOldValue: true }); pass(); setInterval(() => { if (!document.hidden) pass(); }, 5000); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   window.addEventListener('resize', () => { document.querySelectorAll('[data-sk74]').forEach(size); });
   window.UI74 = { pass, decide };

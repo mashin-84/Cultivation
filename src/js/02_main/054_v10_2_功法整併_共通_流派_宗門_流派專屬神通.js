@@ -118,7 +118,7 @@
       exp = `<div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800 mt-1"><div class="h-full rounded-full" style="width:${Math.min(100, e.exp / need * 100)}%;background:${elc}"></div></div><div class="text-[10px] text-slate-500">熟練度 ${e.exp}/${need}</div>`;
     }
     const next = e && lv < 10 && lv < cap ? `<div class="text-[10px] text-emerald-300">下一級:${skHead(sk, lv + 1)}</div>` : '';
-    const tag = sk.sch ? `<span class="sk27t" style="background:#422006;color:#fcd34d">${SCI[sk.sch]}${SCN[sk.sch]}專屬</span>` : '';
+    const tag = sk.sch ? `<span class="sk27t" style="background:#fef3c7;color:#92400e;border:1px solid #d97706">${SCI[sk.sch]}${SCN[sk.sch]}專屬</span>` : '';
     const rd = sk.rdD ? `<div class="text-[10px] text-amber-300">◆ ${sk.rdD}</div>` : '';
     return `<div class="rounded-xl border p-2.5 flex space-x-2.5 ${eq ? 'border-amber-500/50' : 'border-slate-800'} ${locked || off ? 'opacity-60' : ''} bg-slate-900"><div class="w-14 h-14 shrink-0 relative">${skArt(sk.id, !e)}${!e ? '<div class="absolute inset-0 flex items-center justify-center text-slate-300 font-bold text-lg">?</div>' : ''}</div><div class="flex-1 min-w-0">
       <div class="flex items-center justify-between"><span class="font-serif-tc font-bold text-sm ${e ? 'text-amber-200' : 'text-slate-400'}">${sk.name}${tag}${e ? ` <span class="text-[11px] text-slate-400">Lv.${lv}</span>` : ''}</span><span class="text-[10px]" style="color:${elc}">${sk.el ? SK_EL[sk.el] + '系' : '無屬性'}·${SK_TYPE[sk.type]}·冷卻${c.cd}</span></div>
@@ -139,7 +139,7 @@
     h += '<div class="space-y-2 mt-2">';
     ids.forEach(id => {
       const s = SE.SECTS.find(x => x.id === id), e = state.sectSk[id];
-      h += `<div class="rounded-xl border p-2.5 ${e.eq ? 'border-amber-500/50' : 'border-slate-800'} bg-slate-900"><div class="flex items-center justify-between"><span class="font-serif-tc font-bold text-sm text-amber-200">${sk45(s.id)}${s.sk.n}<span class="sk27t" style="background:#1e3a5f;color:#93c5fd">🏛${s.n}</span></span><button data-x27="seq" data-id="${id}" class="tap-effect px-2.5 py-1 rounded text-xs font-bold ${e.eq ? 'bg-slate-700 text-amber-300' : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'}">${e.eq ? '卸下' : '裝備'}</button></div><div class="text-[11px] text-emerald-300">${X.fxText(s.sk.E)}</div><div class="text-[10px] text-slate-500">${s.sk.d}</div></div>`;
+      h += `<div class="rounded-xl border p-2.5 ${e.eq ? 'border-amber-500/50' : 'border-slate-800'} bg-slate-900"><div class="flex items-center justify-between"><span class="font-serif-tc font-bold text-sm text-amber-200">${sk45(s.id)}${s.sk.n}<span class="sk27t" style="background:#e0f2fe;color:#1e40af;border:1px solid #38bdf8">🏛${s.n}</span></span><button data-x27="seq" data-id="${id}" class="tap-effect px-2.5 py-1 rounded text-xs font-bold ${e.eq ? 'bg-slate-700 text-amber-300' : 'bg-gradient-to-r from-teal-600 to-teal-500 text-white'}">${e.eq ? '卸下' : '裝備'}</button></div><div class="text-[11px] text-emerald-300">${X.fxText(s.sk.E)}</div><div class="text-[10px] text-slate-500">${s.sk.d}</div></div>`;
     });
     return h + '</div>';
   }

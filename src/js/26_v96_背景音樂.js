@@ -11,7 +11,8 @@
     clearInterval(a._r); const from = a.volume, t0 = performance.now();
     a._r = setInterval(() => { const k = Math.min(1, (performance.now() - t0) / ms); a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); if (k >= 1) { clearInterval(a._r); if (to === 0) a.pause(); } }, 50);
   }
-  const enabled = () => typeof state !== 'undefined' && state.bgmOn !== false && !document.hidden && fileOK();
+  let blurred = false;   /* v168 切到別的 App 時有些手機只發 blur、不發 visibilitychange */
+  const enabled = () => typeof state !== 'undefined' && state.bgmOn !== false && !document.hidden && document.visibilityState === 'visible' && !blurred && fileOK();
   const tabNow = () => (document.querySelector('.tab-panel:not(.hidden)') || {}).id;
   function battleKind(B) {
     const m = B.monster || {}, id = String(m.id || '');
@@ -83,6 +84,10 @@
   }
   function wake() { try { if (audio && audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume(); } catch (e) { } try { sync(true); } catch (e) { } }
   document.addEventListener('visibilitychange', () => { if (document.hidden) hush(); else wake(); });
+  window.addEventListener('blur', () => { blurred = true; hush(); });
+  window.addEventListener('focus', () => { blurred = false; if (!document.hidden) wake(); });
+  /* 保險:任何時候發現畫面不在前景,但還有音樂在播,就立刻停 */
+  setInterval(() => { if ((document.hidden || blurred || document.visibilityState !== 'visible') && Object.keys(tracks).some(n => { const T = tracks[n]; return [T.a, T.b].some(a => a && !a.paused); })) hush(); }, 1000);
   window.addEventListener('pagehide', hush);
   document.addEventListener('freeze', hush);
   window.addEventListener('pageshow', () => { if (!document.hidden) wake(); });

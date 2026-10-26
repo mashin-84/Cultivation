@@ -224,5 +224,9 @@
     } catch (e) { }
   }, 2500);
   { const og = renderAutoStatusBar; renderAutoStatusBar = function () { try { return og.apply(this, arguments); } catch (e) { } }; }
+  /* v168 點壽元:說明主線未了之前不會壽盡 */
+  document.addEventListener('click', e => { const a = e.target.closest && e.target.closest('#res-lifespan'); if (!a) return;
+    try { showToast((window.ST28 && ST28.S().ending) ? '壽元:真實時間每 10 分鐘長一歲,壽盡則坐化輪迴。' : '壽元:每突破大境界都會增加。主線未了之前,灰珠會護住你的真靈——不會壽盡坐化,安心修煉。'); } catch (er) { } });
+  { const s = document.createElement('style'); s.textContent = '#res-lifespan{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}'; document.head.appendChild(s); }
   window.G160 = { pick, render, convert, gateInfo };
 })();

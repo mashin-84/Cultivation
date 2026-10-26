@@ -416,7 +416,9 @@
   let notified = {};
   /* 自動劇情節流:同一時間只放一段;支線/系統劇情需間隔且玩家在場;婉拒的不重放 */
   const declined = {}; let lastEndT = 0, lastWasPost = false, lastTouch = Date.now();
-  const POST_GAP = 90000, OPT_GAP = 100000, PRESENT = 60000, BACKLOG_GAP = 60000;
+  const early = () => (state.realmIdx || 0) <= 1;   /* v168 練氣・築基期突破快,劇情間隔縮短 */
+  let POST_GAP = 90000, OPT_GAP = 100000, PRESENT = 60000, BACKLOG_GAP = 60000;
+  setInterval(() => { const e = early(); POST_GAP = e ? 10000 : 90000; OPT_GAP = e ? 10000 : 100000; BACKLOG_GAP = e ? 10000 : 60000; }, 2000);
   ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastTouch = Date.now(); }, true));
   function blocked() {
     if (run || currentBattle || (window.TUT160 && TUT160.busy()) || (window.BF113 && BF113.on) || (window.THU160 && THU160.on)) return true;
