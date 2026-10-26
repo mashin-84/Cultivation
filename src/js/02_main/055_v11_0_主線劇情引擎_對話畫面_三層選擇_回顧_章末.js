@@ -507,6 +507,7 @@
     const chs = [...new Set(NODES.map(n => n.ch))].sort((a, b) => a - b);
     let h = `<div class="x5-sub" style="margin-bottom:8px">主線依境界推進。章末劇情須看完才能渡劫突破;其餘劇情可隨時觀看,也可重看已讀。</div>`;
     h += `<div class="x5-row" style="margin-bottom:8px;flex-wrap:wrap;gap:6px"><button class="x5-btn ${s.auto ? 'am' : 'gy'}" data-x5="st28.auto">自動播放:${s.auto ? '開' : '關'}</button><button class="x5-btn gy" data-x5="st28.spd">文字速度:${['慢', '正常', '快'][[0.7, 1, 1.6].indexOf(s.spd) < 0 ? 1 : [0.7, 1, 1.6].indexOf(s.spd)]}</button></div>`;
+    if (window.SJ172) h += SJ172.card();   /* v172 生死交鋒預告 */
     const _top = h.length;
     chs.forEach(c => {
       const list0 = NODES.filter(n => n.ch === c); let lk = [-1, 0];   /* v109 依開啟境界排序;沒有境界資訊者沿用前一節的位置 */

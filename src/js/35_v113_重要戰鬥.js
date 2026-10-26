@@ -38,7 +38,40 @@
     '仙衛統領': { charge: ['天戈凝光,雲海俱靜', '天戈鎮世'],
       intro: '逆者當誅。此界,只容一個意志。',
       p2: '……偏離天規。加重懲處。', p3: '天戈,鎮世。',
-      win: '……天道……為何……不語……', lose: '逆者已伏。天門,復歸於靜。' }
+      win: '……天道……為何……不語……', lose: '逆者已伏。天門,復歸於靜。' },
+    /* v172 八位境主(第一次交手為生死交鋒) */
+    '狂暴青狼王': { charge: ['(狼王伏低身軀,四爪扣進岩縫)', '裂風狼牙'],
+      intro: '(狼王仰天長嚎,滿山狼群應聲伏低——這片山,是牠的)',
+      p2: '(狼王甩去臉上的血,綠眼裡第一次露出忌憚)', p3: '(一聲淒厲長嚎,牠渾身青毛倒豎,狂性大發)',
+      win: '(狼王嗚咽著倒地,狼群四散奔逃)', lose: '(狼王低頭嗅了嗅你,轉身踱回巢穴)' },
+    '千年幽冥蛟': { charge: ['(蛟身盤起,幽潭之水倒捲上天)', '幽冥吞淵'],
+      intro: '千年了……總算又有不知死活的修士,來送道行。',
+      p2: '區區人修,竟能傷我鱗甲?', p3: '那便連人帶魂,沉進這幽冥潭底!',
+      win: '我修了千年……竟要死在……一個小輩手裡……', lose: '回去再修幾年。你的道行,我日後再收。' },
+    '烈焰火鱗雕': { charge: ['(火鱗雕振翅升空,周身烈焰越燒越白)', '焚天俯衝'],
+      intro: '(一聲尖唳,熔岩翻湧,火鱗雕自火穴深處破焰而出)',
+      p2: '(羽翼間的火鱗片片豎起,熱浪逼得人睜不開眼)', p3: '(火鱗雕燃起本命真火,整座火穴都在震顫)',
+      win: '(火光一暗,巨雕墜入熔岩,只留下幾片不滅的火羽)', lose: '(火鱗雕盤旋一周,長唳一聲,飛回火穴深處)' },
+    '滅世雷煞魔尊': { charge: ['雷煞匯聚,崖頂天色驟黑', '滅世雷煞'],
+      intro: '本尊在這雷崖鎮了三千年。每一道雷,都劈過一個想成仙的蠢貨。',
+      p2: '有趣……你的骨頭,比雷還硬。', p3: '那便讓你嘗嘗,真正的滅世之雷!',
+      win: '雷……竟也有,劈不動的人……', lose: '又一道雷。這崖上,很快就會多一具骸骨。' },
+    '混沌造化真龍': { charge: ['龍吟九霄,造化之氣翻湧', '造化龍息'],
+      intro: '凡人修到此處,已是不易。可這仙宮,不是你能踏足的地方。',
+      p2: '……你的道,竟有幾分造化之意。', p3: '那便讓吾看看,你能承受幾分真龍之怒!',
+      win: '好……這仙宮,今後由你來去。', lose: '回去罷。你的道,尚未成形。' },
+    '司雷天將': { charge: ['天鼓擂響,雷光聚於鞭梢', '九天司雷鞭'],
+      intro: '奉天庭之令,鎮守天闕。下界修士,止步!',
+      p2: '能接下天雷三鞭……你在下界,定是一方人物。', p3: '天規所在,不容僭越——雷部,聽令!',
+      win: '……天闕為你而開。可天上,未必如你所想。', lose: '下界之人,終究是下界之人。' },
+    '弱水玄龜': { charge: ['(玄龜緩緩縮首,弱水在四周凝成漩渦)', '弱水沉淵'],
+      intro: '老龜……睡了很久了。是你,吵醒了老龜?',
+      p2: '……疼。很久……沒有疼過了。', p3: '弱水三千,鴻毛不浮……你,沉得下去麼?',
+      win: '……好……老龜,可以再睡了……', lose: '去吧……等你輕得能浮在弱水上……再來。' },
+    '混沌魔神·渾沌': { charge: ['混沌翻湧,天地輪廓逐漸模糊', '歸墟混沌'],
+      intro: '天地未分之前,便有我。你這一念,又算得了什麼?',
+      p2: '……一念,竟能在混沌中不散。', p3: '那便讓這一念,也歸於混沌!',
+      win: '原來……一念,也能開天……', lose: '歸去吧。萬物,終將歸我。' }
   };
   const PT = { '顧青衍': 'gu_a', '司徒衡': 'situ_a', '執法長老・司徒衡': 'situ_a', '九幽魔將': '魔將_a', '仙衛統領': '仙衛統領_a', '黑市散修': '散修_a' };
   const FL = ['gu', 'jy_demon', 'jy_rogue'];
@@ -934,6 +967,7 @@
       if (Bt.isJie) return 'jie';
       if (Bt.isWB) return 'wb';
       if (Bt.isTower && (m.isBoss || id === 'tw_100')) return 'tower';
+      if (!Bt.isTower && !Bt.isSect && m.isBoss && bossArea(m) >= 0) return 'boss';   /* v172 境主首戰 */
       return null;
     }
     function cfgOf(k, Bt) {
@@ -944,10 +978,13 @@
       else if (k === 'jie') { c.id = m.id; c.label = '九重劫'; c.intro = '天威浩蕩,劫雷將至——受死!'; c.turns = 10; }
       else if (k === 'demon') { c.id = 'mind_demon'; c.label = '渡劫・心魔'; c.intro = '我即是你,你的貪嗔痴,都在這裡。'; c.art = mindArt(); c.pfrac = 1; }
       else if (k === 'wb') { const w = window.wbState ? wbState().cur : null; c.label = `天地異種${w ? `・第 ${w.tries}/${typeof WB_TRIES !== 'undefined' ? WB_TRIES : 3} 次挑戰` : ''}`; c.art = wbArt(m); c.intro = '(震耳欲聾的咆哮)'; c.efrac = w && w.maxHp ? Math.max(.02, Math.min(1, (m.curHp || w.hp) / w.maxHp)) : 1; c.turns = 10; }
+      else if (k === 'boss') { const i = bossArea(m); c.id = m.id; c.label = `境主・${AREAS_DATA[i].name}`; { const sa = window.MONART26 && MONART26(m); if (sa) c.art = { src: sa, flip: false }; } c.bgSrc = G3()['A' + Math.min(7, i)] || ''; c.auto = !!state.autoExplore; c.turns = 10; }
       else if (k === 'tb26') { const t = Bt.tb26; c.label = t.label || ''; c.tier = t.tier; c.intro = t.kind === 'trial' ? '想兼修此道?先接我三招!' : '擅闖秘境者,死!'; }
       return c;
     }
     const id100 = m => String(m.id || '') === 'tw_100';
+    /* v172 境主所屬地區;已首殺的不算(重打維持一般歷練戰鬥) */
+    function bossArea(m) { try { const i = AREAS_DATA.findIndex(a => a.monsters.some(x => x.isBoss && x.id === m.id)); return i >= 0 && !(state.areaFirstClear || {})[AREAS_DATA[i].id] ? i : -1; } catch (e) { return -1; } }
     function engage(k) {
       const Bt = currentBattle; if (!Bt || Bt.bf113) return; Bt.bf113 = k; battleLock = true;
       try { clearTimeout(battleAutoTimer); } catch (e) { }

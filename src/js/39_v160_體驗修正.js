@@ -147,7 +147,7 @@
     const brkB = $('btn-trigger-breakthrough');
     /* 1. 新劇情 */
     const sn = !(window.ST28 && ST28.busy()) && storyNext();
-    if (sn && $('btn-story28') && $('btn-story28').classList.contains('dot')) return { k: 'st:' + sn.id, ic: '卷', t: `新的劇情:〈${sn.title}〉`, go: () => playStory(sn.id) };
+    if (sn && $('btn-story28') && $('btn-story28').classList.contains('dot')) return { k: 'st:' + sn.id, ic: '卷', t: `${window.SJ172 && SJ172.has(sn) ? '生死交鋒將至' : '新的劇情'}:〈${sn.title}〉`, go: () => playStory(sn.id) };
     /* 2. 新手四步 */
     /* 新手四步:實際做過就算完成(劇情引導裡可能先做了後面的步驟) */
     try { const S = X.ST(); let s = state.tutorialStep || 0;
@@ -164,7 +164,7 @@
     const G = gateInfo();
     if (G && state.qi >= getRealmInfo().maxQi) {
       if (G.cp < G.rec) return { k: 'gate', ic: '力', t: `斬殺【${G.boss}】才能突破・戰力 ${fmt(G.cp)}/${fmt(G.rec)},先變強`, go: () => BK160.open() };
-      return { k: 'gate2', ic: '戰', t: `前往【${G.area}】斬殺境主【${G.boss}】`, go: () => goTab('tab-adventure', () => { const b = document.querySelector(`[data-area="${G.i}"]`); if (b) b.click(); }) };
+      return { k: 'gate2', ic: '戰', t: `生死交鋒:前往【${G.area}】斬殺境主【${G.boss}】`, go: () => goTab('tab-adventure', () => { const b = document.querySelector(`[data-area="${G.i}"]`); if (b) b.click(); }) };
     }
     /* 5. 修行指引任務鏈(同一步卡超過 15 分鐘,改指向最划算的戰力提升) */
     const g = GS(), n = window.GD9X && GD9X.next();
