@@ -18266,8 +18266,6 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
 #btn-use-heal,#btn-auto-pill{min-height:40px!important}
 .inv13-chips button,#cr52 .chips button,[data-k52],[data-s52],[data-c13]{min-height:38px!important}
 /* 紅點:淡色 = 早就在那、可以做但不急;亮紅 = 新出現 */
-.rd.f160,.dot25.f160,.x5-dot.f160,.rd14.f160{background:#f59e0b!important;opacity:.55;transform:scale(.8);box-shadow:none!important;animation:none!important}
-#btn-story28.dot.f160::after{background:#f59e0b!important;opacity:.55}
 `;
   document.head.appendChild(css);
 
@@ -18319,7 +18317,8 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
     /* 底部分頁:裡面有新的紅點 → 亮紅;只剩看過的 → 淡色 */
     document.querySelectorAll('#nav25 [data-n25]').forEach(b => { const d = b.querySelector('.dot25'); if (d) d.classList.toggle('f160', !unseen[b.dataset.n25]); });
   }
-  setInterval(() => { try { dots(); } catch (e) { } }, 1200);
+  /* v167 取消橘點:能點的地方一律紅點(清掉舊的淡色標記) */
+  setInterval(() => { try { document.querySelectorAll('.f160').forEach(d => d.classList.remove('f160')); } catch (e) { } }, 1200);
 
   /* ---------- 3. 歷練頁區域標題:跟著目前區域走 ---------- */
   setInterval(() => {
