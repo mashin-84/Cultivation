@@ -52,7 +52,7 @@
   let busy = false;
   async function play() {
     busy = true; window.THU160.on = true;
-    let mv = false; try { mv = window.MOV174 ? await MOV174.play('tribulation') : false; } catch (e) { }   /* v174 有雷劫動畫就先播,三重雷的程式演出略過 */
+    let mv = false; try { mv = window.MOV174 ? await MOV174.play(state.gender === 'f' && MOV174.has('tribulation_f') ? 'tribulation_f' : 'tribulation') : false; } catch (e) { }   /* v174 有雷劫動畫就先播,三重雷的程式演出略過 */
     const realm = state.realmIdx || 0, next = (REALM_DATA[realm + 1] || {}).name || '下一境界';
     let bgSrc = ''; try { const G = window.GEN3 || (typeof GEN3 !== 'undefined' ? GEN3 : {}); bgSrc = G['A' + Math.min(7, realm)] || G.A0 || ''; } catch (e) { }
     const o = document.createElement('div'); o.id = 'thu160';

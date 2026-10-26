@@ -179,6 +179,7 @@
   /* ---------- 執行 ---------- */
   let run = null, bgSlot = 0, timer = null, typeT = null;
   function play(id, o) {
+    if (window.MOV174 && !(o && o._mv) && MOV174.has('n_' + id)) { MOV174.play('n_' + id).then(() => play(id, Object.assign({}, o, { _mv: 1 }))); return; }   /* v179 節點開頭動畫 n_節點id */
     const n = BY[id]; if (!n || run) return false;
     o = o || {}; ensureUI();
     const s = SD();
@@ -258,7 +259,7 @@
       if (b.fx) { fxDo(b.fx); continue; }
       if (b.clr) { $('st28p').className = 'st-p'; $('st28p').innerHTML = ''; run.pk = ''; continue; }
       if (b.set) { if (!run.replay) apply(b.set); continue; }
-      if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } continue; }
+      if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } if (window.MOV174 && MOV174.has('end_' + b.edg)) { MOV174.play('end_' + b.edg).then(() => next()); return; } continue; }   /* v179 結局動畫 end_fly/slay/one */
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
       if (b.guide) { if (run.replay || !window.TUT160 || TUT160.done(b.guide)) continue; return doGuide(b.guide); }
