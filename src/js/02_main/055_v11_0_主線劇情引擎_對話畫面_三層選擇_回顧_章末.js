@@ -332,8 +332,11 @@
     const head = type === 'k' ? '<div class="st-kh">⚑ 命運抉擇</div>' : '';
     const ph = b.head ? `<div class="st-ph">${fmt(b.head)}</div>` : '';
     const lk = o => { try { return o.lock ? (o.lock(s) || '') : ''; } catch (e) { return ''; } };
+    /* v169 第二周目起,命運抉擇標出道心傾向(第一周目保留懸念) */
+    const RTC = { t: '#b45309', r: '#b91c1c', y: '#6d28d9' };
+    const rt = o => (type === 'k' && (s.cycle || 1) > 1 && o.e && o.e.sc && ROUTE[o.e.sc]) ? `<div style="font-size:12px;font-weight:800;color:${RTC[o.e.sc] || '#8a5a12'};margin-top:3px">〔${ROUTE[o.e.sc]}〕</div>` : '';
     const hint = o => { const h = lk(o); return h && (s.cycle || 1) > 1 ? h + `〔超脫 ${s.score.y}/3・蘇棠羈絆 ${s.bond.su}/12〕` : h; };
-    box.innerHTML = ph + head + opts.map((o, i) => { const h = hint(o); return h ? `<button class="${type} lk" data-s28="lock" data-i="${i}" style="opacity:.55;filter:grayscale(.8)">🔒 ${fmt(o.t)}<div style="font-size:12px;font-weight:600;color:#fca5a5;margin-top:3px">${esc(h)}</div></button>` : `<button class="${type}" data-s28="pick" data-i="${i}">${fmt(o.t)}${o.info || ''}</button>`; }).join('');
+    box.innerHTML = ph + head + opts.map((o, i) => { const h = hint(o); return h ? `<button class="${type} lk" data-s28="lock" data-i="${i}" style="opacity:.55;filter:grayscale(.8)">🔒 ${fmt(o.t)}<div style="font-size:12px;font-weight:600;color:#fca5a5;margin-top:3px">${esc(h)}</div></button>` : `<button class="${type}" data-s28="pick" data-i="${i}">${fmt(o.t)}${o.info || ''}${rt(o)}</button>`; }).join('');
     run.cur = b;
   }
   function choose(b, i, silent) {
