@@ -14534,6 +14534,8 @@ header .flex.justify-between.mb-0\\.5{margin-bottom:1px!important}
     ['玄仙境界,三界之中能教你的人,已經不多了。', '瑤池、弱水、蟠桃、觀潮、噬魂——幾家古老的仙宗,仍守著不外傳的法門。'],
     ['金仙之境,你離「一念」只差最後幾步。', '混沌、星辰、輪迴、劍冢、魔殿——最後一批願意開門的宗門,都在等你。']
   ];
+  /* v178 遊學已完成(功法已拿到)但劇情沒標看過 → 補標,避免永遠鎖住 */
+  setInterval(() => { try { const sn = state.story27 && state.story27.seen; if (!sn) return; for (let r = 0; r <= 7; r++) if (!sn['yx.' + r] && inGrad(r)) sn['yx.' + r] = 1; } catch (e) { } }, 2000);
   for (let r = 0; r <= 7; r++) {
     const list = SE.SECTS.filter(x => x.r === r); if (!list.length) continue;
     const need = r === 0 ? 4 : 2;
