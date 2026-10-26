@@ -10628,6 +10628,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
       if (b.fx) { fxDo(b.fx); continue; }
       if (b.clr) { $('st28p').className = 'st-p'; $('st28p').innerHTML = ''; run.pk = ''; continue; }
       if (b.set) { if (!run.replay) apply(b.set); continue; }
+      if (b.mov) { if (!run.replay && window.MOV174 && MOV174.has(b.mov)) { MOV174.play(b.mov).then(() => next()); return; } continue; }   /* v180 劇情中途動畫 */
       if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } if (window.MOV174 && MOV174.has('end_' + b.edg)) { MOV174.play('end_' + b.edg).then(() => next()); return; } continue; }   /* v179 結局動畫 end_fly/slay/one */
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
@@ -12742,7 +12743,7 @@ bg('sky'),
           S('仙官', '', '真君,您瘋了。毀掉天門,凡間就再無飛升之路!'),
           S('N', '', '那就讓凡間,走自己的路。'),
           fx('red'),
-          N('你抬手,一劍斬向天門。天地間響起一聲悠長的、近乎哀鳴的嘯聲,白玉的紋路一寸寸崩裂。'),
+          { mov: 'cut_gate' }, N('你抬手,一劍斬向天門。天地間響起一聲悠長的、近乎哀鳴的嘯聲,白玉的紋路一寸寸崩裂。'),
           fx('shake'),
           N('仙班驚呼著後退,天將紛紛拔劍。夜無咎一個箭步擋在你身前,白澤的身形暴漲數倍,咆哮聲震得雲海翻騰。'),
           S('夜無咎', 'smile', '(低聲)終於。我等的,就是這一劍。'),
