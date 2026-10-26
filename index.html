@@ -10434,6 +10434,23 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     const r = state.realmIdx || 0;
     return NODES.find(n => n.end && !n.post && CHR[n.ch] === r && !seen(n.id)) || null;
   }
+  /* v173 大境界突破前必看:該境界(含之前)尚未看過的支線/機緣/遊學,只列現在就能看的(避免卡死) */
+  const realmOf = n => { const q = n.at && n.at._rq, y = n.at && n.at._yx; return y ? y[0] : q ? q[0] : null; };
+  const canNow = n => !seen(n.id) && safe(n.at) && (!n.after || seen(n.after)) && (n.opt || nextMain() === n);
+  function reqList() {
+    const r = state.realmIdx || 0;
+    return NODES.filter(n => n.opt && n.id !== 's.cycle' && !seen(n.id) && realmOf(n) != null && realmOf(n) <= r)
+      .sort((a, b) => realmOf(a) - realmOf(b)).filter(canNow);
+  }
+  ST.req = reqList;
+  /* 鎖住的劇情:往前追到現在就能看的那一段 */
+  function goTo(n, d) {
+    if (!n || (d || 0) > 12 || seen(n.id) || !safe(n.at)) return null;   /* 境界未到:只寫條件,不給前往 */
+    if (canNow(n)) return n;
+    if (n.after && !seen(n.after)) return goTo(BY[n.after], (d || 0) + 1);
+    if (!n.opt) { const m = nextMain(); if (m && m !== n) return goTo(m, (d || 0) + 1); }
+    return null;
+  }
   /* ---------- 效果 ---------- */
   const rs = n => Math.floor(n * 60 * Math.pow(5, state.realmIdx || 0));
   function apply(e, cid, type) {
@@ -10833,6 +10850,8 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
           else { play(m.id, { then: () => { try { showToast('📖 尚有前塵未了,再按一次渡劫繼續。'); } catch (e) { } } }); }
           return; }
         try { showToast('📖 仙途上尚有未了的前塵,需先完成本章劇情。'); } catch (e) { } return; } }
+    { const L = reqList();   /* v173 本境界(含之前)的支線/機緣/遊學要先看完 */
+      if (L.length) { play(L[0].id, { then: () => { const k = reqList().length; try { showToast(k ? `📖 突破前還有 ${k} 段劇情未看,再按一次渡劫繼續。` : '📖 前塵已了,再按一次渡劫。'); } catch (e) { } } }); return; } }
     if (g && safe(g.at)) { play(g.id, { then: () => (g.id === '8.6' ? daoLuo() : o.apply(self, args)) }); return; }
     if (g) { try { showToast('📖 仙途上尚有未了的前塵,需先完成本章劇情。'); } catch (e) { } return; }
     if ((state.realmIdx || 0) === 7 && seen('8.6')) { daoLuo(); return; }   /* 終章已演過:不再二次渡劫 */
@@ -10864,8 +10883,11 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   function lockWhy(n) {
     const q = n.at && n.at._rq, rn = r => (REALM_DATA[r] || {}).name || '';
     const realmOk = !n.at || safe(n.at);
+    const y = n.at && n.at._yx;
+    if (!realmOk && y) return `${rn(y[0])}${y[1] > 1 ? `第 ${y[1]} 層` : ''}後開啟`;
+    if (!realmOk && !q) { const W = { '1.4b': '在洞府打坐修煉片刻後開啟', '5.1': '看完〈神識通天〉後開啟', '5.7': '飛升時開啟', 's.cycle': '看完結局後開啟' }; if (W[n.id]) return W[n.id]; }
     if (!realmOk && q) return q[2] ? `${rn(q[0])}圓滿後開啟` : `${rn(q[0])}${q[1] > 1 && (REALM_DATA[q[0]] || {}).subMax > 1 ? `第 ${q[1]} 層` : ''}後開啟`;
-    if (n.after && !seen(n.after)) return '看完前一段劇情後開啟';
+    if (n.after && !seen(n.after)) return BY[n.after] && (seen(BY[n.after].id) || canNow(BY[n.after]) || goTo(BY[n.after])) ? `看完〈${BY[n.after].title}〉後開啟` : '看完前一段劇情後開啟';
     if (!n.opt) { const m = nextMain(); if (m && m.id !== n.id) return '依序看完前面的主線後開啟'; }
     return realmOk ? '條件達成後開啟' : '特定條件達成後開啟';
   }
@@ -10876,6 +10898,8 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     const chs = [...new Set(NODES.map(n => n.ch))].sort((a, b) => a - b);
     let h = `<div class="x5-sub" style="margin-bottom:8px">主線依境界推進。章末劇情須看完才能渡劫突破;其餘劇情可隨時觀看,也可重看已讀。</div>`;
     h += `<div class="x5-row" style="margin-bottom:8px;flex-wrap:wrap;gap:6px"><button class="x5-btn ${s.auto ? 'am' : 'gy'}" data-x5="st28.auto">自動播放:${s.auto ? '開' : '關'}</button><button class="x5-btn gy" data-x5="st28.spd">文字速度:${['慢', '正常', '快'][[0.7, 1, 1.6].indexOf(s.spd) < 0 ? 1 : [0.7, 1, 1.6].indexOf(s.spd)]}</button></div>`;
+    { const L = reqList(), nx = REALM_DATA[(state.realmIdx || 0) + 1];   /* v173 突破前必看 */
+      if (L.length && nx) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d;font-size:14px">📖 突破【${nx.name}】前還需看完 ${L.length} 段</b>` + L.map(n => `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0">${n.sys ? '<span class="x5-sub">[機緣]</span> ' : '<span class="x5-sub">[支線]</span> '}${n.title}</div><button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button></div>`).join('') + `</div>`; }
     if (window.SJ172) h += SJ172.card();   /* v172 生死交鋒預告 */
     const _top = h.length;
     chs.forEach(c => {
@@ -10884,7 +10908,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
       h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d;font-size:14px">第${'零一二三四五六七八'[c]}章・${CHN[c]}</b> <span class="x5-sub">${done}/${list.length}</span>`;
       list.forEach(n => {
         const sn = !!s.seen[n.id], ok = ids.has(n.id);
-        h += `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0"><span style="color:${sn ? '#86efac' : ok ? '#fbbf24' : '#64748b'}">${sn ? '✔' : ok ? '▶' : '🔒'}</span> ${n.sys ? '<span class="x5-sub">[機緣]</span> ' : n.opt ? '<span class="x5-sub">[支線]</span> ' : ''}${sn || ok ? n.title : '？？？'}${!sn && !ok ? `<div class="x5-sub" style="margin-top:2px">🔒 ${lockWhy(n)}</div>` : ''}</div>${sn && fightOf(n) ? `<button class="x5-btn am" data-x5="st28.refight" data-id="${n.id}" style="margin-right:4px">⚔ 重戰</button>` : ''}${sn ? `<button class="x5-btn gy" data-x5="st28.play" data-id="${n.id}">重看</button>` : ok ? `<button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button>` : ''}</div>`;
+        h += `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0"><span style="color:${sn ? '#86efac' : ok ? '#fbbf24' : '#64748b'}">${sn ? '✔' : ok ? '▶' : '🔒'}</span> ${n.sys ? '<span class="x5-sub">[機緣]</span> ' : n.opt ? '<span class="x5-sub">[支線]</span> ' : ''}${sn || ok ? n.title : '？？？'}${!sn && !ok ? `<div class="x5-sub" style="margin-top:2px">🔒 ${lockWhy(n)}</div>` : ''}</div>${sn && fightOf(n) ? `<button class="x5-btn am" data-x5="st28.refight" data-id="${n.id}" style="margin-right:4px">⚔ 重戰</button>` : ''}${sn ? `<button class="x5-btn gy" data-x5="st28.play" data-id="${n.id}">重看</button>` : ok ? `<button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button>` : (() => { const g = goTo(n); return g && g !== n ? `<button class="x5-btn am" data-x5="st28.play" data-id="${g.id}">前往</button>` : ''; })()}</div>`;
       });
       h += '</div>';
     });
@@ -14525,7 +14549,7 @@ header .flex.justify-between.mb-0\\.5{margin-bottom:1px!important}
     }));
     A.add({
       id: 'yx.' + r, ch: Math.min(8, r + 1), title: `${['練氣', '築基', '金丹', '元嬰', '化神', '真仙', '玄仙', '金仙'][r]}・遊學`, opt: true, auto: true, after: r === 0 ? 's.sect' : undefined,
-      at: () => (state.realmIdx || 0) === r && (state.subRealm || 1) >= need && !inGrad(r),
+      at: Object.assign(() => ((state.realmIdx || 0) > r || ((state.realmIdx || 0) === r && (state.subRealm || 1) >= need)) && !inGrad(r), { _yx: [r, need] }),   /* v173 過了該境界仍可補做 */
       beats: [
         bg(IMM(r) ? 'gate_xian' : 'gate'),
         N(INTRO[r][0]), N(INTRO[r][1]),
@@ -18210,6 +18234,8 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
       if (ts === 3 && window.UNLOCK9 && !UNLOCK9.on('alch')) return { k: 'nb3', ic: '修', t: '修煉到【練氣第5層】,煉丹閣就會開啟', go: () => goTab('tab-abode') };
       return { k: 'nb' + ts, ic: String(ts + 1), t: NEWBIE[ts], go: () => goTab(['tab-abode', 'tab-abode', 'tab-adventure', 'tab-crafting'][ts], () => { const e = ts === 0 ? $('btn-tap-cultivate') : ts === 1 ? document.querySelector('[data-a53=arr]') : null; if (e) e.scrollIntoView({ block: 'center' }); }) };
     }
+    /* v173 大境界圓滿、仍有必看劇情 */
+    try { const ri = getRealmInfo(); if (state.qi >= ri.maxQi && (state.subRealm || 1) >= ri.realm.subMax && window.ST28 && ST28.req) { const L = ST28.req(); if (L.length) return { k: 'req', ic: '卷', t: `突破前還有 ${L.length} 段劇情未看:〈${L[0].title}〉`, go: () => playStory(L[0].id) }; } } catch (e) { }
     /* 3. 可以突破 */
     if (brkB && !brkB.disabled && state.qi >= getRealmInfo().maxQi && !gateInfo()) return { k: 'brk', ic: '破', t: '修為圓滿,可以突破了!', go: () => goTab('tab-abode', () => { const b = $('btn-trigger-breakthrough'); if (b) b.scrollIntoView({ block: 'center' }); }) };
     /* 4. 卡在境界見證 */
