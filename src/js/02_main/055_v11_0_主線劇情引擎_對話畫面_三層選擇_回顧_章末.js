@@ -573,7 +573,7 @@
   X.act('st28.refight', t => { const n = BY[t.dataset.id], f = n && fightOf(n); if (!f || !window.BF113 || run) return; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { try { showToast('戰鬥中無法重戰。'); } catch (e) { } return; } X.close('st28'); BF113.start(Object.assign({}, f, { rematch: true })).then(() => { try { X.open('st28'); } catch (e) { } }); });
   /* v182 動畫回顧:只列已經歷過的(避免劇透) */
   const MVL = [['opening', '開場・一念而已', () => true], ['n_1.2', '妖潮夜', () => seen('1.2')], ['tribulation', '雷劫(男)', () => (state.realmIdx || 0) >= 1], ['tribulation_f', '雷劫(女)', () => (state.realmIdx || 0) >= 1],
-    ['n_4.4', '正魔大戰', () => seen('4.4')], ['n_5.7', '飛升', () => seen('5.7')], ['gate_obey', '天門前・歸位', () => flag('k4_obey')], ['cut_gate', '斬天門', () => flag('k4_smash')],
+    ['n_4.4', '正魔大戰', () => seen('4.4')], ['n_5.7', '飛升', () => seen('5.7')], ['gate_obey', '天門前・歸位', () => flag('k4_obey')], ['cut_gate', '斬天門', () => flag('k4_smash')], ['gate_wait', '天門前・暫緩', () => flag('k4_wait')],
     ['n_8.3', '天道之戰', () => seen('8.3')], ['end_fly', '結局・飛仙', () => !!SD().endings.fly], ['end_slay', '結局・弒天', () => !!SD().endings.slay], ['end_one', '結局・歸一', () => !!SD().endings.one]];
   X.sheet('mvl182', () => '🎬 動畫回顧', b => {
     let h = '<div class="x5-sub" style="margin-bottom:8px">經歷過的動畫可在此重看;未經歷的以 ？？？ 表示。</div>';
