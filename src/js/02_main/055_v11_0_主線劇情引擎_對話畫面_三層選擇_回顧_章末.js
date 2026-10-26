@@ -441,7 +441,7 @@
   setInterval(() => { const e = early(); POST_GAP = e ? 10000 : 90000; OPT_GAP = e ? 10000 : 100000; BACKLOG_GAP = e ? 10000 : 60000; }, 2000);
   ['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastTouch = Date.now(); }, true));
   function blocked() {
-    if (run || currentBattle || (window.TUT160 && TUT160.busy()) || (window.BF113 && BF113.on) || (window.THU160 && THU160.on)) return true;
+    if (run || currentBattle || (window.TUT160 && TUT160.busy()) || (window.BF113 && BF113.on) || (window.THU160 && THU160.on) || (window.MOV174 && MOV174.on())) return true;
     return ['modal-ascension', 'modal-tribulation', 'modal-offline', 'modal-death-reincarnate', 'modal-event-choice', 'modal-event-result', 'modal-battle-result', 'modal-gender14', 'title34'].some(id => { const e = $(id); return e && !e.classList.contains('hidden') && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0; });
   }
   function badge() {
@@ -455,7 +455,9 @@
     if (blocked() || !state.gender) return;
     const m = nextMain();
     const backlog = (() => { let c = 0; for (const x of mainNodes()) { if (seen(x.id) || x.end || x.post) continue; if (safe(x.at)) c++; else break; } return c; })();
-    if (m && m.auto && !declined[m.id] && safe(m.at) && !(lastWasPost && Date.now() - lastEndT < POST_GAP) && !(backlog >= 2 && Date.now() - lastEndT < BACKLOG_GAP)) { play(m.id); return; }
+    if (m && m.auto && !declined[m.id] && safe(m.at) && !(lastWasPost && Date.now() - lastEndT < POST_GAP) && !(backlog >= 2 && Date.now() - lastEndT < BACKLOG_GAP)) {
+      if (m.id === '1.1' && !state.op176 && window.MOV174 && MOV174.has('opening')) { state.op176 = 1; MOV174.play('opening').then(() => play('1.1')); return; }   /* v176 開場動畫 */
+      play(m.id); return; }
     /* 機緣節點(opt+auto):系統開放的劇情,條件齊備即自動演出;系統已開(讀檔/新周目)則靜默略過 */
     { const oa = NODES.find(n => n.opt && n.auto && !declined[n.id] && !seen(n.id) && (!n.after || seen(n.after)) && safe(n.at));
       if (oa) { if ((oa.sys && window.UNLOCK9 && UNLOCK9.on(oa.sys)) || (oa.cyc && (SD().cycle || 1) > 1)) { SD().seen[oa.id] = 1; try { saveGame(); } catch (e) { } } else if (Date.now() - lastEndT >= OPT_GAP && Date.now() - lastTouch < PRESENT) { play(oa.id); return; } } }
@@ -532,6 +534,7 @@
     { const L = reqList(), nx = REALM_DATA[(state.realmIdx || 0) + 1];   /* v173 突破前必看 */
       if (L.length && nx) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d;font-size:14px">📖 突破【${nx.name}】前還需看完 ${L.length} 段</b>` + L.map(n => `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0">${n.sys ? '<span class="x5-sub">[機緣]</span> ' : '<span class="x5-sub">[支線]</span> '}${n.title}</div><button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button></div>`).join('') + `</div>`; }
     if (window.SJ172) h += SJ172.card();   /* v172 生死交鋒預告 */
+    if (window.MOV174 && MOV174.has('opening')) h += `<div class="x5-row" style="margin-bottom:8px"><button class="x5-btn gy" data-x5="st28.op">🎬 重看開場動畫</button></div>`;   /* v176 */
     const _top = h.length;
     chs.forEach(c => {
       const list0 = NODES.filter(n => n.ch === c); let lk = [-1, 0];   /* v109 依開啟境界排序;沒有境界資訊者沿用前一節的位置 */
@@ -566,6 +569,7 @@
   /* v113 重戰:找出節點裡的劇情戰設定 */
   function fightOf(n) { let f = null; const walk = x => { if (f || !x || typeof x !== 'object') return; if (x.fight && typeof x.fight === 'object' && x.fight.name) { f = x.fight; return; } (Array.isArray(x) ? x : Object.values(x)).forEach(walk); }; walk(n.beats); return f; }
   X.act('st28.refight', t => { const n = BY[t.dataset.id], f = n && fightOf(n); if (!f || !window.BF113 || run) return; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { try { showToast('戰鬥中無法重戰。'); } catch (e) { } return; } X.close('st28'); BF113.start(Object.assign({}, f, { rematch: true })).then(() => { try { X.open('st28'); } catch (e) { } }); });
+  X.act('st28.op', () => { if (run) return; X.close('st28'); MOV174.play('opening'); });   /* v176 */
   X.act('st28.play', t => { const id = t.dataset.id, n = BY[id]; if (!n) return; if (blocked() && !run) { try { showToast('目前無法觀看劇情。'); } catch (e) { } return; } X.close('st28'); play(id); });
   X.act('st28.log', () => { X.close('st28'); ensureUI(); $('st28').classList.add('on'); showLog(); });
   /* 主線未了不會坐化;結局後坐化/輪迴 = 新周目 */
