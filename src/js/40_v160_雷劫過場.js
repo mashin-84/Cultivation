@@ -52,6 +52,7 @@
   let busy = false;
   async function play() {
     busy = true; window.THU160.on = true;
+    let mv = false; try { mv = window.MOV174 ? await MOV174.play('tribulation') : false; } catch (e) { }   /* v174 有雷劫動畫就先播,三重雷的程式演出略過 */
     const realm = state.realmIdx || 0, next = (REALM_DATA[realm + 1] || {}).name || '下一境界';
     let bgSrc = ''; try { const G = window.GEN3 || (typeof GEN3 !== 'undefined' ? GEN3 : {}); bgSrc = G['A' + Math.min(7, realm)] || G.A0 || ''; } catch (e) { }
     const o = document.createElement('div'); o.id = 'thu160';
@@ -61,8 +62,8 @@
     const pc = o.querySelector('.pc'), svg = o.querySelector('svg'), fl = o.querySelector('.fl'), tt = o.querySelector('.tt'), bar = o.querySelector('.bar i'), aura = o.querySelector('.aura');
     pc.src = poseKey(1) || (typeof playerArt === 'function' ? playerArt() : '');
     tt.innerHTML = `天劫降臨<small>欲踏入【${next}】,須硬抗三重天雷</small>`; tt.classList.add('on');
-    await sleep(1900); tt.classList.remove('on'); await sleep(350);
-    for (let i = 0; i < 3; i++) {
+    if (!mv) { await sleep(1900); tt.classList.remove('on'); await sleep(350); } else { tt.classList.remove('on'); bar.style.width = '16%'; }
+    for (let i = 0; i < (mv ? 0 : 3); i++) {
       tt.innerHTML = `${NAMES[i][0]}<small>${NAMES[i][1]}</small>`; tt.classList.add('on');
       pc.src = poseKey(5) || pc.src; aura.classList.add('on');
       await sleep(700);

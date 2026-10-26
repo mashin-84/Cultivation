@@ -29,6 +29,11 @@ def sfxmap():   # 網站版音效清單 {名稱: 雜湊}
     if not os.path.isdir(d): return {}
     return {f[:-4]: hashlib.md5(open(os.path.join(d, f), 'rb').read()).hexdigest()[:8] for f in sorted(os.listdir(d)) if f.endswith('.mp3')}
 
+def movmap():   # 網站版動畫清單 {名稱: 雜湊}
+    d = os.path.join(SRC, 'pwa', 'movie')
+    if not os.path.isdir(d): return {}
+    return {f[:-4]: hashlib.md5(open(os.path.join(d, f), 'rb').read()).hexdigest()[:8] for f in sorted(os.listdir(d)) if f.endswith('.mp4')}
+
 def build(site=False):
     html = re.sub(r'@@INC:([^@]+)@@', inc, rd(os.path.join(SRC, 'index.html')))
     if site:   # 網站版:data URI 整段換成相對路徑
@@ -36,6 +41,7 @@ def build(site=False):
         html = re.sub(r'data:image/webp;base64,@@IMG:([^@]+)@@', lambda m: 'assets/' + m.group(1) + '.webp?v=' + ver(m.group(1)), html)
     html = re.sub(r'@@IMG:([^@]+)@@', img, html)
     html = html.replace('@@SFXMAP@@', json.dumps(sfxmap() if site else {}))
+    html = html.replace('@@MOVMAP@@', json.dumps(movmap() if site else {}))
     assert '@@INC:' not in html and '@@IMG:' not in html
     return html
 
@@ -59,6 +65,7 @@ def build_site(out):
         d = os.path.join(out, 'assets', os.path.dirname(k)); os.makedirs(d, exist_ok=True)
         shutil.copy(os.path.join(SRC, 'assets', k + '.webp'), d)
     urls += ['sfx/%s.mp3?v=%s' % kv for kv in sfxmap().items()]
+    urls += ['movie/%s.mp4?v=%s' % kv for kv in movmap().items()]
     json.dump(['./' + u for u in urls], open(os.path.join(out, 'assets', 'list.json'), 'w', encoding='utf-8'), ensure_ascii=False)
     pwa = os.path.join(SRC, 'pwa')
     for f in os.listdir(pwa):
