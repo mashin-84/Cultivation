@@ -536,7 +536,7 @@
     { const L = reqList(), nx = REALM_DATA[(state.realmIdx || 0) + 1];   /* v173 突破前必看 */
       if (L.length && nx) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d;font-size:14px">📖 突破【${nx.name}】前還需看完 ${L.length} 段</b>` + L.map(n => `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0">${n.sys ? '<span class="x5-sub">[機緣]</span> ' : '<span class="x5-sub">[支線]</span> '}${n.title}</div><button class="x5-btn am" data-x5="st28.play" data-id="${n.id}">觀看</button></div>`).join('') + `</div>`; }
     if (window.SJ172) h += SJ172.card();   /* v172 生死交鋒預告 */
-    if (window.MOV174 && MOV174.has('opening')) h += `<div class="x5-row" style="margin-bottom:8px"><button class="x5-btn gy" data-x5="st28.op">🎬 重看開場動畫</button></div>`;   /* v176 */
+    if (window.MOV174 && MOV174.has('opening')) h += `<div class="x5-row" style="margin-bottom:8px"><button class="x5-btn am" data-x5="st28.mvl">🎬 動畫回顧</button></div>`;   /* v176 */
     const _top = h.length;
     chs.forEach(c => {
       const list0 = NODES.filter(n => n.ch === c); let lk = [-1, 0];   /* v109 依開啟境界排序;沒有境界資訊者沿用前一節的位置 */
@@ -571,6 +571,17 @@
   /* v113 重戰:找出節點裡的劇情戰設定 */
   function fightOf(n) { let f = null; const walk = x => { if (f || !x || typeof x !== 'object') return; if (x.fight && typeof x.fight === 'object' && x.fight.name) { f = x.fight; return; } (Array.isArray(x) ? x : Object.values(x)).forEach(walk); }; walk(n.beats); return f; }
   X.act('st28.refight', t => { const n = BY[t.dataset.id], f = n && fightOf(n); if (!f || !window.BF113 || run) return; if (currentBattle && !(window.HO43 && HO43.yieldBattle())) { try { showToast('戰鬥中無法重戰。'); } catch (e) { } return; } X.close('st28'); BF113.start(Object.assign({}, f, { rematch: true })).then(() => { try { X.open('st28'); } catch (e) { } }); });
+  /* v182 動畫回顧:只列已經歷過的(避免劇透) */
+  const MVL = [['opening', '開場・一念而已', () => true], ['n_1.2', '妖潮夜', () => seen('1.2')], ['tribulation', '雷劫(男)', () => (state.realmIdx || 0) >= 1], ['tribulation_f', '雷劫(女)', () => (state.realmIdx || 0) >= 1],
+    ['n_4.4', '正魔大戰', () => seen('4.4')], ['n_5.7', '飛升', () => seen('5.7')], ['gate_obey', '天門前・歸位', () => flag('k4_obey')], ['cut_gate', '斬天門', () => flag('k4_smash')],
+    ['n_8.3', '天道之戰', () => seen('8.3')], ['end_fly', '結局・飛仙', () => !!SD().endings.fly], ['end_slay', '結局・弒天', () => !!SD().endings.slay], ['end_one', '結局・歸一', () => !!SD().endings.one]];
+  X.sheet('mvl182', () => '🎬 動畫回顧', b => {
+    let h = '<div class="x5-sub" style="margin-bottom:8px">經歷過的動畫可在此重看;未經歷的以 ？？？ 表示。</div>';
+    MVL.filter(m => MOV174.has(m[0])).forEach(m => { const ok = safe(m[2]); h += `<div class="x5-row" style="margin-top:6px;gap:8px"><div style="flex:1;min-width:0">${ok ? m[1] : '？？？'}</div>${ok ? `<button class="x5-btn am" data-x5="st28.mv" data-id="${m[0]}">播放</button>` : ''}</div>`; });
+    b.innerHTML = h;
+  });
+  X.act('st28.mvl', () => { if (run) return; X.open('mvl182'); });
+  X.act('st28.mv', t => { if (run) return; MOV174.play(t.dataset.id); });
   X.act('st28.op', () => { if (run) return; X.close('st28'); MOV174.play('opening'); });   /* v176 */
   X.act('st28.play', t => { const id = t.dataset.id, n = BY[id]; if (!n) return; if (blocked() && !run) { try { showToast('目前無法觀看劇情。'); } catch (e) { } return; } X.close('st28'); play(id); });
   X.act('st28.log', () => { X.close('st28'); ensureUI(); $('st28').classList.add('on'); showLog(); });
