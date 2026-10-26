@@ -10548,6 +10548,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
   /* ---------- 執行 ---------- */
   let run = null, bgSlot = 0, timer = null, typeT = null;
   function play(id, o) {
+    if (window.MOV174 && !(o && o._mv) && MOV174.has('n_' + id)) { MOV174.play('n_' + id).then(() => play(id, Object.assign({}, o, { _mv: 1 }))); return; }   /* v179 節點開頭動畫 n_節點id */
     const n = BY[id]; if (!n || run) return false;
     o = o || {}; ensureUI();
     const s = SD();
@@ -10627,7 +10628,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
       if (b.fx) { fxDo(b.fx); continue; }
       if (b.clr) { $('st28p').className = 'st-p'; $('st28p').innerHTML = ''; run.pk = ''; continue; }
       if (b.set) { if (!run.replay) apply(b.set); continue; }
-      if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } continue; }
+      if (b.edg) { if (!run.replay) { const s = SD(); s.ending = b.edg; s.endings[b.edg] = s.cycle || 1; flash('📜 結局已記錄:' + (ENM[b.edg] || b.edg)); } if (window.MOV174 && MOV174.has('end_' + b.edg)) { MOV174.play('end_' + b.edg).then(() => next()); return; } continue; }   /* v179 結局動畫 end_fly/slay/one */
       if (b.ti) return showTitle(b.ti);
       if (b.fight) { if (run.replay) continue; return doFight(b.fight); }
       if (b.guide) { if (run.replay || !window.TUT160 || TUT160.done(b.guide)) continue; return doGuide(b.guide); }
@@ -18369,7 +18370,7 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
   let busy = false;
   async function play() {
     busy = true; window.THU160.on = true;
-    let mv = false; try { mv = window.MOV174 ? await MOV174.play('tribulation') : false; } catch (e) { }   /* v174 有雷劫動畫就先播,三重雷的程式演出略過 */
+    let mv = false; try { mv = window.MOV174 ? await MOV174.play(state.gender === 'f' && MOV174.has('tribulation_f') ? 'tribulation_f' : 'tribulation') : false; } catch (e) { }   /* v174 有雷劫動畫就先播,三重雷的程式演出略過 */
     const realm = state.realmIdx || 0, next = (REALM_DATA[realm + 1] || {}).name || '下一境界';
     let bgSrc = ''; try { const G = window.GEN3 || (typeof GEN3 !== 'undefined' ? GEN3 : {}); bgSrc = G['A' + Math.min(7, realm)] || G.A0 || ''; } catch (e) { }
     const o = document.createElement('div'); o.id = 'thu160';
