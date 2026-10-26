@@ -158,6 +158,8 @@
       if (ts === 3 && window.UNLOCK9 && !UNLOCK9.on('alch')) return { k: 'nb3', ic: '修', t: '修煉到【練氣第5層】,煉丹閣就會開啟', go: () => goTab('tab-abode') };
       return { k: 'nb' + ts, ic: String(ts + 1), t: NEWBIE[ts], go: () => goTab(['tab-abode', 'tab-abode', 'tab-adventure', 'tab-crafting'][ts], () => { const e = ts === 0 ? $('btn-tap-cultivate') : ts === 1 ? document.querySelector('[data-a53=arr]') : null; if (e) e.scrollIntoView({ block: 'center' }); }) };
     }
+    /* v173 大境界圓滿、仍有必看劇情 */
+    try { const ri = getRealmInfo(); if (state.qi >= ri.maxQi && (state.subRealm || 1) >= ri.realm.subMax && window.ST28 && ST28.req) { const L = ST28.req(); if (L.length) return { k: 'req', ic: '卷', t: `突破前還有 ${L.length} 段劇情未看:〈${L[0].title}〉`, go: () => playStory(L[0].id) }; } } catch (e) { }
     /* 3. 可以突破 */
     if (brkB && !brkB.disabled && state.qi >= getRealmInfo().maxQi && !gateInfo()) return { k: 'brk', ic: '破', t: '修為圓滿,可以突破了!', go: () => goTab('tab-abode', () => { const b = $('btn-trigger-breakthrough'); if (b) b.scrollIntoView({ block: 'center' }); }) };
     /* 4. 卡在境界見證 */

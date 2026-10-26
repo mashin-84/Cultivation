@@ -50,7 +50,7 @@
     }));
     A.add({
       id: 'yx.' + r, ch: Math.min(8, r + 1), title: `${['練氣', '築基', '金丹', '元嬰', '化神', '真仙', '玄仙', '金仙'][r]}・遊學`, opt: true, auto: true, after: r === 0 ? 's.sect' : undefined,
-      at: () => (state.realmIdx || 0) === r && (state.subRealm || 1) >= need && !inGrad(r),
+      at: Object.assign(() => ((state.realmIdx || 0) > r || ((state.realmIdx || 0) === r && (state.subRealm || 1) >= need)) && !inGrad(r), { _yx: [r, need] }),   /* v173 過了該境界仍可補做 */
       beats: [
         bg(IMM(r) ? 'gate_xian' : 'gate'),
         N(INTRO[r][0]), N(INTRO[r][1]),
