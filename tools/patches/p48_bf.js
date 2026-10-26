@@ -518,11 +518,11 @@
     if (B.auto) return Promise.resolve('gd');
     return new Promise(res => {
       const q = qOpen(`<div class="bf-qhint">${hint}<br><span style="font-size:11px;opacity:.8">按住蓄力,在金色區放開</span></div><div class="bf-hold"><div class="z"></div><span>按住<br>蓄力</span></div>`);
-      const h = q.querySelector('.bf-hold'); let t0 = 0, v = 0, done = false, holding = false; const T = 1300, tStart = performance.now();
+      const h = q.querySelector('.bf-hold'); let t0 = 0, v = 0, done = false, holding = false; const T = 1300; let tStart = performance.now();
       const step = () => { if (done) return; if (holding) { const f = (performance.now() - t0) / T; v = f <= 1 ? f : Math.max(0, 1 - (f - 1) * 3); h.style.setProperty('--v', (v * 100) + '%'); if (f > 1.4) fin(); } else if (performance.now() - tStart > 6000) fin(); requestAnimationFrame(step); };
       const fin = () => { if (done) return; done = true; const pv = v * 360; const r = pv >= 306 && pv <= 352 ? 'pf' : v >= .6 ? 'gd' : 'ms'; qClose(); result(r); res(r); };
       q.onpointerdown = e => { if (holding) return; holding = true; t0 = performance.now(); h.querySelector('span').innerHTML = '蓄力中'; };
-      q.onpointerup = () => { if (!holding) return; if (performance.now() - t0 < 250) { holding = false; v = 0; h.style.setProperty('--v', '0%'); h.querySelector('span').innerHTML = '要按住<br>不要放'; return; } fin(); };   /* v168 點一下不算失誤 */
+      q.onpointerup = () => { if (!holding) return; if (performance.now() - t0 < 250) { holding = false; v = 0; tStart = performance.now(); h.style.setProperty('--v', '0%'); h.querySelector('span').innerHTML = '要按住<br>不要放'; return; } fin(); };   /* v168 點一下不算失誤 */
       requestAnimationFrame(step);
     });
   }
@@ -623,7 +623,7 @@
   }
   async function doSkill(i) {
     const k = B.sk[i]; if (!k || (B.cd[k.id] || 0) > 0) return; const sk = k.sk, c = k.c;
-    B.cd[k.id] = c.cd + 1; skName(sk.name); sfx('sfx_skill');
+    B.cd[k.id] = c.cd + 1; skName(sk.name); sfx('sfx_skill'); if (!B.A && typeof skGainExp === 'function') try { skGainExp(k.id); } catch (e) { }
     const dm = window.sectDmgMult ? sectDmgMult(sk) : 1;
     if (sk.type === 'shield' || sk.type === 'heal' || sk.type === 'buff') {
       const q = await qTiming(`✨ ${sk.name}`, .85), f = q === 'pf' ? 1.35 : q === 'gd' ? 1 : .65;
@@ -744,7 +744,7 @@
     try {
       const sc5 = B.A ? '' : SCHM();   /* v168 流派被動 */
       if (sc5 === 'pill' && a[0] !== 'pill') { const h = Math.floor(B.p.max * .02); if (h > 0 && B.p.hp < B.p.max) { B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); } }
-      if (sc5 === 'sword' && a[0] !== 'pill') { B.swN = (B.swN || 0) + 1; if (B.swN % 5 === 0) { B.swX = 1.8; num('p', '劍氣貫穿', 'tx'); } }
+      if (sc5 === 'sword' && (a[0] === 'atk' || a[0] === 'ult' || (a[0] === 'sk' && B.sk[a[1]] && !/^(shield|heal|buff)$/.test(B.sk[a[1]].sk.type)))) { B.swN = (B.swN || 0) + 1; if (B.swN % 5 === 0) { B.swX = 1.8; num('p', '劍氣貫穿', 'tx'); } }
       if (a[0] === 'atk') await doAtk(); else if (a[0] === 'sk') await doSkill(a[1]); else if (a[0] === 'ult') await doUlt(); else if (a[0] === 'pill') { await doPill(); } else if (a[0] === 'wine') await doWine();
       if (B.swX) { B.swX = 0; log('劍意凝聚,這一擊化為劍氣貫穿(傷害 ×1.8)!'); }
       if (sc5 === 'magic' && a[0] === 'sk' && B.e.hp > 0) { await sleep(250); const d = Math.floor(base(1.2)); B.e.hp = Math.max(0, B.e.hp - d); impact('#c4b5fd', false); num('e', fm(d), ''); log(`三枚靈球追射,再造成 ${fm(d)} 傷害。`); ui(); await sleep(300); }

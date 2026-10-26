@@ -3,6 +3,8 @@
 (function () {
   var ua = navigator.userAgent || '', url = location.href;
   var isLine = /\bLine\//i.test(ua), isFB = /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger|Instagram|MicroMessenger|Threads/i.test(ua);
+  /* v170 已跳到外部瀏覽器:把 openExternalBrowser 參數從網址擦掉 */
+  if (!isLine && /[?&]openExternalBrowser=1/.test(url)) { try { history.replaceState(history.state, '', url.replace(/([?&])openExternalBrowser=1(&|$)/, function (m, p, q) { return q ? p : ''; })); } catch (e) { } }
   if (!isLine && !isFB) return;
   var android = /Android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua);
   try { if (sessionStorage.getItem('iab168') === 'stay') return; } catch (e) { }

@@ -275,7 +275,7 @@
   }
   function showFightLose(cfg) {
     run.choosing = true; run.cur = { fightCfg: cfg }; $('st28nx').style.visibility = 'hidden';
-    $('st28cs').innerHTML = `<div class="st-ph">戰局未定……(戰鬥中的損失不會保留)</div><button data-s28="fretry">⚔ 再戰一次</button><button data-s28="fskip">以劇情帶過(視為險勝)</button>`;
+    $('st28cs').innerHTML = `<div class="st-ph">戰局未定……(戰鬥中的損失不會保留)</div><button data-s28="fretry">⚔ 再戰一次</button>${cfg.noskip ? '<button data-s28="exitok">改日再來</button>' : '<button data-s28="fskip">以劇情帶過(視為險勝)</button>'}`;
   }
   function showTitle(t) {
     const e = $('st28ti'); e.innerHTML = `<div class="a">${esc(fmt(t[0]))}</div><div class="b">${esc(fmt(t[1]))}</div>`;
@@ -522,7 +522,7 @@
       h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d">📜 結局收藏</b> <span class="x5-sub">${Object.keys(s.endings).length}/3・第 ${s.cycle || 1} 周目</span>` + ['fly', 'slay', 'one'].map(k => `<div class="x5-row" style="margin-top:6px"><div style="flex:1">${s.endings[k] ? `<span style="color:#86efac">✔</span> ${EN[k][0]} <span class="x5-sub">${EN[k][1]}(第${s.endings[k]}周目)</span>` : '<span style="color:#64748b">🔒 ？？？</span>'}</div></div>`).join('') + '</div>';
       const NB = { mo: '墨塵', su: '蘇棠', ye: '夜無咎', ba: '白澤' }, bl = Object.keys(NB).filter(k => (s.bond[k] || 0) > 0);
       if (bl.length) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d">💞 羈絆</b>${bl.map(k => `<div class="x5-row" style="margin-top:4px"><span style="width:56px">${NB[k]}</span><div style="flex:1;height:6px;border-radius:3px;background:#1e293b"><div style="width:${Math.round(s.bond[k] / 30 * 100)}%;height:100%;border-radius:3px;background:#f472b6"></div></div><span class="x5-sub" style="width:34px;text-align:right">${s.bond[k]}</span></div>`).join('')}</div>`;
-      if (s.ending) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#c4b5fd">🔄 輪迴再修</b><div class="x5-sub" style="margin:4px 0 8px">從第一章重新開始新的一世:圖鑑、稱號、結局收藏與道心點保留;每一周目吞納 +5%(至多 +15%),但突破所需修為 ×1.25。已看過的劇情可按「跳過」,關鍵抉擇可重新選擇。</div><button class="x5-btn ${cyc.arm ? 'am' : 'gy'}" data-x5="st28.cycle">${cyc.arm ? '再按一次,確認輪迴' : '開啟新周目'}</button></div>`; h = h.slice(0, _top) + h.slice(_e0) + h.slice(_top, _e0); }
+      if (s.ending) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#c4b5fd">🔄 輪迴再修</b><div class="x5-sub" style="margin:4px 0 8px">從第一章重新開始新的一世:圖鑑、稱號、結局收藏與道心點保留;每一周目吐納 +30%(至多 +90%),突破所需修為不變,妖魔每世強 5%。已看過的劇情可按「跳過」,關鍵抉擇可重新選擇。</div><button class="x5-btn ${cyc.arm ? 'am' : 'gy'}" data-x5="st28.cycle">${cyc.arm ? '再按一次,確認輪迴' : '開啟新周目'}</button></div>`; h = h.slice(0, _top) + h.slice(_e0) + h.slice(_top, _e0); }
     const keys = Object.keys(s.key).sort();
     if (keys.length) h += `<div class="x5-cd" style="margin-bottom:8px"><b style="color:#fcd34d">⚑ 命運抉擇記錄</b>${keys.map(k => `<div class="x5-sub" style="margin-top:4px">${k.toUpperCase()}:${ROUTE[s.key[k]]}之路</div>`).join('')}</div>`;
     h += `<button class="x5-btn gy" data-x5="st28.log" style="width:100%">📜 劇情回顧(最近對話)</button>`;

@@ -71,7 +71,7 @@
     try{
       const idx=state.currentArea||0, cyc=Math.min(5,state.reincarnationCount|0); let t='';
       if(state.realmIdx>=5 && idx>=Math.min(7,state.realmIdx-1)){ const rec=(CAL9.REC||[])[idx]||0, cp=calculateTotalStats().combatPower; if(rec>0&&cp/rec>1.2) t='天地增厚:此境妖魔感應道行,氣血與殺伐隨之增強。'; }
-      if(cyc>0) t+=(t?' ':'')+`第${cyc+1}世:天地規則更嚴,妖魔再增 ${cyc*20}%。`;
+      if(cyc>0) t+=(t?' ':'')+`第${cyc+1}世:天地規則更嚴,妖魔再增 ${cyc*5}%。`;
       n.textContent=t; n.style.display=t?'block':'none';
     }catch(e){}
   }

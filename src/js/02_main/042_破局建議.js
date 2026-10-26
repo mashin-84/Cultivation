@@ -136,7 +136,7 @@
       else if (k === 'aff') { goToTab('tab-techniques'); setTimeout(() => { try { AFF16.openSlot('weapon'); } catch (e) { } }, 150); }
       else goToTab(k);
     } catch (e) { } });
-  X.act('bk.run', t => { const x = CUR[+t.dataset.i]; if (!x || !x.ok) return; if (x.go) { X.close('bk'); try { x.go(); } catch (e) { } return; } try { x.run(); } catch (e) { } try { updateTopBar(); renderInventory(); } catch (e) { } saveGame(); X.refresh('bk'); upd(); });
+  X.act('bk.run', t => { const x = CUR[+t.dataset.i]; if (!x || !x.ok) return; if (x.go) { X.close('bk'); try { x.go(); } catch (e) { } return; } try { x.run(); } catch (e) { } memo = null; try { updateTopBar(); renderInventory(); } catch (e) { } saveGame(); X.refresh('bk'); upd(); });
   let sig = {};
   function upd() {
     try {
@@ -155,6 +155,6 @@
   /* v168 效能:指引列與紅點只要「能不能做」,狀態沒變就沿用上次的試算(最多 20 秒) */
   let memo = null, memoSig = '', memoT = 0;
   const sigNow = () => { const inv = state.inventory || {}; let n = 0, s = 0; for (const k in inv) { n++; s += inv[k] * (k.length + 1); }
-    return [state.realmIdx, state.subRealm, Math.floor(Math.log2((state.stones || 0) + 1) * 6), state.daoPoints || 0, state.body || 0, n, s, JSON.stringify(state.equipment || {}), JSON.stringify(state.enhance || {}), (state.techniques || []).map(t => t.level).join(','), JSON.stringify(state.talents || {}), Object.keys((state.skills || {}).learned || {}).length].join('|'); };
+    return [state.realmIdx, state.subRealm, Math.floor(Math.log2((state.stones || 0) + 1) * 6), state.daoPoints || 0, state.body || 0, n, s, JSON.stringify(state.equipment || {}), JSON.stringify(state.enhance || {}), (state.techniques || []).map(t => t.level).join(','), JSON.stringify(state.talents || {}), JSON.stringify((state.skills || {}).learned || {}), (state.sch || {}).dao || 0, JSON.stringify((state.sch || {}).nodes || {}), JSON.stringify(state.pets || {}), state.tfrag || 0, JSON.stringify(state.eggs || 0)].join('|'); };
   const okMemo = () => { const g = sigNow(); if (!memo || g !== memoSig || Date.now() - memoT > 20000) { memo = cands().filter(x => x.ok); memoSig = g; memoT = Date.now(); } return memo; };
   window.BK160 = { cands: () => cands(), ok: okMemo, target, cp: cpNow, rec: () => REC(target().t), open: () => X.open('bk') };
