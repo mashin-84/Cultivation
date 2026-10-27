@@ -130,7 +130,7 @@
     try {
       const A = window.ST28; if (!A || !A.nodes) return null; const s = A.S(), seen = id => !!s.seen[id];
       const ok = f => { try { return !f || f(); } catch (e) { return false; } };
-      const m = A.nodes.find(n => !n.opt && !seen(n.id)); if (m && ok(m.at)) return m;
+      const m = A.nodes.find(n => !n.opt && !seen(n.id)); if (m && ok(m.at)) return (A.before && A.before(m)) || m;   /* v189 依層數 */
       return A.nodes.find(n => n.opt && !seen(n.id) && (!n.after || seen(n.after)) && ok(n.at)) || null;
     } catch (e) { return null; }
   }
