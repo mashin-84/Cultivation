@@ -290,6 +290,11 @@ window.addEventListener('load', () => {
       localStorage.removeItem('XIUXIAN_SAVE_DATA_V1');
     } catch (e) {}
     state = JSON.parse(JSON.stringify(defaultState));
+    /* v185 散功:先存一份空白檔,再清掉所有備份與 IndexedDB 復原點,重新載入乾淨頁面(避免被當成遺失而跳還原) */
+    try { saveGame(); } catch (e) { }
+    try { ['XIUXIAN_SAVE_BAK1', 'XIUXIAN_SAVE_BAK2', 'XIUXIAN_SAVE_RESCUE'].forEach(k => localStorage.removeItem(k)); } catch (e) { }
+    try { indexedDB.deleteDatabase('yinian'); } catch (e) { }
+    setTimeout(() => { try { location.reload(); } catch (e) { } }, 500);
     updateTopBar();
     renderTechniques();
     renderInventory();

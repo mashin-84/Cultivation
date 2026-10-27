@@ -60,7 +60,7 @@
   }
   function stop(name) { const T = tracks[name]; if (!T) return; T.last = Date.now(); [T.a, T.b].forEach(a => a && !a.paused && ramp(a, 0, FADE)); }
   function sync(force) {
-    if (!enabled()) { Object.keys(tracks).forEach(stop); cur = null; pend = null; return; }
+    if (!enabled() || (window.MOV174 && MOV174.on())) { Object.keys(tracks).forEach(stop);   /* v185 影片播放時背景音樂淡出 */ cur = null; pend = null; return; }
     const [want, now] = target();
     if (want === cur && !force) { pend = null; }
     else if (now || !cur || force || /tianjie|zhandou|wenqing|libie|weiju/.test(cur)) { switchTo(want); }   /* 從戰鬥/劇情回來:延續期已過,直接回區域曲 */

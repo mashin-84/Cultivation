@@ -52,6 +52,7 @@ function executeReincarnation() {
   // 重置境界與修為，保留成就、道心點、道心閣升級
   const preserved = {
     saveVersion: SAVE_VERSION,
+    tut160: state.tut160, op176: state.op176,   /* v185 教學與開場片看過紀錄跨周目保留 */
     name: state.name,
     daoPoints: state.daoPoints,
     daoUpgrades: state.daoUpgrades || {},

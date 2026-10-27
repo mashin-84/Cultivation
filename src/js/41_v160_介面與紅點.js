@@ -120,7 +120,7 @@
     if (!r) { r = document.createElement('div'); r.id = 'dl160'; r.className = 'x5-card'; r.style.cssText = 'margin-bottom:8px;display:flex;align-items:center;gap:10px'; b.appendChild(r); }
     const p = await progress(); if (!p) { r.style.display = 'none'; return; }
     const done = p[0] >= p[1];
-    r.innerHTML = `<span style="flex:1"><b style="font-size:14px">離線資源</b><br><span style="font-size:12px">${done ? '圖片已全部存在手機裡,沒網路也能玩。' : `已下載 ${p[0]}/${p[1]} 張圖。用 Wi-Fi 時會自動在背景下載;行動網路下可手動下載(約 50MB)。`}</span></span>${done ? '' : '<button class="x5-btn am" data-x5="dl160.go" style="flex:none">下載</button>'}`;
+    r.innerHTML = `<span style="flex:1"><b style="font-size:14px">離線資源</b><br><span style="font-size:12px">${done ? '圖片已全部存在手機裡,沒網路也能玩。' : `已下載 ${p[0]}/${p[1]} 項資源。用 Wi-Fi 時會自動在背景下載;行動網路下可手動下載(約 50MB)。`}</span></span>${done ? '' : '<button class="x5-btn am" data-x5="dl160.go" style="flex:none">下載</button>'}`;
   }
   X.act('dl160.go', () => { swPost('warm!'); showToast('開始下載離線資源,可以繼續玩。'); setTimeout(dlRow, 3000); });
   { const o = X.open; X.open = function (id) { const r = o.apply(this, arguments); if (id === 'mn') setTimeout(dlRow, 50); return r; }; }

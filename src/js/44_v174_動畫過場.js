@@ -9,7 +9,7 @@ window.MOV174 = (() => {
   };
   let on = false;
   function play(n) {
-    if (!ok(n)) return Promise.resolve(false);
+    if (on || !ok(n)) return Promise.resolve(false);   /* v185 防重入 */
     on = true;
     return new Promise(res0 => {
       const res = r => { on = false; res0(r); };
