@@ -10826,8 +10826,14 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     const b = $('btn-story28'); if (!b) return;
     const el = eligible(); b.classList.toggle('dot', el.length > 0); b.classList.toggle('pulse', el.length > 0);
   }
+  /* v189 依層數:主線前若有層數更低、尚未看的機緣/遊學,先播它 */
+  const keyOf = n => { const a = n && n.at, q = a && (a._rq || a._yx); return q ? [q[0], q[1]] : null; };
+  const lowerK = (a, b) => a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]);
+  const silentOpt = n => (n.sys && window.UNLOCK9 && UNLOCK9.on(n.sys)) || (n.cyc && (SD().cycle || 1) > 1);
+  function before(m) { const km = keyOf(m); if (!km) return null; return NODES.filter(n => n.opt && n.auto && !declined[n.id] && !seen(n.id) && (!n.after || seen(n.after)) && safe(n.at) && !silentOpt(n) && keyOf(n) && lowerK(keyOf(n), km)).sort((a, b) => lowerK(keyOf(a), keyOf(b)) ? -1 : lowerK(keyOf(b), keyOf(a)) ? 1 : 0)[0] || null; }
+  ST.before = before;
   let nowPend = 0;   /* v188 突破時正在戰鬥:待播,這場打完立刻播 */
-  ST.now = () => { try { if (!NODES.length || !state.gender) return; const m = nextMain(); if (!(m && m.auto && !declined[m.id] && safe(m.at))) { nowPend = 0; return; } if (blocked()) { if (!run) nowPend = Date.now(); return; } nowPend = 0; play(m.id); } catch (e) { } };   /* v186 突破後立刻播 */
+  ST.now = () => { try { if (!NODES.length || !state.gender) return; const m = nextMain(); if (!(m && m.auto && !declined[m.id] && safe(m.at))) { nowPend = 0; return; } if (blocked()) { if (!run) nowPend = Date.now(); return; } nowPend = 0; play((before(m) || m).id); } catch (e) { } };   /* v186 突破後立刻播 */
   ST.pend = () => !!nowPend && Date.now() - nowPend < 60000;
   setInterval(() => { if (!nowPend) return; if (Date.now() - nowPend >= 60000) { nowPend = 0; return; } if (!blocked()) ST.now(); }, 150);
   function scan() {
@@ -10839,7 +10845,7 @@ button[data-ult26]:disabled{opacity:.5;filter:grayscale(.5)}`;
     const backlog = (() => { let c = 0; for (const x of mainNodes()) { if (seen(x.id) || x.end || x.post) continue; if (safe(x.at)) c++; else break; } return c; })();
     if (m && m.auto && !declined[m.id] && safe(m.at) && !(lastWasPost && Date.now() - lastEndT < POST_GAP) && !(backlog >= 2 && Date.now() - lastEndT < BACKLOG_GAP)) {
       if (m.id === '1.1' && !state.op176 && window.MOV174 && MOV174.has('opening')) { state.op176 = 1; MOV174.play('opening').then(() => play('1.1')); return; }   /* v176 開場動畫 */
-      play(m.id); return; }
+      play((before(m) || m).id); return; }
     /* 機緣節點(opt+auto):系統開放的劇情,條件齊備即自動演出;系統已開(讀檔/新周目)則靜默略過 */
     { const oa = NODES.find(n => n.opt && n.auto && !declined[n.id] && !seen(n.id) && (!n.after || seen(n.after)) && safe(n.at));
       if (oa) { if ((oa.sys && window.UNLOCK9 && UNLOCK9.on(oa.sys)) || (oa.cyc && (SD().cycle || 1) > 1)) { SD().seen[oa.id] = 1; try { saveGame(); } catch (e) { } } else if (Date.now() - lastEndT >= OPT_GAP && Date.now() - lastTouch < PRESENT) { play(oa.id); return; } } }
@@ -18240,7 +18246,7 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
     try {
       const A = window.ST28; if (!A || !A.nodes) return null; const s = A.S(), seen = id => !!s.seen[id];
       const ok = f => { try { return !f || f(); } catch (e) { return false; } };
-      const m = A.nodes.find(n => !n.opt && !seen(n.id)); if (m && ok(m.at)) return m;
+      const m = A.nodes.find(n => !n.opt && !seen(n.id)); if (m && ok(m.at)) return (A.before && A.before(m)) || m;   /* v189 依層數 */
       return A.nodes.find(n => n.opt && !seen(n.id) && (!n.after || seen(n.after)) && ok(n.at)) || null;
     } catch (e) { return null; }
   }
