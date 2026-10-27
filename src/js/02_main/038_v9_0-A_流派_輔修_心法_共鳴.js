@@ -71,9 +71,9 @@
   /* ---------- 抉擇 ---------- */
   const CDMS = 12 * 3600 * 1000;
   const rcNow = () => state.reincarnationCount || 0;
-  const free = () => { if (window.FREE143) return true; const s = SCH(); return !s.main || s.rc !== rcNow(); };   /* FREE143:測試期間換流派免費、無冷卻 */
+  const free = () => { const s = SCH(); return !s.main || s.rc !== rcNow(); };   /* v187:首次與新一世免費,其餘只收靈石 */
   const swCost = () => X.sb(X.tier()) * 30;
-  const cdLeft = () => free() ? 0 : Math.max(0, SCH().sw + CDMS - Date.now());
+  const cdLeft = () => 0;   /* v187:取消換道冷卻,改以靈石限制 */
   const hm = ms => { const m = Math.ceil(ms / 60000); return m >= 60 ? `${Math.floor(m / 60)}時${m % 60}分` : `${m}分`; };
   function pickMain(sc) {
     const s = SCH(); if (!schOK()) { showToast(window.sysLockMsg ? sysLockMsg('school') : '築基期方可選定流派。'); return; } if (s.main === sc) return;
@@ -86,7 +86,7 @@
   function pickSub(sc) {
     const s = SCH(); if (!subOK()) { showToast(window.sysLockMsg ? sysLockMsg('sub') : '金丹期方可兼修第二流派。'); return; } if (!s.main || s.main === sc || s.sub === sc) return;
     if (!s.trial[sc]) { showToast(`須先通過【${SC[sc].trial}】。`); return; }
-    const c = s.sub && !window.FREE143 ? Math.floor(swCost() / 2) : 0;
+    const c = s.sub ? Math.floor(swCost() / 2) : 0;
     if (s.sub && cdLeft() > 0 && !free()) { showToast(`道基未穩,尚需 ${hm(cdLeft())}。`); return; }
     if (state.stones < c) { showToast(`靈石不足,換修需 ${fmt(c)}。`); return; }
     state.stones -= c; s.sub = sc; if (c) s.sw = Date.now(); X.dirty(); audio.playFanfare(); showToast(`已兼修【${SC[sc].n}】。`); saveGame(); updateTopBar(); render();
@@ -106,7 +106,7 @@
     let h = `<div class="x5-tabs"><button class="${tab === 'pick' ? 'on' : ''}" data-x5="sc.tab" data-k="pick">流派</button><button class="${tab === 'node' ? 'on' : ''}" data-x5="sc.tab" data-k="node">心法</button><button class="${tab === 'res' ? 'on' : ''}" data-x5="sc.tab" data-k="res">共鳴</button></div>`;
     if (tab === 'pick') {
       h += `<div class="x5-sub" style="margin-bottom:6px">墨塵曾說:「劍、法、體、丹,修道不止一途,擇其一而深,方能入道。」</div>`;
-      h += `<div class="x5-sub" style="margin-bottom:8px">${free() ? '<b style="color:#4ade80">現在可免費選擇本命流派。</b>' : cdLeft() > 0 ? `換道冷卻 <b style="color:#f87171">${hm(cdLeft())}</b>` : '換道需靈石;輔修於金丹期開放。'}</div>`;
+      h += `<div class="x5-sub" style="margin-bottom:8px">${free() ? '<b style="color:#4ade80">現在可免費選擇本命流派。</b>' : cdLeft() > 0 ? `換道冷卻 <b style="color:#f87171">${hm(cdLeft())}</b>` : `換本命流派需靈石 ${fmt(swCost())}${s.sub ? `;換輔修需 ${fmt(Math.floor(swCost() / 2))}` : ';輔修於金丹期開放'}。`}</div>`;
       SK.forEach(sc => {
         const d = SC[sc], isM = s.main === sc, isS = s.sub === sc;
         let btns = '';

@@ -287,7 +287,7 @@
   }
   /* v160 劇情引導:暫離對話畫面,讓玩家親手按一次對應的按鈕 */
   function doGuide(k) {
-    run.fighting = true; run.choosing = false; clearTimeout(timer); clearInterval(typeT); $('st28cs').innerHTML = '';
+    run.fighting = true; run.choosing = false; run.skip = false; syncBtns(); clearTimeout(timer); clearInterval(typeT); $('st28cs').innerHTML = '';   /* v187:跳過只作用到引導前,回來後恢復正常 */
     $('st28').classList.remove('on');
     let back = false; const done = () => { if (back || !run) return; back = true; run.fighting = false; $('st28').classList.add('on'); next(); };
     try { if (!TUT160.run(k, done)) done(); } catch (e) { done(); }
