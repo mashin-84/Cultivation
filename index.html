@@ -4448,6 +4448,7 @@ function executeReincarnation() {
   // 重置境界與修為，保留成就、道心點、道心閣升級
   const preserved = {
     saveVersion: SAVE_VERSION,
+    tut160: state.tut160, op176: state.op176,   /* v185 教學與開場片看過紀錄跨周目保留 */
     name: state.name,
     daoPoints: state.daoPoints,
     daoUpgrades: state.daoUpgrades || {},
@@ -5184,6 +5185,11 @@ window.addEventListener('load', () => {
       localStorage.removeItem('XIUXIAN_SAVE_DATA_V1');
     } catch (e) {}
     state = JSON.parse(JSON.stringify(defaultState));
+    /* v185 散功:先存一份空白檔,再清掉所有備份與 IndexedDB 復原點,重新載入乾淨頁面(避免被當成遺失而跳還原) */
+    try { saveGame(); } catch (e) { }
+    try { ['XIUXIAN_SAVE_BAK1', 'XIUXIAN_SAVE_BAK2', 'XIUXIAN_SAVE_RESCUE'].forEach(k => localStorage.removeItem(k)); } catch (e) { }
+    try { indexedDB.deleteDatabase('yinian'); } catch (e) { }
+    setTimeout(() => { try { location.reload(); } catch (e) { } }, 500);
     updateTopBar();
     renderTechniques();
     renderInventory();
@@ -16191,7 +16197,7 @@ body:not(#z74) i.rd{display:block}
   }
   function stop(name) { const T = tracks[name]; if (!T) return; T.last = Date.now(); [T.a, T.b].forEach(a => a && !a.paused && ramp(a, 0, FADE)); }
   function sync(force) {
-    if (!enabled()) { Object.keys(tracks).forEach(stop); cur = null; pend = null; return; }
+    if (!enabled() || (window.MOV174 && MOV174.on())) { Object.keys(tracks).forEach(stop);   /* v185 影片播放時背景音樂淡出 */ cur = null; pend = null; return; }
     const [want, now] = target();
     if (want === cur && !force) { pend = null; }
     else if (now || !cur || force || /tianjie|zhandou|wenqing|libie|weiju/.test(cur)) { switchTo(want); }   /* 從戰鬥/劇情回來:延續期已過,直接回區域曲 */
@@ -18569,7 +18575,7 @@ window.IC138 = {"camp": "assets/IC138/camp.webp?v=23979c68", "flag": "assets/IC1
     if (!r) { r = document.createElement('div'); r.id = 'dl160'; r.className = 'x5-card'; r.style.cssText = 'margin-bottom:8px;display:flex;align-items:center;gap:10px'; b.appendChild(r); }
     const p = await progress(); if (!p) { r.style.display = 'none'; return; }
     const done = p[0] >= p[1];
-    r.innerHTML = `<span style="flex:1"><b style="font-size:14px">離線資源</b><br><span style="font-size:12px">${done ? '圖片已全部存在手機裡,沒網路也能玩。' : `已下載 ${p[0]}/${p[1]} 張圖。用 Wi-Fi 時會自動在背景下載;行動網路下可手動下載(約 50MB)。`}</span></span>${done ? '' : '<button class="x5-btn am" data-x5="dl160.go" style="flex:none">下載</button>'}`;
+    r.innerHTML = `<span style="flex:1"><b style="font-size:14px">離線資源</b><br><span style="font-size:12px">${done ? '圖片已全部存在手機裡,沒網路也能玩。' : `已下載 ${p[0]}/${p[1]} 項資源。用 Wi-Fi 時會自動在背景下載;行動網路下可手動下載(約 50MB)。`}</span></span>${done ? '' : '<button class="x5-btn am" data-x5="dl160.go" style="flex:none">下載</button>'}`;
   }
   X.act('dl160.go', () => { swPost('warm!'); showToast('開始下載離線資源,可以繼續玩。'); setTimeout(dlRow, 3000); });
   { const o = X.open; X.open = function (id) { const r = o.apply(this, arguments); if (id === 'mn') setTimeout(dlRow, 50); return r; }; }
@@ -18657,7 +18663,7 @@ window.MOV174 = (() => {
   };
   let on = false;
   function play(n) {
-    if (!ok(n)) return Promise.resolve(false);
+    if (on || !ok(n)) return Promise.resolve(false);   /* v185 防重入 */
     on = true;
     return new Promise(res0 => {
       const res = r => { on = false; res0(r); };
