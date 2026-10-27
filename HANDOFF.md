@@ -1,4 +1,4 @@
-# 《一念飛仙》交接說明（最終版187）
+# 《一念飛仙》交接說明（最終版188）
 
 ## 新對話第一步
 1. 把 GitHub 倉庫 `mashin-84/Cultivation` 加進對話（要推送權限）。
@@ -72,6 +72,7 @@
 - v185(p95_gem3.py,Gemini 第三輪):散功先存空白檔、清 BAK1/BAK2/RESCUE 與 IndexedDB yinian 後重載;MOV174 防重入;影片播放中背景音樂淡出(26_v96 sync);輪迴 preserved 加 tut160/op176(新周目不重跑教學與開場片);離線資源文字「張圖」→「項資源」。未採納:再戰動畫殘留、心魔血量(推測)、iOS 離線影片 Range(使用者用 Android,公開前再處理)、WebGL/計時器效能。
 - v186(p96_guide_brk.py):引導開始時 closeAll186(x5 面板＋一般 modal-*,建角/渡劫/轉世/飛升除外);每一步高亮前若目標中心被蓋住(covered)先收面板再高亮。突破小境界成功(028)與雷劫結束(40)後 700ms 呼叫 `ST28.now()` 立刻播下一段主線,不等輪詢間隔。
 - v187(p97_skip_free.py):劇情「跳過」只作用到引導教學前,doGuide 開始時重設 run.skip,回來後正常播放;男女隨時可換(033 lockG14 恆 false);換流派取消 12 小時冷卻,改純靈石限制(本命 swCost、輔修半價,首次與新一世免費,038);FREE143 改 false 且已無作用。
+- v188(p98_brk_pend.py):突破時若正在戰鬥,`ST28.now` 記下待播(nowPend,60 秒失效),150ms 輪詢到不再被擋就立刻播(不套 POST/BACKLOG 間隔);待播期間 stepAdventure(009)不開下一場,播完自動歷練照常,不跳繼續詢問。`ST28.pend()` 對外。
 
 ## 待辦
 - （已完成）男女五套外觀（o1–o5）的背影、本命特寫、選招半身全部完成（v133）。特寫切圖 `python3 tools/art/uc_slice.py F o2 特寫表.jpg`（依 3x2 格線切：劍/法/體/丹絕學、戰意、負傷）。Gemini 生的第 3 格（攻擊神通）常朝左，切完要左右翻轉再量 TIPS。女款第 3、8 格 TIPS 自動判斷不準，已手動量測。切背影圖用 `python3 tools/art/bp_slice.py M o2 主表.jpg [補圖.jpg 4,7]`，會印出 TIPS 要補進兩份戰鬥模組。特寫 UC 與半身 CP 已依外觀取圖（鍵 `F_o2_sword`、`F_o2_n`），缺圖退回只分性別的舊圖。

@@ -450,7 +450,10 @@
     const b = $('btn-story28'); if (!b) return;
     const el = eligible(); b.classList.toggle('dot', el.length > 0); b.classList.toggle('pulse', el.length > 0);
   }
-  ST.now = () => { try { if (!NODES.length || blocked() || !state.gender) return; const m = nextMain(); if (m && m.auto && !declined[m.id] && safe(m.at)) play(m.id); } catch (e) { } };   /* v186 突破後立刻播 */
+  let nowPend = 0;   /* v188 突破時正在戰鬥:待播,這場打完立刻播 */
+  ST.now = () => { try { if (!NODES.length || !state.gender) return; const m = nextMain(); if (!(m && m.auto && !declined[m.id] && safe(m.at))) { nowPend = 0; return; } if (blocked()) { if (!run) nowPend = Date.now(); return; } nowPend = 0; play(m.id); } catch (e) { } };   /* v186 突破後立刻播 */
+  ST.pend = () => !!nowPend && Date.now() - nowPend < 60000;
+  setInterval(() => { if (!nowPend) return; if (Date.now() - nowPend >= 60000) { nowPend = 0; return; } if (!blocked()) ST.now(); }, 150);
   function scan() {
     ensureBtn();
     if (!NODES.length) return;

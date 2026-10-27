@@ -100,6 +100,7 @@ function logAdventure(text) {
 // FIX-B6 & OPT-O4: 歷練探索狀態機與 8 種隨機事件
 function stepAdventure() {
   if (eventModalOpen()) return; // 奇遇進行中,歷練暫停
+  if (!currentBattle && window.ST28 && ST28.pend && ST28.pend()) return; // v188 突破劇情待播,先不開下一場
   if (currentBattle) {
     if (!state.autoExplore) adventureNotice('戰鬥正酣，無法脫離戰場！');
     return;
