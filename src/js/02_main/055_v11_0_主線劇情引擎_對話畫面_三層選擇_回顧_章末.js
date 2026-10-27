@@ -450,6 +450,7 @@
     const b = $('btn-story28'); if (!b) return;
     const el = eligible(); b.classList.toggle('dot', el.length > 0); b.classList.toggle('pulse', el.length > 0);
   }
+  ST.now = () => { try { if (!NODES.length || blocked() || !state.gender) return; const m = nextMain(); if (m && m.auto && !declined[m.id] && safe(m.at)) play(m.id); } catch (e) { } };   /* v186 突破後立刻播 */
   function scan() {
     ensureBtn();
     if (!NODES.length) return;

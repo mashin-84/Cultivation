@@ -27,7 +27,7 @@
     const g = gate9(); if (g) { showToast(gateMsg(g)); return; }
     const r0 = state.realmIdx, s0 = state.subRealm, p0 = calculateTotalStats().combatPower;
     _cab.apply(this, arguments);
-    if (state.realmIdx === r0 && state.subRealm > s0) { const p1 = calculateTotalStats().combatPower; showToast(`突破成功!【${getRealmInfo().title}】戰力 ${formatNum(p0)} → ${formatNum(p1)}`); }
+    if (state.realmIdx === r0 && state.subRealm > s0) { const p1 = calculateTotalStats().combatPower; showToast(`突破成功!【${getRealmInfo().title}】戰力 ${formatNum(p0)} → ${formatNum(p1)}`); setTimeout(() => window.ST28 && ST28.now && ST28.now(), 700); }
   };
   const _otm = openTribulationModal;
   openTribulationModal = function () { const g = gate9(); if (g) { showToast(gateMsg(g)); return; } return _otm.apply(this, arguments); };

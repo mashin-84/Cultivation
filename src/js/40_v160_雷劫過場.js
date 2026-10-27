@@ -97,6 +97,7 @@
     if (mv && ok) {   /* v184 有雷劫動畫且成功:不出成功卡,直接回遊戲 */
       o.remove(); busy = false; window.THU160.on = false;
       try { showToast(`渡劫功成!踏入【${REALM_DATA[state.realmIdx].name}】`); updateTopBar(); } catch (e) { }
+      setTimeout(() => window.ST28 && ST28.now && ST28.now(), 700);
       return;
     }
     end.classList.add('on');
@@ -104,6 +105,7 @@
     o.style.transition = 'opacity .4s'; o.style.opacity = '0'; await sleep(420); o.remove();
     busy = false; window.THU160.on = false;
     try { updateTopBar(); } catch (e) { }
+    setTimeout(() => window.ST28 && ST28.now && ST28.now(), 700);
   }
   /* 取代原本按下「運功硬抗天劫」後的小卡演出 */
   executeTribulation = function () {

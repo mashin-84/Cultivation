@@ -1,4 +1,4 @@
-# 《一念飛仙》交接說明（最終版185）
+# 《一念飛仙》交接說明（最終版186）
 
 ## 新對話第一步
 1. 把 GitHub 倉庫 `mashin-84/Cultivation` 加進對話（要推送權限）。
@@ -70,6 +70,7 @@
 - v182(p93_gallery.py):11 支影片全部放入 src/pwa/movie(n_1.2/n_4.4/n_5.7/n_8.3/end_fly/end_slay/end_one/tribulation_f/cut_gate/gate_obey,橫式置中裁 720x1280、crf26),opening 第 4 段換中性版重接。劇情總覽「🎬 動畫回顧」(sheet mvl182,MVL 表:只列已經歷的,未經歷 ？？？;天門兩支看 flags k4_obey/k4_smash)。
 - v184(p94_skip.py):放入 gate_wait.mp4;影片不再點畫面跳過,改右上「跳過」鍵→暫停並詢問(繼續觀看/跳過);雷劫有影片且成功時不出程式成功卡,直接回遊戲並 toast(失敗仍顯示結果卡)。
 - v185(p95_gem3.py,Gemini 第三輪):散功先存空白檔、清 BAK1/BAK2/RESCUE 與 IndexedDB yinian 後重載;MOV174 防重入;影片播放中背景音樂淡出(26_v96 sync);輪迴 preserved 加 tut160/op176(新周目不重跑教學與開場片);離線資源文字「張圖」→「項資源」。未採納:再戰動畫殘留、心魔血量(推測)、iOS 離線影片 Range(使用者用 Android,公開前再處理)、WebGL/計時器效能。
+- v186(p96_guide_brk.py):引導開始時 closeAll186(x5 面板＋一般 modal-*,建角/渡劫/轉世/飛升除外);每一步高亮前若目標中心被蓋住(covered)先收面板再高亮。突破小境界成功(028)與雷劫結束(40)後 700ms 呼叫 `ST28.now()` 立刻播下一段主線,不等輪詢間隔。
 - **測試開關 FREE143（v143，目前開著）**：`src/js/02_main/000_…js` 第 2 行 `window.FREE143 = true`，換流派免靈石、無冷卻，劇情開始後也能換男女。測完要改成 `false` 恢復限制。
 
 ## 待辦
