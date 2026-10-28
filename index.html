@@ -17833,6 +17833,7 @@ window.QT124 = {"dot": "assets/QT/dot.webp?v=beeeb71c", "tg": "assets/QT/tg.webp
     const t = e.target; if (!t || !t.closest || t.closest(SKIP)) return;
     const h = hit(t); if (!h) return;
     const btn = h.el.closest('button,a,[data-mk111],[role="button"]');
+    { const tb = t.closest('button,a,[data-mk111],[role="button"]'); if (tb && tb !== h.el && h.el.contains(tb)) return; }   /* v191 點到卡片裡的按鈕(領取等)→ 不攔 */
     if (btn === h.el || (btn && h.el.contains(btn))) return;       /* 本身就是按鈕(購買、選擇等)→ 不攔 */
     if (btn) { const bt = (btn.textContent || '').trim(); if (bt.length <= h.tx.length + 4) return; }
     let need = 0; const m = /([\d,]+)\s*\/\s*([\d,]+)\s*$/.exec(h.tx); if (m) { const a = num(m[1]), b = num(m[2]); if (b > 0 && a >= 0) need = b; }
