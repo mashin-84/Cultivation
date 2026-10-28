@@ -1,4 +1,4 @@
-# 《一念飛仙》交接說明（最終版190）
+# 《一念飛仙》交接說明（最終版191）
 
 ## 新對話第一步
 1. 把 GitHub 倉庫 `mashin-84/Cultivation` 加進對話（要推送權限）。
@@ -75,6 +75,7 @@
 - v188(p98_brk_pend.py):突破時若正在戰鬥,`ST28.now` 記下待播(nowPend,60 秒失效),150ms 輪詢到不再被擋就立刻播(不套 POST/BACKLOG 間隔);待播期間 stepAdventure(009)不開下一場,播完自動歷練照常,不跳繼續詢問。`ST28.pend()` 對外。
 - v189(p99_story_order.py):劇情依境界層數出現。055 `before(m)`(`ST28.before`):主線 m 之前若有層數(at._rq/_yx 的 [境界,層])更低、尚未看、可播的 opt+auto 節點(機緣/遊學,排除 silentOpt 靜默略過者),先播最低的那個;用在 scan、ST.now、指引列 storyNext(39)。劇情總覽手動點選不受影響。
 - v190(p100_splash.py):進遊戲先顯示宣傳圖 `#sp190`(src/index.html,title34 之前;圖 `src/assets/css/sp190.webp`,1438x2576,object-fit contain,上下補漸層 #b7d2e7→#f8efe6),底部小字「點擊螢幕繼續」閃爍,點擊淡出後露出原標題頁(title34 照常讀取)。換圖:同檔名覆蓋 sp190.webp。
+- v191(p101_mat_btn.py):材料取得途徑(36_v137)點擊攔截修正——點到的是材料文字所在卡片裡的另一顆按鈕(圖鑑「領取」等)時不攔,原本會跳器紋石途徑導致領不到。
 
 ## 待辦
 - （已完成）男女五套外觀（o1–o5）的背影、本命特寫、選招半身全部完成（v133）。特寫切圖 `python3 tools/art/uc_slice.py F o2 特寫表.jpg`（依 3x2 格線切：劍/法/體/丹絕學、戰意、負傷）。Gemini 生的第 3 格（攻擊神通）常朝左，切完要左右翻轉再量 TIPS。女款第 3、8 格 TIPS 自動判斷不準，已手動量測。切背影圖用 `python3 tools/art/bp_slice.py M o2 主表.jpg [補圖.jpg 4,7]`，會印出 TIPS 要補進兩份戰鬥模組。特寫 UC 與半身 CP 已依外觀取圖（鍵 `F_o2_sword`、`F_o2_n`），缺圖退回只分性別的舊圖。
