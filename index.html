@@ -18778,6 +18778,13 @@ window.MOV174 = (() => {
 @keyframes sxForm{0%{transform:scale(.3) rotate(-120deg);opacity:0}25%{opacity:1}75%{opacity:1}100%{transform:scale(1.1) rotate(0);opacity:0}}
 .sx-fist{left:50%;top:44%;width:42%;aspect-ratio:1;margin:-21% 0 0 -21%;border-radius:50%;background:radial-gradient(circle,#fff,#fde68a 35%,rgba(251,191,36,0) 70%);animation:sxGlow calc(.4s*var(--sxd,1)) ease-out forwards;--s:1.9}
 /* 持續狀態 */
+.sx-sil{left:0;top:0;width:100%;height:100%;background:var(--c);-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.sx-sil.sx-flash{animation:sxSilF calc(.55s*var(--sxd,1)) ease-out forwards}
+@keyframes sxSilF{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+.sx-sil.sx-pul{animation:sxSilP 1.3s ease-in-out infinite alternate}
+@keyframes sxSilP{from{opacity:.55}to{opacity:1}}
+.sx-fring{left:-14%;top:30%;width:128%;height:34%;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 9px var(--c),inset 0 0 7px var(--c);opacity:0;animation:sxFR calc(.6s*var(--sxd,1)) ease-out forwards}
+@keyframes sxFR{0%{transform:translateY(95%) scale(.7);opacity:0}20%{opacity:1}100%{transform:translateY(-120%) scale(1.05);opacity:0}}
 .sx-bg{left:-5%;top:78%;width:110%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,var(--c),transparent 70%);mix-blend-mode:screen;animation:sxBg 1s ease-in-out infinite alternate}
 @keyframes sxBg{from{opacity:.35}to{opacity:.8}}
 .sx-fl{width:15%;height:19%;bottom:-3%;left:var(--x);transform-origin:50% 100%;animation:sxFlick calc(var(--t,.5s)*1) ease-in-out infinite alternate;animation-delay:var(--d,0s)}
@@ -18861,6 +18868,14 @@ window.MOV174 = (() => {
     const d = document.createElement('div'); d.className = 'sx-e ' + cls; if (st) d.style.cssText = st; d.innerHTML = html; (par || a).appendChild(d);
     setTimeout(() => { try { d.remove(); } catch (e) { } }, life / spd(a._h)); return d;
   }
+  /* 依敵人圖輪廓套一層半透明顏色(剪影);鏡像的敵人圖同步鏡像 */
+  function sil(a, col, cls, ms) {
+    const el = a._h === 'b' ? $('bf-ei') : ($('bs-m') && ($('bs-m').querySelector('img.bs-mi') || $('bs-m').querySelector('.bs-memo'))); if (!el) return null;
+    const src = el.currentSrc || el.src; let fl = false; try { fl = new DOMMatrix(getComputedStyle(el).transform).a < 0; } catch (e) { }
+    const d = document.createElement('div'); d.className = 'sx-e sx-sil ' + (cls || ''); const u = src ? `url("${src}")` : '';
+    d.style.cssText = `--c:${col};${u ? `-webkit-mask-image:${u};mask-image:${u};` : 'border-radius:40%;'}${fl ? 'transform:scaleX(-1);' : ''}`;
+    a.insertBefore(d, a._sd); if (ms) setTimeout(() => { try { d.remove(); } catch (e) { } }, ms / spd(a._h)); return d;
+  }
   const dly = (a, ms) => `animation-delay:${(ms / 1000 / spd(a._h)).toFixed(3)}s;`;
   const glow = (a, c, s) => E(a, '', 'sx-glow', `--c:${c};--s:${s || 1.15}`, 650);
   const sflash = (a, c) => E(a, '', 'sx-sf', `--c:${c}`, 400, a.parentNode);
@@ -18873,9 +18888,10 @@ window.MOV174 = (() => {
     slash(a, o) { const r = R(-14, 14); E(a, `<svg viewBox="0 0 100 100"><path d="M6 88Q54 -2 96 12" fill="none" stroke="url(#sxS)" stroke-width="6" stroke-linecap="round" pathLength="100"/></svg>`, 'sx-slash', `transform:rotate(${r}deg)`, 600); glow(a, '#e0f2fe', .9); },
     flow(a, o) { const i = o.i || 0; E(a, `<svg viewBox="0 0 100 100"><path d="M8 80Q50 10 92 30" fill="none" stroke="url(#sxS)" stroke-width="4" stroke-linecap="round" pathLength="100"/></svg>`, 'sx-slash', `transform:rotate(${-40 + (i % 3) * 38}deg)`, 600); },
     fire(a, o) {
-      const g = o.ghost ? 'sxG' : 'sxF', n = o.small ? 4 : 8; glow(a, o.ghost ? '#38bdf8' : '#fb923c', o.small ? .9 : 1.25);
-      for (let k = 0; k < n; k++) E(a, flame(g), 'sx-rise', `left:${R(4, 68).toFixed(0)}%;bottom:${R(0, 24).toFixed(0)}%;--s:${R(.75, 1.2).toFixed(2)};${dly(a, k * 45)}`, 950);
-      sparks(a, o.ghost ? '#67e8f9' : '#fbbf24', o.small ? 4 : 10);
+      const c = o.ghost ? '#38bdf8' : '#f97316', c2 = o.ghost ? '#a5f3fc' : '#ef4444';
+      sil(a, o.ghost ? 'rgba(56,189,248,.55)' : 'rgba(239,68,68,.55)', 'sx-flash');
+      E(a, '', 'sx-fring', `--c:${c};${dly(a, 0)}`, 800); E(a, '', 'sx-fring', `--c:${c2};${dly(a, 130)}`, 950);
+      if (!o.small) sparks(a, c, 6);
     },
     ice(a, o) {
       glow(a, '#7dd3fc', 1.2); E(a, STAR, 'sx-star', '', 700); shards(a, o.big ? 12 : 8);
@@ -18946,9 +18962,9 @@ window.MOV174 = (() => {
     return h;
   }
   const NODE = {
-    burn: () => flames('sxF', 'rgba(249,115,22,.6)'),
-    ghost: () => flames('sxG', 'rgba(56,189,248,.55)'),
-    poison() { let h = `<i class="sx-e sx-bg" style="--c:rgba(132,204,22,.5)"></i>`; for (let k = 0; k < 7; k++) h += `<i class="sx-e sx-bub" style="--x:${(8 + k * 12)}%;--z:${11 + (k % 3) * 3}%;--b:${(k * 9) % 40}%;--t:1.5s;animation-iteration-count:infinite;animation-delay:-${(k * .22).toFixed(2)}s"></i>`; return h; },
+    burn: a => { sil(a, 'rgba(239,68,68,.30)', 'sx-pul', 0); return ''; },
+    ghost: a => { sil(a, 'rgba(56,189,248,.30)', 'sx-pul', 0); return ''; },
+    poison: a => { sil(a, 'rgba(132,204,22,.34)', 'sx-pul', 0); return ''; },
     freeze() {
       let h = `<i class="sx-e sx-tint"></i><svg class="sx-e sx-ice" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="6,22 18,8 34,16 50,2 66,16 82,8 94,22 98,60 94,92 80,98 20,98 6,92 2,60" fill="url(#sxIb)" stroke="#e0f2fe" stroke-width="2.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M14 32L32 18M70 42L86 30M22 74L36 62M60 84L74 76" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".8" vector-effect="non-scaling-stroke"/><path d="M52 6L46 30L56 46L48 70" stroke="#bae6fd" stroke-width="1.4" fill="none" opacity=".8" vector-effect="non-scaling-stroke"/></svg>`;
       for (let k = 0; k < 5; k++) h += `<i class="sx-e sx-tw" style="--x:${R(8, 80).toFixed(0)}%;--y:${R(8, 80).toFixed(0)}%;--d:-${(k * .22).toFixed(2)}s"></i>`; return h;
@@ -18960,7 +18976,7 @@ window.MOV174 = (() => {
     const box = slot === 'dot' ? a._sd : a._ss, old = a._st[slot]; if (old === kind) return; a._st[slot] = kind;
     if (old === 'freeze') { shards(a, 10); glow(a, '#bae6fd', 1.3); }
     if (box.children.length) { const kids = [...box.children]; kids.forEach(k => k.classList.add('sx-out')); setTimeout(() => kids.forEach(k => { try { k.remove(); } catch (e) { } }), 260); }
-    if (kind && NODE[kind]) { const w = document.createElement('div'); w.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%'; w.innerHTML = NODE[kind](); box.appendChild(w); }
+    if (kind && NODE[kind]) { const w = document.createElement('div'); w.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%'; if (kind === 'burn' || kind === 'ghost' || kind === 'poison') { const s = sil(a, kind === 'burn' ? 'rgba(239,68,68,.30)' : kind === 'ghost' ? 'rgba(56,189,248,.30)' : 'rgba(132,204,22,.34)', 'sx-pul', 0); if (s) { box.appendChild(s); } } else { w.innerHTML = NODE[kind](a); box.appendChild(w); } }
     loop(a);
   }
 
@@ -18974,7 +18990,7 @@ window.MOV174 = (() => {
       FX[sp[0]](a, Object.assign({}, sp[1], o));
     },
     sync(h, st) { st = st || {}; const host = hostOf(h); if (!host) return; if (!(st.dot || st.stun) && !host.querySelector(':scope > .sx-L > .sx-a')) return; const a = anchor(h); if (!a) return; setSlot(a, 'dot', st.dot || null); setSlot(a, 'stun', st.stun || null); },
-    tick(h, id) { const k = DOTK[id] || 'burn', a = anchor(h); if (!a) return; if (k === 'poison') FX.poison(a, { small: 1 }); else FX.fire(a, { small: 1, ghost: k === 'ghost' }); },
+    tick(h, id) { const k = DOTK[id] || 'burn', a = anchor(h); if (!a) return; sil(a, k === 'poison' ? 'rgba(132,204,22,.75)' : k === 'ghost' ? 'rgba(56,189,248,.75)' : 'rgba(239,68,68,.8)', 'sx-flash'); },
     stOf(o, dotFx, stunFx) { if (!o) return {}; return { dot: o.dot && o.dot.turns > 0 ? (DOTK[dotFx] || 'burn') : null, stun: o.stun > 0 ? (STUNK[stunFx] || 'dizzy') : null }; }
   };
 
