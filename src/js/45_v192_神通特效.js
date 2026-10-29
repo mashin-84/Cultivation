@@ -67,7 +67,7 @@
 .sx-bg{left:-10%;top:-5%;width:120%;height:115%;border-radius:50%;background:radial-gradient(ellipse at 50% 80%,var(--c),transparent 68%);mix-blend-mode:screen;animation:sxBg 1s ease-in-out infinite alternate}
 @keyframes sxBg{from{opacity:.35}to{opacity:.8}}
 .sx-fl{width:26%;height:40%;bottom:-2%;left:var(--x);transform-origin:50% 100%;animation:sxFlick calc(var(--t,.5s)*1) ease-in-out infinite alternate;animation-delay:var(--d,0s)}
-@keyframes sxFlick{from{transform:scale(.8,.75) skewX(-5deg)}to{transform:scale(1.1,1.25) skewX(6deg)}}
+@keyframes sxFlick{from{transform:scale(.97,.95) skewX(-1.2deg)}to{transform:scale(1.02,1.05) skewX(1.2deg)}}
 .sx-em{width:4px;height:4px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);left:var(--x);bottom:20%;animation:sxEm var(--t,1.4s) ease-out infinite;animation-delay:var(--d,0s)}
 @keyframes sxEm{from{transform:translateY(0);opacity:0}15%{opacity:1}to{transform:translateY(-120px);opacity:0}}
 .sx-tint{left:-6%;top:-4%;width:112%;height:108%;border-radius:36%;background:rgba(125,211,252,.26);mix-blend-mode:screen}
@@ -83,8 +83,8 @@
 .sx-out{animation:sxOut .25s forwards!important}@keyframes sxOut{to{opacity:0}}
 `;
   const DEFS = `<svg id="sx-defs" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
-<linearGradient id="sxF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#dc2626"/><stop offset=".45" stop-color="#f97316"/><stop offset=".8" stop-color="#fbbf24"/><stop offset="1" stop-color="#fff7c2"/></linearGradient>
-<linearGradient id="sxG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#1e3a8a"/><stop offset=".45" stop-color="#2563eb"/><stop offset=".8" stop-color="#22d3ee"/><stop offset="1" stop-color="#e0f2fe"/></linearGradient>
+<linearGradient id="sxF" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#dc2626"/><stop offset=".45" stop-color="#f97316"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+<linearGradient id="sxG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#1e3a8a"/><stop offset=".45" stop-color="#2563eb"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
 <linearGradient id="sxI" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0f9ff"/><stop offset=".5" stop-color="#7dd3fc"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
 <linearGradient id="sxIb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0f2fe" stop-opacity=".4"/><stop offset="1" stop-color="#38bdf8" stop-opacity=".2"/></linearGradient>
 <linearGradient id="sxS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bae6fd" stop-opacity="0"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#e0f2fe" stop-opacity=".2"/></linearGradient>
@@ -92,7 +92,7 @@
 <linearGradient id="sxW" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#94a3b8"/><stop offset=".5" stop-color="#f8fafc"/><stop offset="1" stop-color="#94a3b8"/></linearGradient>
 </defs></svg>`;
   const FP = 'M20 1C21 13 35 19 35 36 35 50 28 58 20 58 12 58 5 50 5 36 5 27 11 25 14 13 16 17 19 11 20 1Z';
-  const flame = g => `<svg viewBox="0 0 40 60"><path d="${FP}" fill="url(#${g})"/><path d="${FP}" fill="#fffbe0" opacity=".8" transform="translate(8 24) scale(.6)"/></svg>`;
+  const flame = g => `<svg viewBox="0 0 40 60"><path d="${FP}" fill="url(#${g})"/></svg>`;
   const STAR = `<svg viewBox="-50 -50 100 100"><path d="M0-46V46M-40-23L40 23M-40 23L40-23" stroke="#e0f2fe" stroke-width="5" stroke-linecap="round" fill="none"/><circle r="8" fill="#fff"/></svg>`;
   const SHARD = `<svg viewBox="0 0 20 44"><polygon points="10,0 20,36 10,44 0,36" fill="url(#sxI)" stroke="#fff" stroke-width="1.5"/></svg>`;
   const SWORD = `<svg viewBox="0 0 16 80"><polygon points="8,80 3,24 13,24" fill="url(#sxW)" stroke="#94a3b8" stroke-width=".8"/><rect x="0" y="20" width="16" height="4" rx="1" fill="#fbbf24"/><rect x="6" y="5" width="4" height="15" fill="#78350f"/><circle cx="8" cy="3.5" r="3" fill="#fbbf24"/></svg>`;
