@@ -372,7 +372,7 @@
     $('bf-et').textContent = `${fm(B.e.hp)} / ${fm(B.e.max)}`; $('bf-pt').textContent = `${fm(B.p.hp)} / ${fm(B.p.max)}${B.p.sh > 0 ? `(🛡${fm(B.p.sh)})` : ''}`;
     $('bf-ph2').textContent = ['', '', '第二階段', '最終階段'][B.phase] || '';
     const s = []; if (B.e.charge) s.push('⚠ 蓄力中'); if (B.e.stun) s.push('💫 暈眩'); if (B.e.dot) s.push('🔥 灼燒'); if (B.p.buff) s.push('💢 戰意');
-    $('bf-es').textContent = s.join(' '); $('bf-ei').classList.toggle('charge', !!B.e.charge);
+    $('bf-es').textContent = s.join(' '); $('bf-ei').classList.toggle('charge', !!B.e.charge); try { if (window.SX192) SX192.sync('b', SX192.stOf(B.e, B.e.dotFx, B.e.stunFx)); } catch (e) { }
     acts(); cmdUi();
   }
   function acts() {
@@ -653,7 +653,7 @@
   async function dealE(total, hits, crit, key) {
     hits = Math.max(1, hits); const per = total / hits;
     for (let i = 0; i < hits; i++) {
-      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(B.A && B.A.efloor ? B.A.efloor() : 0, B.e.hp - v); impact(B.fxc || '#ffffff', crit); num('e', fm(v), crit ? 'cr' : '');
+      const v = Math.floor(per * rnd(.92, 1.08)); B.e.hp = Math.max(B.A && B.A.efloor ? B.A.efloor() : 0, B.e.hp - v); impact(B.fxc || '#ffffff', crit); try { if (window.SX192 && key) SX192.hit('b', key, (window.SK_BY_ID && SK_BY_ID[key] || {}).fx, { i, n: hits, crit }); } catch (e) { } num('e', fm(v), crit ? 'cr' : '');
       sfx(crit ? 'sfx_crit' : 'sfx_hit', () => audio.playSlash()); ui(); await sleep(70); await sleep(hits > 1 ? 120 : 200);
       if (B.e.hp <= 0) break;
     }
@@ -699,9 +699,9 @@
     const hits = sk.type === 'atk' ? c.hits : 1, cr = r >= 1 || Math.random() * 100 < B.s.crit;
     const total = base(c.mult * (sk.type === 'atk' ? c.hits : 1) * f) * (cr ? critM() : 1) * dm;
     log(`施展【${sk.name}】${r >= 1 ? ',法訣圓滿!' : ''}`);
-    await dealE(total, hits, cr);
-    if (sk.type === 'burn') { B.e.dot = { dmg: Math.floor(base(c.dot) * f), turns: c.turns }; log(`【${B.e.name}】身中業火!`); }
-    else if (sk.type === 'stun') { if (Math.random() < (r >= 1 ? .85 : .5)) { B.e.stun = 1; B.e.charge = 0; num('e', '暈眩', 'tx'); log(`【${B.e.name}】被定住了!`); } else { num('e', '抵抗', 'tx'); } }
+    await dealE(total, hits, cr, sk.id);
+    if (sk.type === 'burn') { B.e.dot = { dmg: Math.floor(base(c.dot) * f), turns: c.turns }; B.e.dotFx = sk.id; log(`【${B.e.name}】身中業火!`); }
+    else if (sk.type === 'stun') { if (Math.random() < (r >= 1 ? .85 : .5)) { B.e.stun = 1; B.e.stunFx = sk.id; B.e.charge = 0; num('e', '暈眩', 'tx'); log(`【${B.e.name}】被定住了!`); } else { num('e', '抵抗', 'tx'); } }
     else if (sk.type === 'drain') { const h = Math.floor(total * c.steal); B.p.hp = Math.min(B.p.max, B.p.hp + h); num('p', '+' + fm(h), 'hl'); }
     ui();
   }
@@ -728,10 +728,10 @@
     fxBurst(uc); shake();
     }
     const ucr = q === 'pf' || Math.random() * 100 < B.s.crit;
-    await dealE(B.A && B.A.ultKill ? B.e.hp * 1.5 + 10 : base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr);
+    await dealE(B.A && B.A.ultKill ? B.e.hp * 1.5 + 10 : base(ultM(B) * f) * (ucr ? critM() : 1) * ultDm(B), 5, ucr, 'ult_' + ((B.ult && B.ult.k) || 'sword'));
     setPose(1); await back(320);
     const uk = !B.A && B.ult.k;
-    if (uk === 'magic' && B.e.hp > 0) { B.e.dot = { dmg: Math.max(1, Math.floor(base(.35))), turns: 3 }; num('e', '灼燒', 'tx'); await sleep(250); if (Math.random() < .6) { B.e.stun = 1; B.e.charge = 0; num('e', '定身', 'tx'); } else num('e', '抵抗', 'tx'); }
+    if (uk === 'magic' && B.e.hp > 0) { B.e.dotFx = B.e.stunFx = 'ult_magic'; B.e.dot = { dmg: Math.max(1, Math.floor(base(.35))), turns: 3 }; num('e', '灼燒', 'tx'); await sleep(250); if (Math.random() < .6) { B.e.stun = 1; B.e.charge = 0; num('e', '定身', 'tx'); } else num('e', '抵抗', 'tx'); }
     else if (uk === 'body') { B.p.sh = Math.max(B.p.sh, Math.floor(B.p.max * .4)); fxAura('sh'); num('p', '🛡' + fm(B.p.sh), 'hl'); }
     else if (uk === 'pill') { const h = Math.floor(B.p.max * .3); B.p.hp = Math.min(B.p.max, B.p.hp + h); B.p.buff = { pct: .25, turns: 4 }; fxAura('hl'); num('p', '+' + fm(h), 'hl'); await sleep(250); num('p', '攻↑', 'tx'); }
     ui();
@@ -753,7 +753,7 @@
   /* ---------- 敵方行動 ---------- */
   async function enemyTurn() {
     const E = B.e;
-    if (E.dot && E.dot.turns > 0) { E.hp = Math.max(0, E.hp - E.dot.dmg); num('e', '🔥' + fm(E.dot.dmg), 'pd'); E.dot.turns--; if (!E.dot.turns) E.dot = null; ui(); await sleep(350); if (E.hp <= 0) return; }
+    if (E.dot && E.dot.turns > 0) { E.hp = Math.max(0, E.hp - E.dot.dmg); num('e', '🔥' + fm(E.dot.dmg), 'pd'); try { if (window.SX192) SX192.tick('b', E.dotFx); } catch (e) { } E.dot.turns--; if (!E.dot.turns) E.dot = null; ui(); await sleep(350); if (E.hp <= 0) return; }
     if (E.stun) { E.stun = 0; log(`【${E.name}】動彈不得!`); ui(); await sleep(500); return; }
     const atkM = 1 + .12 * (B.phase - 1);
     let dmg, q = null;

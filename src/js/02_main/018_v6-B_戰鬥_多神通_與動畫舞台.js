@@ -160,8 +160,8 @@ function playerActCore(id) {
   bT(() => {
     // 附加效果
     if (sk) {
-      if (sk.type === 'burn') { B.dot = { dmg: Math.max(1, Math.floor(base * c.dot)), turns: c.turns }; logAdventure(`🔥 【${m.name}】身中業火，${c.turns} 回合內持續灼燒！`); }
-      else if (sk.type === 'stun') { const resist = m.isBoss && Math.random() < 0.4; if (resist) { fx.num('抵抗', 'info', 'm'); logAdventure(`🛡️ 【${m.name}】魔威濃重，抵抗了控制！`); } else { B.stun = m.isBoss ? Math.min(1, c.stun) : c.stun; fx.stunned(); logAdventure(`💫 【${m.name}】被定身 ${B.stun} 回合！`); } }
+      if (sk.type === 'burn') { B.dot = { dmg: Math.max(1, Math.floor(base * c.dot)), turns: c.turns }; B.dotFx = sk.id; logAdventure(`🔥 【${m.name}】身中業火，${c.turns} 回合內持續灼燒！`); }
+      else if (sk.type === 'stun') { const resist = m.isBoss && Math.random() < 0.4; if (resist) { fx.num('抵抗', 'info', 'm'); logAdventure(`🛡️ 【${m.name}】魔威濃重，抵抗了控制！`); } else { B.stun = m.isBoss ? Math.min(1, c.stun) : c.stun; B.stunFx = sk.id; fx.stunned(); logAdventure(`💫 【${m.name}】被定身 ${B.stun} 回合！`); } }
       else if (sk.type === 'shield') { B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * c.pct)); fx.num('+🛡' + formatNum(B.shield), 'heal', 'p'); logAdventure(`🛡️ 護體靈光籠罩全身，獲得 ${formatNum(B.shield)} 點護盾。`); }
       else if (sk.type === 'heal') { const h = Math.floor(B.playerMaxHp * c.pct); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); fx.num('+' + formatNum(h), 'heal', 'p'); logAdventure(`🌿 生機湧現，恢復 ${formatNum(h)} 點氣血。`); }
       else if (sk.type === 'drain') { const h = Math.floor(total * c.steal); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); fx.num('+' + formatNum(h), 'heal', 'p'); logAdventure(`🩸 吸取精血，恢復 ${formatNum(h)} 點氣血。`); }

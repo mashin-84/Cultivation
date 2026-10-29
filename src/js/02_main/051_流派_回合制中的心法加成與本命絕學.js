@@ -33,12 +33,12 @@
     battleLock = true; updateBattleUI(); audio.init(); if (!isQuietAuto() && !SFX.play('sfx_ult')) audio.playSlash();
     const m = B.monster, sp = state.battleSpeed || 1, base = baseDmg(B), bs = ultBest(), dm = window.sectDmgMult ? sectDmgMult(bs.sk) : 1;
     skillCds.ULT26 = U.cd; fx.pulse(stageEl('bs-p'), 'cast', 700); fx.banner(`${U.ic} ${U.n}`, '#f59e0b'); logAdventure(`${U.ic} 道友祭出本命絕學【${U.n}】!`);
-    const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
+    const hit = (x, k) => { const cr = Math.random() * 100 < calculateTotalStats().crit, d = Math.max(1, Math.floor(base * x * dm * (cr ? (window.sectCritMult ? sectCritMult() : 1.5) : 1))); m.curHp = Math.max(0, m.curHp - d); fx._sk = 'ult_' + sc; fx.hit(d, cr, k, 0); logAdventure(`💥 【${U.n}】造成 ${fmt(d)} 點傷害!${cr ? '(會心一擊!)' : ''}`); return d; };
     bT(() => {
       if (sc === 'sword') hit(Math.max(3, bs.m * 1.6), 'god');
       else if (sc === 'magic') {
-        const d = hit(Math.max(2.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
-        const resist = m.isBoss && Math.random() < .4; if (resist) { fx.num('抵抗', 'info', 'm'); } else { B.stun = 1; fx.stunned(); }
+        const d = hit(Math.max(2.5, bs.m * 1.6), 'void'); B.dot = { dmg: Math.max(1, Math.floor(base * .35)), turns: 3 }; B.dotFx = 'ult_magic'; logAdventure(`🔥 【${m.name}】被法陣灼燒,3 回合內持續受創!`);
+        const resist = m.isBoss && Math.random() < .4; if (resist) { fx.num('抵抗', 'info', 'm'); } else { B.stun = 1; B.stunFx = 'ult_magic'; fx.stunned(); }
       } else if (sc === 'body') { hit(Math.max(2.5 + (state.realmIdx || 0) * .4, bs.m * 1.4), 'quake'); B.shield = Math.max(B.shield || 0, Math.floor(B.playerMaxHp * .4)); fx.num('+🛡' + fmt(B.shield), 'heal', 'p'); logAdventure(`🛡️ 金身怒目,獲得 ${fmt(B.shield)} 點護盾。`); }
       else if (sc === 'pill') { hit(Math.max(3 + (state.realmIdx || 0) * .5, bs.m * 1.4), 'god');   /* v162 丹修自身攻擊神通少,保底隨境界成長 */ const h = Math.floor(B.playerMaxHp * .3); B.playerHp = Math.min(B.playerMaxHp, B.playerHp + h); B.buff = { pct: .25, turns: 3 }; fx.num('+' + fmt(h), 'heal', 'p'); fx.spawn && hasFx() && fx.spawn(spr(7), 1000, 'onp'); logAdventure(`♨️ 丹爐煉化,恢復 ${fmt(h)} 點氣血,攻擊提升 25%(3 回合)。`); }
       fx.status(); updateBattleUI();
