@@ -2,7 +2,7 @@
 """神通特效截圖(最終版192):在假舞台上逐格播 SX192 特效,輸出聯絡表。
 用法:python3 tools/sxshots.py n:sk_fire,b:ult_sword,n:st_burn,b:st_+freeze 輸出.png
   n=一般歷練舞台(#bs-m) b=重要戰鬥(#bf-ei);神通 id 見 45_v192 的 SPEC;st_燃燒種類 或 st_+暈眩種類 = 持續狀態
-  需先 python3 build.py dist/v193.html(路徑寫在下面 goto)。怪物圖用 src/assets/GEN3/K2.webp。"""
+  需先 python3 build.py dist/v197.html(路徑寫在下面 goto)。怪物圖用 src/assets/GEN3/K2.webp。"""
 import asyncio, sys, io
 from playwright.async_api import async_playwright
 from PIL import Image, ImageDraw
@@ -10,7 +10,7 @@ EFF = sys.argv[1].split(',')   # 例: n:sk_fire,n:sk_ice,b:ult_sword
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width':420,'height':320})
-        await pg.goto('file:///home/claude/rf/dist/v193.html'); await pg.wait_for_timeout(3500)
+        await pg.goto('file:///home/claude/rf/dist/v197.html'); await pg.wait_for_timeout(3500)
         await pg.evaluate('''()=>{
           document.querySelectorAll('#title34,#sp190').forEach(e=>e.remove());
           document.body.innerHTML='';
